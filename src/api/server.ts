@@ -15,6 +15,7 @@ import {
   db,
 } from '../indexer/database.js';
 import config from '../config.js';
+import { decodeMidnightTransaction } from '../midnight-decoder.js';
 
 const app = express();
 
@@ -396,6 +397,40 @@ app.get('/api/extrinsics/:hash', (req, res) => {
       return res.status(404).json({ error: 'Extrinsic not found' });
     }
     res.json(ext);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Decoded Midnight transaction
+app.get('/api/extrinsics/:hash/decoded', (req, res) => {
+  try {
+    let hash = req.params.hash;
+    hash = hash.startsWith('0x') ? hash : `0x${hash}`;
+    const ext = getExtrinsicByHash(hash);
+    if (!ext) return res.status(404).json({ error: 'Extrinsic not found' });
+    if ((ext as any).section !== 'midnight') {
+      return res.json({ ...ext, decoded: null, message: 'Not a Midnight transaction' });
+    }
+    const decoded = decodeMidnightTransaction((ext as any).args);
+    res.json({ ...ext, decoded });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Also support singular /extrinsic/:hash/decoded
+app.get('/extrinsic/:hash/decoded', (req, res) => {
+  try {
+    let hash = req.params.hash;
+    hash = hash.startsWith('0x') ? hash : `0x${hash}`;
+    const ext = getExtrinsicByHash(hash);
+    if (!ext) return res.status(404).json({ error: 'Extrinsic not found' });
+    if ((ext as any).section !== 'midnight') {
+      return res.json({ ...ext, decoded: null, message: 'Not a Midnight transaction' });
+    }
+    const decoded = decodeMidnightTransaction((ext as any).args);
+    res.json({ ...ext, decoded });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
