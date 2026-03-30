@@ -12,10 +12,11 @@ import {
   getExtrinsicStats,
   getLatestEpoch,
   searchByHash,
+  getMidnightTransactions,
   db,
 } from '../indexer/database.js';
 import config from '../config.js';
-import { decodeMidnightTransaction } from '../midnight-decoder.js';
+import { decodeMidnightTransaction, classifyMidnightTx } from '../midnight-decoder.js';
 
 const app = express();
 
@@ -535,6 +536,63 @@ app.get('/api/analytics/block-rate', (req, res) => {
       )
       .all(cutoff);
     res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Midnight transaction analytics - shielded/unshielded breakdown
+app.get('/api/analytics/tx-classification', (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 500, 2000);
+    const txs = getMidnightTransactions(limit);
+
+    let shielded = 0;
+    let unshielded = 0;
+    let mixed = 0;
+    let unknown = 0;
+    const txTypeBreakdown: Record<string, number> = {};
+
+    for (const tx of txs as any[]) {
+      const classified = classifyMidnightTx(tx.args);
+
+      if (classified.shieldingType === 'shielded') shielded++;
+      else if (classified.shieldingType === 'unshielded') unshielded++;
+      else if (classified.shieldingType === 'mixed') mixed++;
+      else unknown++;
+
+      txTypeBreakdown[classified.txType] = (txTypeBreakdown[classified.txType] || 0) + 1;
+    }
+
+    res.json({
+      analyzed: txs.length,
+      shielding: { shielded, unshielded, mixed, unknown },
+      types: txTypeBreakdown,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Recent midnight transactions with decoded info
+app.get('/api/midnight-txs', (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const txs = getMidnightTransactions(limit);
+
+    const decoded = (txs as any[]).map(tx => {
+      const classification = classifyMidnightTx(tx.args);
+      return {
+        hash: tx.hash,
+        block_height: tx.block_height,
+        timestamp: tx.timestamp,
+        signer: tx.signer,
+        shieldingType: classification.shieldingType,
+        txType: classification.txType,
+      };
+    });
+
+    res.json(decoded);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
