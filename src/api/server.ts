@@ -13,6 +13,15 @@ import {
   getLatestEpoch,
   searchByHash,
   getMidnightTransactions,
+  getMidnightTxsWithTimestamp,
+  getAllMidnightTxCount,
+  getBridgeAnalytics,
+  getContractAnalytics,
+  getNetworkOverviewData,
+  getPrivacyFromEvents,
+  getCommitteeMembers,
+  getContractAddresses,
+  getEventBreakdown,
   db,
 } from '../indexer/database.js';
 import config from '../config.js';
@@ -598,6 +607,149 @@ app.get('/api/midnight-txs', (req, res) => {
   }
 });
 
+// --- Privacy Dashboard API (event-based) ---
+let privacyCache: { data: any; ts: number } | null = null;
+
+app.get('/api/analytics/privacy', (req, res) => {
+  try {
+    const hours = Math.min(parseInt(req.query.hours as string) || 24, 168);
+    const now = Date.now();
+
+    // Return cached result if less than 60s old
+    if (privacyCache && now - privacyCache.ts < 60000 && privacyCache.data._hours === hours) {
+      return res.json(privacyCache.data);
+    }
+
+    const eventData = getPrivacyFromEvents(hours);
+
+    const result = {
+      totalMidnightTxs: eventData.totalMidnightTxs,
+      shielded: eventData.shielded,
+      unshielded: eventData.unshielded,
+      contractDeploys: eventData.contractDeploys,
+      contractCalls: eventData.contractCalls,
+      shieldedRatio: eventData.shieldedRatio,
+      unshieldedDetails: eventData.unshieldedDetails,
+      trend: eventData.trend,
+      _hours: hours,
+    };
+
+    privacyCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Committee Members API ---
+app.get('/api/committee', (req, res) => {
+  try {
+    const data = getCommitteeMembers();
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Deployed Contracts API (event-based) ---
+app.get('/api/contracts/deployed', (req, res) => {
+  try {
+    const data = getContractAddresses();
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Event Breakdown API ---
+app.get('/api/analytics/events', (req, res) => {
+  try {
+    const data = getEventBreakdown();
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Bridge Monitor API ---
+app.get('/api/analytics/bridge', (req, res) => {
+  try {
+    const hours = Math.min(parseInt(req.query.hours as string) || 24, 168);
+    const data = getBridgeAnalytics(hours);
+
+    const recentBridgeOps = data.recentBridgeOps.map(op => {
+      let args_summary = '';
+      try {
+        const parsed = JSON.parse(op.args);
+        if (Array.isArray(parsed) && parsed.length >= 2) {
+          const cardanoInfo = JSON.parse(parsed[1]);
+          args_summary = `Cardano block #${cardanoInfo.blockNumber || 'N/A'} (${cardanoInfo.blockHash ? cardanoInfo.blockHash.slice(0, 16) + '...' : 'N/A'})`;
+        }
+      } catch {}
+      return {
+        hash: op.hash,
+        block_height: op.block_height,
+        timestamp: op.timestamp,
+        args_summary,
+      };
+    });
+
+    res.json({
+      totalBridgeOps: data.totalBridgeOps,
+      last24h: data.last24h,
+      trend: data.trend,
+      recentBridgeOps,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Contract Leaderboard API ---
+app.get('/api/analytics/contracts', (req, res) => {
+  try {
+    const data = getContractAnalytics();
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Network Overview API ---
+app.get('/api/analytics/overview', (req, res) => {
+  try {
+    const data = getNetworkOverviewData();
+
+    // Get shielded ratio from events (much more reliable than hex decoding)
+    let shieldedRatio = 0;
+    try {
+      const privacyData = getPrivacyFromEvents();
+      shieldedRatio = privacyData.shieldedRatio;
+    } catch {}
+
+    res.json({
+      network: config.network.name,
+      blocks: data.blocksCount,
+      extrinsics: data.extrinsicsCount,
+      midnightTxs: data.midnightTxs,
+      bridgeOps: data.bridgeOps,
+      committeeUpdates: data.committeeUpdates,
+      avgBlockTime: data.avgBlockTime,
+      tps: data.tps,
+      shieldedRatio,
+      contractDeploys: data.contractDeploys,
+      contractCalls: data.contractCalls,
+      committeeSize: data.committeeSize,
+      eventBreakdown: data.eventBreakdown,
+      nodeVersion: config.node.version || 'unknown',
+      specVersion: config.node.specVersion || 0,
+      epoch: data.epoch || null,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export function startAPI() {
   app.listen(config.api.port, () => {
     console.log(`Mainnet API server running on http://localhost:${config.api.port}`);
@@ -615,6 +767,13 @@ export function startAPI() {
     console.log(`  GET /api/epoch - Current epoch info`);
     console.log(`  GET /api/analytics/extrinsic-types - Extrinsic distribution`);
     console.log(`  GET /api/analytics/block-rate - Block production rate`);
+    console.log(`  GET /api/analytics/privacy - Privacy dashboard (event-based)`);
+    console.log(`  GET /api/analytics/bridge - Bridge monitor`);
+    console.log(`  GET /api/analytics/contracts - Contract leaderboard`);
+    console.log(`  GET /api/analytics/overview - Network overview`);
+    console.log(`  GET /api/analytics/events - Event type breakdown`);
+    console.log(`  GET /api/committee - Current committee members`);
+    console.log(`  GET /api/contracts/deployed - Deployed contracts (event-based)`);
   });
 }
 
