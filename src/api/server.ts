@@ -796,6 +796,30 @@ app.get('/api/cardano-anchors', (req, res) => {
   }
 });
 
+// Price proxy with caching (avoids CoinGecko rate limits)
+let priceCache: { data: any; ts: number } | null = null;
+app.get('/api/price', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (priceCache && now - priceCache.ts < 300000) {
+      return res.json(priceCache.data);
+    }
+    const qs = req.originalUrl.includes('?') ? req.originalUrl.substring(req.originalUrl.indexOf('?')) : '?ids=midnight-3&vs_currencies=usd';
+    const resp = await fetch('https://api.coingecko.com/api/v3/simple/price' + qs, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(5000),
+    });
+    const data = await resp.json();
+    if (data && !data.status) {
+      priceCache = { data, ts: now };
+    }
+    res.json(data);
+  } catch {
+    if (priceCache) return res.json(priceCache.data);
+    res.status(502).json({ error: 'Price service unavailable' });
+  }
+});
+
 export function startAPI() {
   app.listen(config.api.port, () => {
     console.log(`Mainnet API server running on http://localhost:${config.api.port}`);
