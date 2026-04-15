@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAMORI — Privacy Wallet for Midnight</title>
+<meta name="description" content="Chrome extension wallet for Midnight blockchain with in-browser ZK proof generation. Built in Japan by NightForge — v1.1.0.">
+<meta property="og:title" content="YAMORI — Privacy Wallet for Midnight">
+<meta property="og:description" content="Chrome extension wallet with in-browser ZK proofs. No Docker required.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nightforge.jp/yamori.html" />
+<meta property="og:url" content="https://nightforge.jp/yamori.html" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans JP',sans-serif;
+    background:#0a0a14;
+    color:#cbd5e1;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:#0ABAB5;text-decoration:none;transition:color 0.2s}
+  a:hover{color:#0dd;text-decoration:none}
+
+  .container{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* ===== NAVBAR ===== */
+  .navbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:0 24px;
+    background:rgba(10,10,20,0.85);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid transparent;
+    transition:border-color 0.3s,background 0.3s;
+  }
+  .navbar.scrolled{
+    border-bottom-color:rgba(10,186,181,0.15);
+    background:rgba(10,10,20,0.95);
+  }
+  .navbar-inner{
+    max-width:1080px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    height:64px;
+  }
+  .navbar-brand{
+    font-size:1.15rem;font-weight:700;
+    color:#f1f5f9;letter-spacing:0.02em;
+  }
+  .navbar-links{display:flex;align-items:center;gap:28px}
+  .navbar-links a{
+    font-size:0.9rem;color:#94a3b8;font-weight:500;
+    transition:color 0.2s;
+  }
+  .navbar-links a:hover,.navbar-links a.active{color:#0ABAB5}
+
+  /* ===== LANG TOGGLE ===== */
+  .lang-toggle{
+    display:inline-flex;align-items:center;
+    background:#1e293b;border-radius:6px;
+    padding:4px 6px;gap:2px;
+    font-size:0.78rem;font-weight:600;
+    cursor:pointer;user-select:none;
+    border:1px solid #334155;
+    margin-left:8px;
+  }
+  .lang-toggle span{
+    padding:3px 8px;border-radius:4px;
+    color:#64748b;transition:all 0.2s;
+  }
+  .lang-toggle span.active{
+    background:rgba(10,186,181,0.2);
+    color:#0ABAB5;
+  }
+  .lang-toggle span:hover{color:#cbd5e1}
+
+  /* ===== HERO ===== */
+  .hero{
+    text-align:center;
+    padding:160px 24px 100px;
+    background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(10,186,181,0.08) 0%,transparent 70%);
+    position:relative;
+  }
+  .hero-gecko{
+    width:120px;height:120px;
+    margin:0 auto 40px;
+    animation:float 4s ease-in-out infinite;
+    filter:drop-shadow(0 0 30px rgba(10,186,181,0.4)) drop-shadow(0 0 60px rgba(10,186,181,0.15));
+    position:relative;
+  }
+  .hero-gecko img{
+    width:120px;height:120px;
+    object-fit:contain;
+    border-radius:16px;
+  }
+  .hero-gecko::after{
+    content:'';
+    position:absolute;
+    top:36%;left:44%;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(10,186,181,0.7) 0%,rgba(10,186,181,0.2) 50%,transparent 70%);
+    filter:blur(4px);
+    animation:eyePulse 2.5s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes eyePulse{
+    0%,100%{opacity:0.6;transform:scale(1)}
+    50%{opacity:1;transform:scale(1.3)}
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-12px)}
+  }
+  .hero h1{
+    font-size:3.5rem;
+    font-weight:800;
+    color:#f1f5f9;
+    letter-spacing:0.02em;
+    line-height:1.15;
+  }
+  .hero h1 .kanji{
+    display:block;
+    font-size:1.2rem;
+    font-weight:400;
+    color:#0ABAB5;
+    letter-spacing:0.2em;
+    margin-top:6px;
+  }
+  .hero .subtitle{
+    font-size:1.25rem;
+    color:#94a3b8;
+    margin-top:20px;
+    font-weight:400;
+  }
+  .hero .builder{
+    font-size:0.85rem;
+    color:#475569;
+    margin-top:16px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+  .hero-buttons{
+    display:flex;gap:16px;justify-content:center;
+    margin-top:40px;flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:14px 32px;border-radius:10px;
+    font-size:0.95rem;font-weight:600;
+    cursor:pointer;transition:all 0.25s;border:none;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,#0ABAB5,#088F8C);
+    color:#fff;
+    box-shadow:0 4px 20px rgba(10,186,181,0.3);
+  }
+  .btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 30px rgba(10,186,181,0.45);
+    color:#fff;
+  }
+  .btn-outline{
+    background:transparent;
+    color:#94a3b8;
+    border:1px solid #334155;
+  }
+  .btn-outline:hover{
+    border-color:#0ABAB5;color:#0ABAB5;
+    transform:translateY(-2px);
+  }
+
+  /* ===== SECTIONS ===== */
+  section{padding:100px 0}
+  .section-label{
+    font-size:0.8rem;font-weight:600;
+    color:#0ABAB5;text-transform:uppercase;
+    letter-spacing:0.12em;margin-bottom:12px;
+  }
+  .section-title{
+    font-size:2.5rem;font-weight:700;
+    color:#f1f5f9;margin-bottom:20px;
+    line-height:1.2;
+  }
+  .section-desc{
+    font-size:1.05rem;color:#94a3b8;
+    max-width:640px;margin-bottom:48px;
+    line-height:1.8;
+  }
+
+  /* ===== GRADIENT SEPARATORS ===== */
+  .section-sep{
+    height:1px;
+    background:linear-gradient(90deg,transparent 0%,rgba(10,186,181,0.25) 30%,rgba(10,186,181,0.25) 70%,transparent 100%);
+    margin:0;border:none;
+  }
+
+  /* ===== FEATURE CARDS ===== */
+  .features-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+  }
+  .feature-card{
+    padding:32px 28px;
+    background:#0f172a;
+    border:1px solid #1e293b;
+    border-radius:14px;
+    transition:all 0.3s;
+  }
+  .feature-card:hover{
+    border-color:rgba(10,186,181,0.4);
+    box-shadow:0 0 30px rgba(10,186,181,0.08);
+    transform:translateY(-3px);
+  }
+  .feature-card h3{
+    font-size:1.15rem;font-weight:600;
+    color:#f1f5f9;margin-bottom:10px;
+  }
+  .feature-card p{
+    font-size:0.95rem;color:#94a3b8;line-height:1.7;
+  }
+  .feature-icon{
+    width:44px;height:44px;
+    border-radius:10px;
+    background:rgba(10,186,181,0.1);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;font-size:1.3rem;
+  }
+
+  /* ===== WALLET MOCKUP ===== */
+  .mockup-section{
+    background:linear-gradient(180deg,#0a0a14 0%,#0d1220 50%,#0a0a14 100%);
+  }
+  .mockup-wrap{
+    display:flex;align-items:center;justify-content:center;
+    gap:60px;flex-wrap:wrap;
+  }
+  .wallet-mockup{
+    width:300px;
+    background:#12182a;
+    border:1px solid #1e293b;
+    border-radius:18px;
+    padding:0;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(10,186,181,0.08);
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .mockup-titlebar{
+    background:#0e1424;
+    padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid #1e293b;
+  }
+  .mockup-titlebar .dots{display:flex;gap:6px}
+  .mockup-titlebar .dots span{
+    width:10px;height:10px;border-radius:50%;
+  }
+  .mockup-titlebar .dots span:nth-child(1){background:#ff5f57}
+  .mockup-titlebar .dots span:nth-child(2){background:#febc2e}
+  .mockup-titlebar .dots span:nth-child(3){background:#28c840}
+  .mockup-titlebar .title{
+    font-size:0.75rem;color:#64748b;
+    font-weight:600;letter-spacing:0.05em;
+  }
+  .mockup-body{padding:28px 20px 24px}
+  .mockup-balance{
+    text-align:center;margin-bottom:20px;
+  }
+  .mockup-balance .amount{
+    font-size:2rem;font-weight:700;
+    color:#f1f5f9;display:block;
+    font-variant-numeric:tabular-nums;
+  }
+  .mockup-balance .token{
+    font-size:0.85rem;color:#64748b;
+    margin-top:2px;display:block;
+  }
+  .mockup-privacy{
+    margin:20px 0;
+  }
+  .mockup-privacy .bar-label{
+    display:flex;justify-content:space-between;
+    font-size:0.72rem;color:#64748b;
+    margin-bottom:6px;text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .mockup-privacy .bar-track{
+    height:6px;background:#1e293b;border-radius:3px;
+    overflow:hidden;
+  }
+  .mockup-privacy .bar-fill{
+    width:60%;height:100%;
+    background:linear-gradient(90deg,#0ABAB5,#4ade80);
+    border-radius:3px;
+  }
+  .mockup-actions{
+    display:flex;gap:10px;margin-top:22px;
+  }
+  .mockup-actions .mock-btn{
+    flex:1;text-align:center;
+    padding:11px 0;border-radius:10px;
+    font-size:0.88rem;font-weight:600;
+    cursor:default;
+  }
+  .mockup-actions .mock-btn.send{
+    background:linear-gradient(135deg,#0ABAB5,#088F8C);
+    color:#fff;
+  }
+  .mockup-actions .mock-btn.receive{
+    background:#1e293b;color:#94a3b8;
+    border:1px solid #334155;
+  }
+  .mockup-caption{
+    max-width:360px;
+  }
+  .mockup-caption h3{
+    font-size:1.6rem;font-weight:700;color:#f1f5f9;
+    line-height:1.3;margin-bottom:14px;
+  }
+  .mockup-caption p{
+    font-size:1rem;color:#94a3b8;line-height:1.8;
+  }
+
+  /* ===== HOW IT WORKS ===== */
+  .steps-row{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:32px;margin-top:48px;
+  }
+  .step-card{
+    text-align:center;padding:36px 24px;
+    background:#0f172a;border:1px solid #1e293b;
+    border-radius:14px;transition:all 0.3s;
+  }
+  .step-card:hover{
+    border-color:rgba(10,186,181,0.3);
+    transform:translateY(-3px);
+  }
+  .step-num{
+    width:48px;height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#0ABAB5,#088F8C);
+    color:#fff;font-weight:700;font-size:1.2rem;
+    display:inline-flex;align-items:center;justify-content:center;
+    margin-bottom:20px;
+  }
+  .step-card h3{
+    font-size:1.1rem;font-weight:600;
+    color:#f1f5f9;margin-bottom:10px;
+  }
+  .step-card p{
+    font-size:0.92rem;color:#94a3b8;line-height:1.7;
+  }
+
+  /* ===== PROVER SECTION ===== */
+  .prover-section{
+    background:linear-gradient(180deg,#0a0a14 0%,#0d1220 50%,#0a0a14 100%);
+  }
+  .stats-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;margin:40px 0 48px;
+  }
+  .stat-card{
+    text-align:center;padding:24px 12px;
+    background:#0f172a;border:1px solid #1e293b;
+    border-radius:12px;
+  }
+  .stat-card .num{
+    font-size:1.8rem;font-weight:700;
+    color:#0ABAB5;display:block;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat-card .label{
+    font-size:0.78rem;color:#64748b;
+    text-transform:uppercase;letter-spacing:0.06em;
+    margin-top:6px;
+  }
+
+  .checklist-grid{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:8px 40px;margin:32px 0 48px;
+  }
+  .checklist-grid li{
+    list-style:none;font-size:0.95rem;
+    color:#cbd5e1;padding:6px 0;
+    display:flex;align-items:center;gap:10px;
+  }
+  .checklist-grid li::before{
+    content:'\2713';
+    color:#0ABAB5;font-weight:700;
+    font-size:1rem;flex-shrink:0;
+  }
+
+  /* ===== BENCHMARK TABLE ===== */
+  .bench-label{
+    font-size:1rem;color:#94a3b8;
+    font-weight:500;text-transform:uppercase;
+    letter-spacing:0.06em;margin-bottom:16px;
+  }
+  .bench-wrap{
+    overflow-x:auto;border-radius:12px;
+    border:1px solid #1e293b;
+  }
+  table{width:100%;border-collapse:collapse;font-size:0.92rem}
+  thead{background:linear-gradient(135deg,rgba(10,186,181,0.15),rgba(10,186,181,0.05))}
+  th{
+    text-align:left;padding:14px 20px;
+    color:#0ABAB5;font-weight:600;
+    text-transform:uppercase;font-size:0.78rem;
+    letter-spacing:0.08em;
+    border-bottom:2px solid rgba(10,186,181,0.2);
+  }
+  td{
+    padding:13px 20px;
+    border-bottom:1px solid #1e293b;
+    color:#cbd5e1;
+  }
+  tbody tr{background:#0f172a;transition:background 0.2s}
+  tbody tr:nth-child(even){background:#0c1322}
+  tbody tr:hover{background:rgba(10,186,181,0.06)}
+
+  /* benchmark table: last-child right align */
+  .bench-wrap td:last-child{
+    color:#0ABAB5;font-weight:600;
+    font-variant-numeric:tabular-nums;
+    text-align:right;
+  }
+  .bench-wrap th:last-child{text-align:right}
+
+  /* ===== SECURITY ===== */
+  .security-section{
+    background:linear-gradient(180deg,#0a0a14 0%,#0e0e1c 100%);
+  }
+  .security-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:8px 20px;border-radius:100px;
+    background:rgba(10,186,181,0.1);
+    border:1px solid rgba(10,186,181,0.25);
+    color:#0ABAB5;font-weight:600;font-size:0.9rem;
+    margin-bottom:32px;
+  }
+  .security-list{
+    list-style:none;display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 32px;margin:32px 0;
+  }
+  .security-list li{
+    font-size:0.95rem;color:#cbd5e1;
+    padding:10px 16px;
+    background:#0f172a;border-radius:8px;
+    border:1px solid #1e293b;
+    display:flex;align-items:center;gap:10px;
+  }
+  .security-list li::before{
+    content:'\1F6E1';font-size:0.85rem;flex-shrink:0;
+  }
+  .security-note{
+    font-size:0.95rem;color:#64748b;
+    margin-top:24px;font-style:italic;
+  }
+
+  /* ===== ARCHITECTURE GRID ===== */
+  .arch-grid{
+    display:grid;
+    grid-template-columns:auto repeat(3,1fr);
+    gap:10px;
+    max-width:780px;
+    margin:0 auto;
+  }
+  .arch-row-label{
+    display:flex;align-items:center;
+    font-size:0.72rem;font-weight:700;
+    color:#475569;text-transform:uppercase;
+    letter-spacing:0.1em;
+    writing-mode:horizontal-tb;
+    padding-right:8px;
+    justify-content:flex-end;
+  }
+  .arch-cell{
+    padding:20px 16px;
+    border-radius:12px;
+    text-align:center;
+    transition:all 0.3s;
+  }
+  .arch-cell:hover{
+    transform:translateY(-2px);
+  }
+  .arch-cell-title{
+    display:block;
+    font-size:0.82rem;font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .arch-cell-desc{
+    display:block;
+    font-size:0.82rem;color:#94a3b8;
+  }
+  .arch-purple{
+    background:rgba(157,78,221,0.08);
+    border:1px solid rgba(157,78,221,0.25);
+  }
+  .arch-purple:hover{border-color:rgba(157,78,221,0.5)}
+  .arch-purple .arch-cell-title{color:#c084fc}
+  .arch-teal{
+    background:rgba(10,186,181,0.06);
+    border:1px solid rgba(10,186,181,0.2);
+  }
+  .arch-teal:hover{border-color:rgba(10,186,181,0.45)}
+  .arch-teal .arch-cell-title{color:#0ABAB5}
+  .arch-orange{
+    background:rgba(249,115,22,0.06);
+    border:1px solid rgba(249,115,22,0.2);
+  }
+  .arch-orange:hover{border-color:rgba(249,115,22,0.45)}
+  .arch-orange .arch-cell-title{color:#f97316}
+
+  /* ===== STATUS ===== */
+  .status-section{
+    background:linear-gradient(180deg,#0a0a14 0%,#0d1220 100%);
+  }
+  .status-grid{display:grid;gap:20px;margin:40px 0 24px}
+  .status-card{
+    padding:28px 24px;
+    background:#0f172a;border:1px solid #1e293b;
+    border-radius:14px;display:flex;align-items:flex-start;gap:16px;
+  }
+  .status-dot{
+    width:10px;height:10px;border-radius:50%;
+    margin-top:7px;flex-shrink:0;
+  }
+  .status-dot.live{background:#0ABAB5;box-shadow:0 0 10px rgba(10,186,181,0.5)}
+  .status-dot.passing{background:#4ade80;box-shadow:0 0 10px rgba(74,222,128,0.5)}
+  .status-dot.blocked{background:#f97316;box-shadow:0 0 10px rgba(249,115,22,0.5)}
+  .status-label{
+    font-size:0.75rem;text-transform:uppercase;
+    letter-spacing:0.08em;color:#64748b;margin-bottom:4px;
+  }
+  .status-text{font-size:1rem;color:#f1f5f9}
+  .status-more{
+    text-align:center;color:#475569;
+    font-size:0.95rem;font-style:italic;
+  }
+
+  /* ===== CTA / COMING SOON ===== */
+  .cta-section{
+    background:linear-gradient(180deg,#0a0a14 0%,rgba(10,186,181,0.08) 40%,rgba(10,186,181,0.12) 60%,#0a0a14 100%);
+    text-align:center;
+    padding:120px 0;
+  }
+  .cta-section .section-title{margin-bottom:16px}
+  .cta-text{
+    font-size:1.05rem;color:#94a3b8;
+    max-width:540px;margin:0 auto 40px;
+    line-height:1.8;
+  }
+  .cta-buttons{
+    display:flex;gap:16px;justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  /* ===== FOOTER ===== */
+  footer{
+    text-align:center;padding:60px 24px;
+    border-top:1px solid #1e293b;
+    background:#08080f;
+  }
+  footer .footer-links{
+    display:flex;justify-content:center;gap:32px;
+    margin-bottom:16px;
+  }
+  footer a{color:#64748b;font-size:0.9rem}
+  footer a:hover{color:#0ABAB5}
+  footer .copyright{color:#334155;font-size:0.85rem}
+
+  /* ===== SCROLL ANIMATION ===== */
+  .reveal{
+    opacity:0;transform:translateY(30px);
+    transition:opacity 0.7s ease,transform 0.7s ease;
+  }
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:768px){
+    .hero{padding:130px 20px 70px}
+    .hero h1{font-size:2.5rem}
+    .hero .subtitle{font-size:1.05rem}
+    .features-grid{grid-template-columns:1fr}
+    .stats-row{grid-template-columns:repeat(2,1fr)}
+    .checklist-grid{grid-template-columns:1fr}
+    .security-list{grid-template-columns:1fr}
+    .section-title{font-size:2rem}
+    section{padding:70px 0}
+    .navbar-links{gap:14px}
+    .navbar-links a{font-size:0.82rem}
+    .steps-row{grid-template-columns:1fr;gap:20px}
+    .mockup-wrap{flex-direction:column;gap:40px}
+    .mockup-caption{text-align:center}
+  }
+  @media(max-width:480px){
+    .hero h1{font-size:2rem}
+    .stats-row{grid-template-columns:repeat(2,1fr);gap:10px}
+    .hero-buttons{flex-direction:column;align-items:center}
+    .btn{width:100%;justify-content:center}
+    .arch-grid{grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .arch-row-label{display:none}
+    .cta-buttons{flex-direction:column;align-items:center}
+  }
+
+    .lang-jp { display: none; }
+    body.jp .lang-en { display: none; }
+    body.jp .lang-jp { display: inline; }
+    body.jp .lang-jp-block { display: block; }
+    body.jp .lang-en-block { display: none; }
+
+
+  /* ===== ROADMAP RESPONSIVE ===== */
+  @media(max-width:640px){
+    .roadmap-grid{
+      grid-template-columns:1fr !important;
+    }
+  }
+
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="https://nightforge.jp" class="navbar-brand"><img src="/favicon.ico" alt="NightForge" style="height:28px;width:28px;border-radius:6px;vertical-align:middle;margin-right:8px;">NightForge</a>
+    <div class="navbar-links">
+      <a href="https://nightforge.jp">Explorer</a>
+      <a href="#" class="active">YAMORI</a>
+      <a href="https://github.com/cryptoleo79/YAMORI" target="_blank" rel="noopener">GitHub</a>
+      <div class="lang-toggle" id="langToggle" title="Switch language">
+        <span id="langEN" class="active">EN</span>
+        <span id="langJP">&#x65E5;&#x672C;&#x8A9E;</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<header class="hero" id="hero">
+  <div class="hero-gecko">
+    <img src="icons/icon-popup.png" alt="YAMORI gecko" width="120" height="120">
+  </div>
+  <h1>YAMORI<span class="kanji">家守</span></h1>
+  <p class="subtitle" data-i18n="hero-subtitle">Biometric Seedless Privacy Wallet for Midnight</p>
+  <p class="subtitle" style="font-size:1rem;color:#64748b;margin-top:10px;">ZK proof generation &bull; SHA-512 key derivation &bull; No seed phrase</p>
+  <p class="builder" data-i18n="hero-builder">Built in Japan by NightForge — v1.1.0</p>
+  <div class="hero-buttons">
+    <a href="#features" class="btn btn-primary">Learn More</a>
+    <a href="https://github.com/cryptoleo79/YAMORI" target="_blank" class="btn btn-outline">View on GitHub</a>
+  </div>
+</header>
+
+<main>
+<!-- Proof / Status Strip -->
+<div style="max-width:1080px;margin:0 auto;padding:16px 24px;">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;">
+    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);font-size:10px;font-weight:600;color:#10b981;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;"></span>Explorer Live
+    </span>
+    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);font-size:10px;font-weight:600;color:#10b981;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;"></span>API Public
+    </span>
+    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);font-size:10px;font-weight:600;color:#10b981;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;"></span>Repo Public
+    </span>
+    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);font-size:10px;font-weight:600;color:#f59e0b;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;"></span>Wallet: Testing
+    </span>
+    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);font-size:10px;font-weight:600;color:#f59e0b;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;"></span>Shield: Blocked (upstream #1206)
+    </span>
+    <a href="https://github.com/cryptoleo79/YAMORI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(100,116,139,0.1);border:1px solid rgba(100,116,139,0.25);font-size:10px;font-weight:600;color:#94a3b8;text-decoration:none;">
+      v1.1.0 &middot; GitHub
+    </a>
+  </div>
+</div>
+
+
+  <!-- ===== WHAT IS YAMORI ===== -->
+  <section id="features">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label"><span class="lang-en">Overview</span><span class="lang-jp">概要</span></p>
+        <h2 class="section-title"><span class="lang-en">What is YAMORI</span><span class="lang-jp">YAMORIとは</span></h2>
+        <p class="section-desc"><span class="lang-en">A Chrome extension wallet for the Midnight blockchain. Biometric login, seedless creation, in-browser ZK proofs, and the most complete DUST management in the ecosystem.</span><span class="lang-jp">Midnightブロックチェーンのための Chrome拡張機能ウォレット。生体認証ログイン、シードレス作成、ブラウザ内ZK証明、エコシステム最も完全なDUST管理。</span></p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x1F91A;</div>
+          <h3><span class="lang-en">Biometric Seedless Wallet</span><span class="lang-jp">生体認証シードレスウォレット</span></h3>
+          <p>Fingerprint or Face ID creates your wallet instantly. No 24-word seed phrase. WebAuthn PRF derives keys in your device's secure enclave.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x1F6E1;</div>
+          <h3>ZK Ownership Proof</h3>
+          <p>Prove you own a wallet without revealing your keys. Zero-knowledge proof using Poseidon hashing and JubJub curve cryptography.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x2B50;</div>
+          <h3><span class="lang-en">DUST Generation Dashboard</span><span class="lang-jp">DUST生成ダッシュボード</span></h3>
+          <p>Live DUST balance, generation progress, manual registration, and Cardano cNIGHT bridge status. All in one view.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x26A1;</div>
+          <h3><span class="lang-en">In-Browser ZK Proofs</span><span class="lang-jp">ブラウザ内ZK証明</span></h3>
+          <p>Custom Zig WASM prover at 133KB generates proofs locally. No Docker, no servers, no trusted third parties.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x1F510;</div>
+          <h3>SHA-512 + PBKDF2</h3>
+          <p>Full BIP39 derivation chain implemented in Zig. SHA-512 hashing and PBKDF2 key stretching compiled to WASM — no JS crypto dependencies.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x1F4CA;</div>
+          <h3><span class="lang-en">NightForge Explorer Tools</span><span class="lang-jp">NightForgeエクスプローラーツール</span></h3>
+          <p>10 interactive tools: DUST Calculator, Privacy Score, Validator Dashboard, Contract Observatory, Network Health, and more.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x1F517;</div>
+          <h3><span class="lang-en">DApp Connector</span><span class="lang-jp">DAppコネクター</span></h3>
+          <p>Connect to Midnight DApps via the window.midnight.yamori API. Transfer, sign, and track transactions from any connected application.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">&#x1F4F1;</div>
+          <h3><span class="lang-en">Multi-Platform Biometrics</span><span class="lang-jp">マルチプラットフォーム生体認証</span></h3>
+          <p>Mac Touch ID, Windows Hello, iPhone Face ID, and Android fingerprint. One wallet creation flow across every platform.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-sep">
+
+  <!-- ===== WALLET MOCKUP ===== -->
+  <section class="mockup-section" id="preview">
+    <div class="container">
+      <div class="mockup-wrap reveal">
+        <div class="wallet-mockup">
+          <div class="mockup-titlebar">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <span class="title">YAMORI Wallet</span>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-balance">
+              <span class="amount">1,000.00</span>
+              <span class="token">tNIGHT</span>
+            </div>
+            <div class="mockup-privacy">
+              <div class="bar-label">
+                <span>Privacy Score</span>
+                <span>60%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill"></div>
+              </div>
+            </div>
+            <div class="mockup-actions">
+              <div class="mock-btn send">Send</div>
+              <div class="mock-btn receive">Receive</div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">
+          <h3>Privacy-first.<br>Shielded by default.</h3>
+          <p>Every transaction is protected by zero-knowledge proofs generated right in your browser. No servers. No trusted third parties. Just math.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-sep">
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label"><span class="lang-en">For Users</span><span class="lang-jp">ユーザー向け</span></p>
+        <h2 class="section-title" data-i18n="how-title">How It Works</h2>
+      </div>
+      <div class="steps-row">
+        <div class="step-card reveal">
+          <div class="step-num">1</div>
+          <h3 data-i18n="step1-title">Install &amp; Create</h3>
+          <p data-i18n="step1-desc">Scan your fingerprint or set a password. No seed phrase needed.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-num">2</div>
+          <h3 data-i18n="step2-title">Receive NIGHT</h3>
+          <p data-i18n="step2-desc">Share your address or QR code. Funds arrive in seconds.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-num">3</div>
+          <h3 data-i18n="step3-title">Send Privately</h3>
+          <p data-i18n="step3-desc">Shielded by default. Zero-knowledge proofs protect your transactions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-sep">
+
+  <!-- ===== ZIG ZK PROVER ===== -->
+  <section class="prover-section" id="prover">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label"><span class="lang-en">Core Technology</span><span class="lang-jp">コア技術</span></p>
+        <h2 class="section-title">First Plonk Prover for Midnight in Zig</h2>
+        <p class="section-desc">A self-contained WASM module with zero runtime dependencies. Every cryptographic primitive written from scratch.</p>
+      </div>
+
+      <div class="stats-row reveal">
+        <div class="stat-card"><span class="num">10,000+</span><span class="label">Lines of Zig</span></div>
+        <div class="stat-card"><span class="num">Full</span><span class="label">Tests</span></div>
+        <div class="stat-card"><span class="num">140 KB</span><span class="label">WASM Binary</span></div>
+        <div class="stat-card"><span class="num">0</span><span class="label">Dependencies</span></div>
+      </div>
+
+      <ul class="checklist-grid reveal">
+        <li>BLS12-381 fields</li>
+        <li>KZG commit / open / verify</li>
+        <li>G1 / G2 curves</li>
+        <li>Plonk Rounds 1-5</li>
+        <li>Ate pairing</li>
+        <li>ZKIR interpreter</li>
+        <li>Pippenger MSM</li>
+        <li>Poseidon + JubJub</li>
+        <li>NTT / FFT</li>
+        <li>Proof serialization</li>
+      </ul>
+
+      <div class="reveal">
+        
+    
+      <div class="reveal" style="margin-top:2rem;">
+        <p style="color:#9d4edd;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;"><span class="lang-en">Verified Benchmarks</span><span class="lang-jp">検証済みベンチマーク</span></p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:700px;">
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#0ABAB5;font-size:16px;font-weight:800;">26ms</p><p style="color:#94a3b8;font-size:9px;">PLONK prove</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#0ABAB5;font-size:16px;font-weight:800;">275ns</p><p style="color:#94a3b8;font-size:9px;">SHA-256</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#0ABAB5;font-size:16px;font-weight:800;">375ns</p><p style="color:#94a3b8;font-size:9px;">SHA-512</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#0ABAB5;font-size:16px;font-weight:800;">4ms</p><p style="color:#94a3b8;font-size:9px;">Pairing</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#f97316;font-size:16px;font-weight:800;">476us</p><p style="color:#94a3b8;font-size:9px;">Ownership proof</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#f97316;font-size:16px;font-weight:800;">6us</p><p style="color:#94a3b8;font-size:9px;">HMAC-SHA-512</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#f97316;font-size:16px;font-weight:800;">33us</p><p style="color:#94a3b8;font-size:9px;">Poseidon hash</p>
+          </div>
+          <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(100,116,139,0.2);border-radius:8px;padding:10px;text-align:center;">
+            <p style="color:#f97316;font-size:16px;font-weight:800;">436us</p><p style="color:#94a3b8;font-size:9px;">G1 scalar mul</p>
+          </div>
+        </div>
+        <p style="color:#475569;font-size:10px;margin-top:8px;">Native benchmarks on Linux x86_64. WASM times are ~3-5x slower.</p>
+      </div></div>
+  </section>
+
+  <hr class="section-sep">
+
+  <!-- ===== SECURITY ===== -->
+  <section class="security-section" id="security">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label">Hardened</p>
+        <h2 class="section-title"><span class="lang-en">Security Hardened</span><span class="lang-jp">セキュリティ強化</span></h2>
+        <div class="security-badge">Constant-time crypto, timing obfuscation, encrypted vault</div>
+      </div>
+      <ul class="security-list reveal">
+        <li>AES-256-GCM encryption</li>
+        <li>PBKDF2 600K iterations</li>
+        <li>Constant-time cryptography</li>
+        <li>Timing obfuscation</li>
+        <li>No fund theft vectors</li>
+        <li>Password-gated operations</li>
+      </ul>
+      <p class="security-note reveal">Built with defense-in-depth principles. No fund-theft vectors in self-audit.</p>
+    </div>
+  </section>
+
+  <hr class="section-sep">
+
+  <!-- ===== ARCHITECTURE ===== -->
+  <section id="architecture">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label"><span class="lang-en">System Design</span><span class="lang-jp">システム設計</span></p>
+        <h2 class="section-title">Architecture</h2>
+        <p class="section-desc">Three-layer stack: cryptographic primitives at the base, proof system in the middle, blockchain integration on top.</p>
+      </div>
+      <div class="arch-grid reveal">
+        <div class="arch-row-label">Primitives</div>
+        <div class="arch-cell arch-purple">
+          <span class="arch-cell-title">Field Math</span>
+          <span class="arch-cell-desc">BLS12-381 Fp/Fr</span>
+        </div>
+        <div class="arch-cell arch-purple">
+          <span class="arch-cell-title">Curves</span>
+          <span class="arch-cell-desc">G1/G2 + JubJub</span>
+        </div>
+        <div class="arch-cell arch-purple">
+          <span class="arch-cell-title">Pairing</span>
+          <span class="arch-cell-desc">Ate + Fp12 Tower</span>
+        </div>
+        <div class="arch-row-label">Proof System</div>
+        <div class="arch-cell arch-teal">
+          <span class="arch-cell-title">KZG</span>
+          <span class="arch-cell-desc">Commitments + MSM</span>
+        </div>
+        <div class="arch-cell arch-teal">
+          <span class="arch-cell-title">PLONK</span>
+          <span class="arch-cell-desc">5-Round Prover</span>
+        </div>
+        <div class="arch-cell arch-teal">
+          <span class="arch-cell-title">Hashing</span>
+          <span class="arch-cell-desc">SHA-512 + Poseidon</span>
+        </div>
+        <div class="arch-row-label">Runtime</div>
+        <div class="arch-cell arch-orange">
+          <span class="arch-cell-title">ZKIR VM</span>
+          <span class="arch-cell-desc">26 Opcodes</span>
+        </div>
+        <div class="arch-cell arch-orange">
+          <span class="arch-cell-title">WASM</span>
+          <span class="arch-cell-desc">140KB Binary</span>
+        </div>
+        <div class="arch-cell arch-orange">
+          <span class="arch-cell-title">Midnight</span>
+          <span class="arch-cell-desc">Network Integration</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-sep">
+
+  <!-- ===== STATUS ===== -->
+  <section class="status-section" id="status">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label"><span class="lang-en">Progress</span><span class="lang-jp">進捗状況</span></p>
+        <h2 class="section-title">Status</h2>
+      </div>
+      <div class="status-grid reveal">
+        <div class="status-card">
+          <div class="status-dot live"></div>
+          <div>
+            <div class="status-label">Wallet v1.1.0</div>
+            <div class="status-text">Biometric wallet + ZK ownership proof + DUST generation dashboard live. 3 confirmed on-chain transactions.</div>
+          </div>
+        </div>
+        <div class="status-card">
+          <div class="status-dot live"></div>
+          <div>
+            <div class="status-label">NightForge Explorer</div>
+            <div class="status-text">10 tools live on all networks (mainnet, preprod, preview). <a href="/tools/">View Tools</a></div>
+          </div>
+        </div>
+        <div class="status-card">
+          <div class="status-dot passing"></div>
+          <div>
+            <div class="status-label">Zig Prover</div>
+            <div class="status-text">10,000 lines of Zig, 133KB WASM. SHA-512 + PBKDF2 + PLONK. Full tests, zero dependencies.</div>
+          </div>
+        </div>
+        <div class="status-card">
+          <div class="status-dot blocked"></div>
+          <div>
+            <div class="status-label">Shield Operations</div>
+            <div class="status-text">Blocked by preprod node bug (#1206). YAMORI code ready &mdash; waiting for node fix.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-sep">
+
+<hr class="section-sep">
+
+<!-- Roadmap -->
+<section id="roadmap">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">Direction</p>
+      <h2 class="section-title">Now &middot; Next &middot; Later</h2>
+    </div>
+    <div class="roadmap-grid reveal" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;">
+      <!-- NOW -->
+      <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:20px;">
+        <p style="color:#10b981;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Now</p>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">NightForge Explorer</li>
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">NightForge API</li>
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">10 Interactive Tools</li>
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;">YAMORI Core Wallet</li>
+        </ul>
+      </div>
+      <!-- NEXT -->
+      <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:12px;padding:20px;">
+        <p style="color:#f97316;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Next</p>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);"><strong style="color:#f97316;">YAMORI Credentials</strong></li>
+          <li style="color:#94a3b8;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">Selective-disclosure identity proofs</li>
+          <li style="color:#94a3b8;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">Prove age, KYC, residency — reveal nothing</li>
+          <li style="color:#94a3b8;font-size:11px;padding:4px 0;">Biometric approval + local proof generation</li>
+        </ul>
+      </div>
+      <!-- LATER -->
+      <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:20px;">
+        <p style="color:#8b5cf6;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Later</p>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);"><strong style="color:#8b5cf6;">NightForge Workbench</strong></li>
+          <li style="color:#94a3b8;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">Browser-native Compact workflow</li>
+          <li style="color:#94a3b8;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);">Write, compile, deploy, monitor</li>
+          <li style="color:#e2e8f0;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(100,116,139,0.1);"><strong style="color:#8b5cf6;">DUST Exchange Dashboard</strong></li>
+          <li style="color:#94a3b8;font-size:11px;padding:4px 0;">Market intelligence for DUST Capacity Exchange</li>
+        </ul>
+      </div>
+    </div>
+    <p style="color:#475569;font-size:10px;text-align:center;margin-top:12px;" class="reveal">Roadmap reflects current product direction. Timelines depend on upstream Midnight protocol development.</p>
+  </div>
+</section>
+
+  <!-- ===== CTA / GET NOTIFIED ===== -->
+  <section class="cta-section" id="notify">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label"><span class="lang-en">Coming Soon</span><span class="lang-jp">近日公開</span></p>
+        <h2 class="section-title">YAMORI v1.1.0 — Public Release Coming Soon</h2>
+        <p class="cta-text">Biometric seedless wallet, ZK ownership proof, DUST dashboard, SHA-512 key derivation, and 10 NightForge Explorer tools — all shipping today.</p>
+      </div>
+      <div class="cta-buttons reveal">
+        <a href="https://x.com/NightForgeJP" target="_blank" rel="noopener" class="btn btn-primary"><span class="lang-en">Follow on X</span><span class="lang-jp">Xでフォロー</span></a>
+        <a href="https://nightforge.jp" class="btn btn-outline"><span class="lang-en">Visit NightForge</span><span class="lang-jp">NightForgeを見る</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-links">
+    <a href="https://nightforge.jp">nightforge.jp</a>
+    <a href="https://midnight.network" target="_blank" rel="noopener">Midnight Network</a>
+  </div>
+  <p class="copyright">NightForge &copy; 2026</p>
+</footer>
+
+<script>
+// Navbar scroll effect
+var navbar = document.getElementById('navbar');
+window.addEventListener('scroll', function() {
+  if (window.scrollY > 40) {
+    navbar.classList.add('scrolled');
+  } else {
+    navbar.classList.remove('scrolled');
+  }
+});
+
+// Scroll reveal
+var reveals = document.querySelectorAll('.reveal');
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(function(el) { observer.observe(el); });
+
+// ===== LANGUAGE TOGGLE =====
+var i18n = {
+  en: {
+    'hero-subtitle': 'Biometric Seedless Privacy Wallet for Midnight',
+    'hero-builder': 'Built in Japan by NightForge — v1.1.0',
+    'how-title': 'How It Works',
+    'step1-title': 'Install & Create',
+    'step1-desc': 'Scan your fingerprint or set a password. No seed phrase needed.',
+    'step2-title': 'Receive NIGHT',
+    'step2-desc': 'Share your address or QR code. Funds arrive in seconds.',
+    'step3-title': 'Send Privately',
+    'step3-desc': 'Shielded by default. Zero-knowledge proofs protect your transactions.'
+  },
+  jp: {
+    'hero-subtitle': '生体認証で守る、Midnightのプライバシーウォレット',
+    'hero-builder': 'NightForge 製 — 日本発 v1.1.0',
+    'how-title': '使い方',
+    'step1-title': 'インストール＆作成',
+    'step1-desc': '指紋をスキャンするだけ。シードフレーズもパスワードも不要。',
+    'step2-title': 'NIGHTを受け取る',
+    'step2-desc': 'アドレスかQRコードを共有。数秒で着金。',
+    'step3-title': 'プライベートに送金',
+    'step3-desc': 'デフォルトでシールド。ゼロ知識証明が取引を保護。'
+  }
+}
+
+var currentLang = localStorage.getItem('yamori-lang') || (navigator.language.startsWith('ja') ? 'jp' : 'en');
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('yamori-lang', lang);
+  document.getElementById('langEN').classList.toggle('active', lang === 'en');
+  document.body.classList.toggle('jp', lang === 'jp');
+  document.getElementById('langJP').classList.toggle('active', lang === 'jp');
+
+  var strings = i18n[lang];
+  var els = document.querySelectorAll('[data-i18n]');
+  els.forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (strings[key]) {
+      el.textContent = strings[key];
+    }
+  });
+}
+
+// Init from saved preference
+setLang(currentLang);
+if (currentLang === 'jp') document.body.classList.add('jp');
+
+document.getElementById('langToggle').addEventListener('click', function(e) {
+  var target = e.target;
+  if (target.id === 'langEN') setLang('en');
+  else if (target.id === 'langJP') setLang('jp');
+});
+</script>
+
+</body>
+</html>
