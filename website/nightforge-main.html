@@ -156,7 +156,7 @@
 
     /* Hide empty stat values — only show when JS populates them */
     .count-up:empty { opacity: 0.3; }
-    .count-up:empty { min-height: 1em; }
+    .count-up:empty { min-height: 1em; opacity: 0; }
 
   </style>
 </head>
@@ -217,14 +217,14 @@
           </div>
         </div>
         <div class="hidden md:flex items-center gap-3">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700" id="priceStrip" style="display:none">
             <img src="/night-logo.webp" alt="NIGHT" class="w-5 h-5 rounded-full"/><span class="text-sm text-slate-400">NIGHT</span>
             <span id="headerPrice" class="font-semibold text-white text-sm" style="display:none"></span>
             <span id="headerChange" class="text-xs font-medium text-slate-500" style="display:none"></span>
             <span class="text-xs text-slate-500">MCap</span>
             <span id="headerMcap" class="text-slate-300 text-xs" style="display:none"></span>
           </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700" id="indexedStrip" style="display:none">
             <span id="headerIndexed" class="font-semibold text-white text-sm"></span>
             <span class="text-xs text-slate-500" data-i18n="indexed">INDEXED</span>
           </div>
@@ -579,7 +579,7 @@
       <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Extrinsics<button onclick="exportExtrinsicsCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allExts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
     <div id="content-contracts" class="tab-content hidden">
-      <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">Smart Contracts (<span id="contractCount"></span>)</h3><span class="text-xs text-slate-500">Deployed contracts</span></div><div id="allContracts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
+      <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">Smart Contracts<span id="contractCount" style="margin-left:4px"></span></h3><span class="text-xs text-slate-500">Deployed contracts</span></div><div id="allContracts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
 
     <!-- Privacy Dashboard Tab -->
@@ -2214,7 +2214,7 @@ function loadStats(){
   fetch(API+"/stats").then(function(r){return r.json()}).then(function(s){
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
     document.getElementById("indexedBlocks").textContent=s.totalBlocks?fmt(s.totalBlocks):"";document.getElementById("indexedBlocks").classList.add("loaded");
-    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
+    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;var is=document.getElementById("indexedStrip");if(is&&newVal)is.style.display="";showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
     document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
     document.getElementById("currentEpoch").classList.add("loaded");document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
@@ -2281,7 +2281,7 @@ function loadTxs(){
 function loadAllBlocks(){fetch(API+"/blocks?limit=50").then(function(r){return r.json()}).then(function(d){document.getElementById("allBlocks").innerHTML=d.map(renderBlock).join("");attachBlockListeners()}).catch(function(){})}
 function loadAllTxs(){fetch(API+"/extrinsics?limit=50").then(function(r){return r.json()}).then(function(d){document.getElementById("txCount").textContent=d.length;document.getElementById("allTxs").innerHTML=d.map(renderExt).join("");attachExtListeners()}).catch(function(){})}
 function loadAllExts(){fetch(API+"/extrinsics?limit=50").then(function(r){return r.json()}).then(function(d){document.getElementById("allExts").innerHTML=d.map(renderExt).join("");attachExtListeners()}).catch(function(){})}
-function loadAllContracts(){Promise.resolve({json:function(){return []}}).then(function(r){return r.json()}).then(function(d){document.getElementById("contractCount").textContent=d.length;document.getElementById("allContracts").innerHTML=d.map(renderContract).join("");attachContractListeners()}).catch(function(){})}
+function loadAllContracts(){Promise.resolve({json:function(){return []}}).then(function(r){return r.json()}).then(function(d){document.getElementById("contractCount").textContent=d?("("+d+")"):"" .length;document.getElementById("allContracts").innerHTML=d.map(renderContract).join("");attachContractListeners()}).catch(function(){})}
 var priceRetries=0;
 function loadPrice(){
   fetch("/api/price?ids=midnight-3&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true").then(function(r){return r.json()}).then(function(d){
@@ -3850,7 +3850,7 @@ function loadCardano(){
 
 // Show price elements after successful fetch
 function showPriceStrip() {
-  var els = ['headerPrice','headerChange','headerMcap','priceWidget','changeWidget'];
+  var els = ['headerPrice','headerChange','headerMcap','priceWidget','changeWidget','priceStrip'];
   for (var i=0; i<els.length; i++) {
     var el = document.getElementById(els[i]);
     if (el && el.textContent) el.style.display = '';
