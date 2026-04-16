@@ -157,7 +157,7 @@
 </head>
 <body class="min-h-screen text-white" style="background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #050a12 100%);">
   <div id="deepLoader" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900" style="background:#0a1628" style="display:none;">
-    <p id="loadingText" class="text-slate-400 text-lg">Loading...</p>
+    <p id="loadingText" class="text-slate-400 text-lg" style="display:none">Loading...</p>
   </div>
   <script>
     var p=location.pathname;
@@ -214,13 +214,13 @@
         <div class="hidden md:flex items-center gap-3">
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700">
             <img src="/night-logo.webp" alt="NIGHT" class="w-5 h-5 rounded-full"/><span class="text-sm text-slate-400">NIGHT</span>
-            <span id="headerPrice" class="font-semibold text-white text-sm">$--</span>
-            <span id="headerChange" class="text-xs font-medium text-slate-500">--</span>
+            <span id="headerPrice" class="font-semibold text-white text-sm" style="display:none"></span>
+            <span id="headerChange" class="text-xs font-medium text-slate-500" style="display:none"></span>
             <span class="text-xs text-slate-500">MCap</span>
-            <span id="headerMcap" class="text-slate-300 text-xs">--</span>
+            <span id="headerMcap" class="text-slate-300 text-xs" style="display:none"></span>
           </div>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700">
-            <span id="headerIndexed" class="font-semibold text-white text-sm">0</span>
+            <span id="headerIndexed" class="font-semibold text-white text-sm"></span>
             <span class="text-xs text-slate-500" data-i18n="indexed">INDEXED</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30">
@@ -404,7 +404,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="bg-gradient-to-r from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/30 p-3">
           <p class="text-xs text-green-400 mb-1" data-i18n="networkAge">Network Age</p>
-          <p id="networkAge" class="text-lg font-bold text-green-400">--</p>
+          <p id="networkAge" class="text-lg font-bold text-green-400"></p>
         </div>
         <div class="bg-gradient-to-r from-amber-500/5 to-orange-500/5 rounded-xl border border-amber-500/20 p-4">
           <div class="flex items-start gap-3">
@@ -458,7 +458,7 @@
                 <img src="/night-logo.webp" alt="NIGHT" class="w-8 h-8 rounded-full"/>
                 <div><p class="font-semibold text-white text-sm">NIGHT</p><p class="text-[10px] text-slate-500">Midnight</p></div>
               </div>
-              <div class="text-right"><p id="priceWidget" class="text-base font-bold text-white">$--</p><p id="changeWidget" class="text-xs text-slate-500">--</p></div>
+              <div class="text-right"><p id="priceWidget" class="text-base font-bold text-white"></p><p id="changeWidget" class="text-xs text-slate-500"></p></div>
             </div>
             <div class="mt-2 h-8 relative">
               <svg class="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
@@ -498,20 +498,20 @@
         <div class="bg-gradient-to-br from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/20 p-4 mt-4">
           <div class="flex items-center justify-between mb-3">
             <p class="text-sm font-semibold text-green-400" data-i18n="networkHealth">Network Health</p>
-            <span id="healthScore" class="text-2xl font-bold text-green-400">--</span>
+            <span id="healthScore" class="text-2xl font-bold text-green-400"></span>
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-400">Block Production</span>
-              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthBlocks" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthBlocksLabel" class="text-green-400 w-8 text-right">--</span></div>
+              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthBlocks" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthBlocksLabel" class="text-green-400 w-8 text-right"></span></div>
             </div>
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-400">Validators</span>
-              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthValidators" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthValidatorsLabel" class="text-green-400 w-8 text-right">--</span></div>
+              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthValidators" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthValidatorsLabel" class="text-green-400 w-8 text-right"></span></div>
             </div>
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-400">Privacy</span>
-              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthPrivacy" class="h-full bg-cyan-400 rounded-full" style="width:0%"></div></div><span id="healthPrivacyLabel" class="text-cyan-400 w-8 text-right">--</span></div>
+              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthPrivacy" class="h-full bg-cyan-400 rounded-full" style="width:0%"></div></div><span id="healthPrivacyLabel" class="text-cyan-400 w-8 text-right"></span></div>
             </div>
           </div>
         </div>
@@ -599,7 +599,7 @@
             <p class="text-xs text-slate-500 uppercase tracking-wider mb-4">Shielded Ratio</p>
             <div id="privacyGauge" class="privacy-gauge" style="background:conic-gradient(#06b6d4 0% 0%,#f97316 0% 100%)">
               <div class="privacy-gauge-inner">
-                <span id="privacyPct" class="text-4xl font-black text-cyan-400">--</span>
+                <span id="privacyPct" class="text-4xl font-black text-cyan-400"></span>
                 <span class="text-xs text-slate-500 mt-1">SHIELDED</span>
               </div>
             </div>
@@ -612,7 +612,7 @@
               <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalMidnightTxs">Total Midnight Txs</p>
-                <p id="privTotalTxs" class="text-3xl font-bold text-white count-up">--</p>
+                <p id="privTotalTxs" class="text-3xl font-bold text-white count-up"></p>
                 <p class="text-xs text-slate-500 mt-1">Last 7 days</p>
               </div>
             </div>
@@ -620,7 +620,7 @@
               <div class="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="shielded">Shielded</p>
-                <p id="privShielded" class="text-3xl font-bold text-cyan-400 count-up">--</p>
+                <p id="privShielded" class="text-3xl font-bold text-cyan-400 count-up"></p>
                 <p class="text-xs text-cyan-400/60 mt-1">Private transactions</p>
               </div>
             </div>
@@ -628,7 +628,7 @@
               <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="unshielded">Unshielded</p>
-                <p id="privUnshielded" class="text-3xl font-bold text-orange-400 count-up">--</p>
+                <p id="privUnshielded" class="text-3xl font-bold text-orange-400 count-up"></p>
                 <p class="text-xs text-orange-400/60 mt-1">Public transactions</p>
               </div>
             </div>
@@ -636,7 +636,7 @@
               <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="contractCalls">Contract Calls</p>
-                <p id="privContractCalls" class="text-3xl font-bold text-purple-400 count-up">--</p>
+                <p id="privContractCalls" class="text-3xl font-bold text-purple-400 count-up"></p>
                 <p class="text-xs text-purple-400/60 mt-1">Smart contract interactions</p>
               </div>
             </div>
@@ -644,7 +644,7 @@
               <div class="absolute top-0 right-0 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="contractDeploys">Contract Deploys</p>
-                <p id="privContractDeploys" class="text-3xl font-bold text-pink-400 count-up">--</p>
+                <p id="privContractDeploys" class="text-3xl font-bold text-pink-400 count-up"></p>
                 <p class="text-xs text-pink-400/60 mt-1">Deployed contracts</p>
               </div>
             </div>
@@ -726,7 +726,7 @@
             <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalBridgeOps">Total Bridge Ops</p>
-              <p id="bridgeTotal" class="text-3xl font-bold text-white count-up">--</p>
+              <p id="bridgeTotal" class="text-3xl font-bold text-white count-up"></p>
               <p class="text-xs text-slate-500 mt-1">Last 7 days</p>
             </div>
           </div>
@@ -742,7 +742,7 @@
             <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="opsPerHour">Ops / Hour</p>
-              <p id="bridgeRate" class="text-3xl font-bold text-orange-400 count-up">--</p>
+              <p id="bridgeRate" class="text-3xl font-bold text-orange-400 count-up"></p>
               <p class="text-xs text-orange-400/60 mt-1">Average rate</p>
             </div>
           </div>
@@ -816,28 +816,28 @@
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalBlocks">Total Blocks</p>
-              <p id="anTotalBlocks" class="text-2xl font-bold text-white count-up">--</p>
+              <p id="anTotalBlocks" class="text-2xl font-bold text-white count-up"></p>
             </div>
           </div>
           <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalExtrinsics">Total Extrinsics</p>
-              <p id="anTotalExts" class="text-2xl font-bold text-green-400 count-up">--</p>
+              <p id="anTotalExts" class="text-2xl font-bold text-green-400 count-up"></p>
             </div>
           </div>
           <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgBlockTime">Avg Block Time</p>
-              <p id="anAvgBlock" class="text-2xl font-bold text-cyan-400 count-up">--</p>
+              <p id="anAvgBlock" class="text-2xl font-bold text-cyan-400 count-up"></p>
             </div>
           </div>
           <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="networkTps">Network TPS</p>
-              <p id="anTPS" class="text-2xl font-bold text-orange-400 count-up">--</p>
+              <p id="anTPS" class="text-2xl font-bold text-orange-400 count-up"></p>
             </div>
           </div>
         </div>
@@ -885,7 +885,7 @@
                   </tr>
                 </thead>
                 <tbody id="contractLeaderboard" class="divide-y divide-slate-700/20">
-                  <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Loading...</td></tr>
+                  <tr><td colspan="4" class="px-4 py-8 text-center text-slate-600 text-xs">Fetching data...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -905,7 +905,7 @@
                   <p class="text-xs text-slate-500">On-chain event breakdown</p>
                 </div>
               </div>
-              <span id="eventTypesTotal" class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full">--</span>
+              <span id="eventTypesTotal" class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="eventTypesList" class="p-4 space-y-2 max-h-[360px] overflow-y-auto">
               <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
@@ -925,7 +925,7 @@
                   <p class="text-xs text-slate-500">On-chain smart contracts</p>
                 </div>
               </div>
-              <span id="deployedContractsTotal" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full">--</span>
+              <span id="deployedContractsTotal" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="deployedContractsList" class="divide-y divide-slate-700/20 max-h-[360px] overflow-y-auto">
               <div class="px-4 py-8 text-center text-slate-500">Loading contracts...</div>
@@ -949,9 +949,9 @@
                 <span class="font-bold text-green-400">Mainnet</span>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpMainBlocks" class="text-sm font-medium text-white">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpMainExts" class="text-sm font-medium text-white">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpMainTPS" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpMainBlocks" class="text-sm font-medium text-white"></span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpMainExts" class="text-sm font-medium text-white"></span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpMainTPS" class="text-sm font-medium text-white"></span></div>
               </div>
             </div>
             <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
@@ -960,9 +960,9 @@
                 <a href="https://preprod.nightforge.jp" class="font-bold text-orange-400 hover:underline">Preprod</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreprodBlocks" class="text-sm font-medium text-white">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreprodExts" class="text-sm font-medium text-white">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreprodTPS" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreprodBlocks" class="text-sm font-medium text-white"></span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreprodExts" class="text-sm font-medium text-white"></span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreprodTPS" class="text-sm font-medium text-white"></span></div>
               </div>
             </div>
             <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
@@ -971,9 +971,9 @@
                 <a href="https://preview.nightforge.jp" class="font-bold text-cyan-400 hover:underline">Preview</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreviewBlocks" class="text-sm font-medium text-white">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreviewExts" class="text-sm font-medium text-white">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreviewTPS" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreviewBlocks" class="text-sm font-medium text-white"></span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreviewExts" class="text-sm font-medium text-white"></span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreviewTPS" class="text-sm font-medium text-white"></span></div>
               </div>
             </div>
           </div>
@@ -989,11 +989,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div class="bg-slate-900/50 rounded-xl p-3 text-center">
                 <p class="text-xs text-slate-500">Total Fee-Paying Txs</p>
-                <p id="dustTotalTxs" class="text-2xl font-bold text-amber-400">--</p>
+                <p id="dustTotalTxs" class="text-2xl font-bold text-amber-400"></p>
               </div>
               <div class="bg-slate-900/50 rounded-xl p-3 text-center">
                 <p class="text-xs text-slate-500">DUST Events</p>
-                <p id="dustEventCount" class="text-2xl font-bold text-amber-400">--</p>
+                <p id="dustEventCount" class="text-2xl font-bold text-amber-400"></p>
               </div>
             </div>
             <div class="h-48">
@@ -1023,27 +1023,27 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalActions">Total Actions</p><p id="govTotal" class="text-2xl font-bold text-white count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalActions">Total Actions</p><p id="govTotal" class="text-2xl font-bold text-white count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilProposals">Council Proposals</p><p id="govCouncilProposals" class="text-2xl font-bold text-blue-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilProposals">Council Proposals</p><p id="govCouncilProposals" class="text-2xl font-bold text-blue-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilVotes">Council Votes</p><p id="govCouncilVotes" class="text-2xl font-bold text-blue-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilVotes">Council Votes</p><p id="govCouncilVotes" class="text-2xl font-bold text-blue-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techProposals">Tech Proposals</p><p id="govTechProposals" class="text-2xl font-bold text-purple-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techProposals">Tech Proposals</p><p id="govTechProposals" class="text-2xl font-bold text-purple-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techVotes">Tech Votes</p><p id="govTechVotes" class="text-2xl font-bold text-purple-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techVotes">Tech Votes</p><p id="govTechVotes" class="text-2xl font-bold text-purple-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-amber-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityResets">Authority Resets</p><p id="govAuthorityResets" class="text-2xl font-bold text-amber-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityResets">Authority Resets</p><p id="govAuthorityResets" class="text-2xl font-bold text-amber-400 count-up"></p></div>
           </div>
         </div>
 
@@ -1141,7 +1141,7 @@
           <div class="relative grid md:grid-cols-4 gap-6 items-center">
             <div class="text-center md:text-left">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="currentEpochInfo">Current Epoch</p>
-              <p id="epochCurrentNum" class="text-5xl font-black text-cyan-400">--</p>
+              <p id="epochCurrentNum" class="text-5xl font-black text-cyan-400"></p>
               <div class="flex flex-wrap gap-2 mt-3">
                 <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300" data-i18n="thirtyMinEpochs">30 min epochs</span>
                 <span class="text-xs px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300" data-i18n="blocksPerEpochValue">~50 blocks/epoch</span>
@@ -1156,11 +1156,11 @@
             </div>
             <div class="text-center">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="cardanoEpoch">Cardano Epoch</p>
-              <p id="epochCardanoNum" class="text-3xl font-bold text-blue-400">--</p>
+              <p id="epochCardanoNum" class="text-3xl font-bold text-blue-400"></p>
             </div>
             <div class="text-center md:text-right">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="sidechainSlot">Sidechain Slot</p>
-              <p id="epochCurrentSlot" class="text-2xl font-bold text-white font-mono">--</p>
+              <p id="epochCurrentSlot" class="text-2xl font-bold text-white font-mono"></p>
             </div>
           </div>
         </div>
@@ -1169,15 +1169,15 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalSessions">Total Sessions</p><p id="epochTotalSessions" class="text-2xl font-bold text-green-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalSessions">Total Sessions</p><p id="epochTotalSessions" class="text-2xl font-bold text-green-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityChanges">Authority Changes</p><p id="epochAuthorityChanges" class="text-2xl font-bold text-orange-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityChanges">Authority Changes</p><p id="epochAuthorityChanges" class="text-2xl font-bold text-orange-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgEpochDuration">Avg Epoch Duration</p><p id="epochAvgDuration" class="text-2xl font-bold text-cyan-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgEpochDuration">Avg Epoch Duration</p><p id="epochAvgDuration" class="text-2xl font-bold text-cyan-400 count-up"></p></div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
@@ -1197,11 +1197,11 @@
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div class="bg-slate-900/50 rounded-xl p-3 text-center">
                   <p class="text-xs text-slate-500">Epochs Today</p>
-                  <p id="epochsToday" class="text-2xl font-bold text-cyan-400">--</p>
+                  <p id="epochsToday" class="text-2xl font-bold text-cyan-400"></p>
                 </div>
                 <div class="bg-slate-900/50 rounded-xl p-3 text-center">
                   <p class="text-xs text-slate-500">Blocks Today</p>
-                  <p id="blocksToday" class="text-2xl font-bold text-white">--</p>
+                  <p id="blocksToday" class="text-2xl font-bold text-white"></p>
                 </div>
               </div>
               <div id="recentEpochsList" class="space-y-2 max-h-64 overflow-y-auto">
@@ -1218,9 +1218,9 @@
             <div class="p-6">
               <div class="flex items-center justify-center mb-6">
                 <div class="text-center">
-                  <p class="text-5xl font-bold text-blue-400" id="cardanoEpochBig">--</p>
+                  <p class="text-5xl font-bold text-blue-400" id="cardanoEpochBig"></p>
                   <p class="text-sm text-slate-400 mt-1">Current Cardano Epoch</p>
-                  <p id="cardanoEpochCountdown" class="text-xs text-blue-300 mt-1">--</p>
+                  <p id="cardanoEpochCountdown" class="text-xs text-blue-300 mt-1"></p>
                   <div class="w-full h-1.5 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                     <div id="cardanoEpochProgress" class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all" style="width:0%"></div>
                   </div>
@@ -1229,11 +1229,11 @@
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div class="bg-slate-900/50 rounded-xl p-3 text-center">
                   <p class="text-xs text-slate-500">Cardano Slot</p>
-                  <p id="cardanoSlotBig" class="text-sm font-mono font-bold text-white">--</p>
+                  <p id="cardanoSlotBig" class="text-sm font-mono font-bold text-white"></p>
                 </div>
                 <div class="bg-slate-900/50 rounded-xl p-3 text-center">
                   <p class="text-xs text-slate-500">Midnight Epochs in this Cardano Epoch</p>
-                  <p id="midnightEpochsInCardano" class="text-sm font-bold text-cyan-400">--</p>
+                  <p id="midnightEpochsInCardano" class="text-sm font-bold text-cyan-400"></p>
                 </div>
               </div>
               <div class="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
@@ -1268,7 +1268,7 @@
                   </tr>
                 </thead>
                 <tbody id="epochSessionTable" class="divide-y divide-slate-700/20">
-                  <tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">Loading...</td></tr>
+                  <tr><td colspan="3" class="px-4 py-8 text-center text-slate-600 text-xs">Fetching data...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1333,9 +1333,9 @@
               <span class="text-sm font-bold text-cyan-400">Midnight</span>
               <div class="text-center">
                 <p class="text-xs text-slate-500">Epoch</p>
-                <p id="cardanoMidEpoch" class="text-lg font-bold text-white">--</p>
+                <p id="cardanoMidEpoch" class="text-lg font-bold text-white"></p>
                 <p class="text-xs text-slate-500 mt-1">Slot</p>
-                <p id="cardanoMidSlot" class="text-sm font-mono text-cyan-400">--</p>
+                <p id="cardanoMidSlot" class="text-sm font-mono text-cyan-400"></p>
               </div>
             </div>
             <div class="flex-1 mx-8 relative h-16">
@@ -1354,9 +1354,9 @@
               <span class="text-sm font-bold text-blue-400">Cardano</span>
               <div class="text-center">
                 <p class="text-xs text-slate-500">Epoch</p>
-                <p id="cardanoCardEpoch" class="text-lg font-bold text-white">--</p>
+                <p id="cardanoCardEpoch" class="text-lg font-bold text-white"></p>
                 <p class="text-xs text-slate-500 mt-1">Slot</p>
-                <p id="cardanoCardSlot" class="text-sm font-mono text-blue-400">--</p>
+                <p id="cardanoCardSlot" class="text-sm font-mono text-blue-400"></p>
               </div>
             </div>
           </div>
@@ -1450,7 +1450,7 @@
         </div>
       </div>
       <div class="mt-4 pt-4 border-t border-slate-800/30 flex items-center justify-center gap-6 text-xs text-slate-600">
-        <span id="loadTime" class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Loaded in <span id="loadMs">--</span>ms</span>
+        <span id="loadTime" class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Loaded in <span id="loadMs"></span>ms</span>
         <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> ~62KB Lite</span>
         <span class="flex items-center gap-1 text-cyan-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Press ? for shortcuts</span>
         <span class="text-xs text-slate-600" data-i18n="builtInJapan">&#x1F1EF;&#x1F1F5; Built in Japan</span>
@@ -2209,13 +2209,13 @@ function loadStats(){
   fetch(API+"/stats").then(function(r){return r.json()}).then(function(s){
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
     document.getElementById("indexedBlocks").textContent=fmt(s.totalBlocks);document.getElementById("indexedBlocks").classList.add("loaded");
-    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
+    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
     document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
     document.getElementById("currentEpoch").classList.add("loaded");document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
     
     // Fetch network info
-    fetch(API+"/api/network").then(function(r){return r.json()}).then(function(net){
+    fetch(API+"/network").then(function(r){return r.json()}).then(function(net){
       window.networkInfo=net;
       if(net.node){
         var infoEl=document.getElementById("networkInfoDisplay");
@@ -2226,7 +2226,7 @@ function loadStats(){
   // Remove duplicate fetch - use same data
   var c={};fetch(API+"/stats").then(function(r){return r.json()}).then(function(c){
     // Also fetch network info for protocol version
-    fetch(API+"/api/network").then(function(r){return r.json()}).then(function(net){
+    fetch(API+"/network").then(function(r){return r.json()}).then(function(net){
       window.networkInfo=net;
       if(net.node){
         var infoEl=document.getElementById("networkInfoDisplay");
@@ -3840,6 +3840,16 @@ function loadCardano(){
 
   if(cardanoInterval)clearInterval(cardanoInterval);
   cardanoInterval=setInterval(function(){if(currentTab==="cardano")loadCardano()},30000);
+}
+
+
+// Show price elements after successful fetch
+function showPriceStrip() {
+  var els = ['headerPrice','headerChange','headerMcap'];
+  for (var i=0; i<els.length; i++) {
+    var el = document.getElementById(els[i]);
+    if (el && el.textContent) el.style.display = '';
+  }
 }
 
 </script>
