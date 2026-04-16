@@ -791,7 +791,7 @@
                 </tr>
               </thead>
               <tbody id="bridgeOpsTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Awaiting data…</td></tr>
+                <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500"></td></tr>
               </tbody>
             </table>
           </div>
@@ -1063,7 +1063,7 @@
               <span id="govCouncilProposalCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="govCouncilProposalsList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Awaiting data…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-blue-500/20 overflow-hidden">
@@ -1389,7 +1389,7 @@
                 </tr>
               </thead>
               <tbody id="cardanoAnchorTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Awaiting data…</td></tr>
+                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"></td></tr>
               </tbody>
             </table>
           </div>
@@ -1545,7 +1545,7 @@ var translations = {
     addressEvents: "Related Events",
     blocksProducedShort: "blks",
     enrichedData: "Indexer Data",
-    enrichedLoading: "Loading enriched data from official indexer...",
+    enrichedLoading: "",
     blockAuthor: "Block Author",
     contractActions: "Contract Actions",
     unshieldedOutputs: "Unshielded Outputs",
@@ -3181,7 +3181,7 @@ function loadBridge(){
     var ops=data.recentBridgeOps||data.recent||[];
     var tbody=document.getElementById("bridgeOpsTable");
     var opCountEl=document.getElementById("bridgeOpCount");
-    if(opCountEl)opCountEl.textContent=ops.length+" ops";
+    if(opCountEl)opCountEl.textContent=ops.length?ops.length+" ops":"";
     if(tbody){
       if(ops.length===0){
         tbody.innerHTML='<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No recent bridge operations</td></tr>';
@@ -3636,7 +3636,7 @@ function loadEpochs(){
         var nts=sc.nextEpochTimestamp/1000;
         var epochStart=sc.epochTimestamp?sc.epochTimestamp/1000:0;
         var updateEpochCountdown=function(){
-          var d=nts*1000-Date.now();if(d<=0){document.getElementById("epochCountdown").textContent="Transitioning...";return;}
+          var d=nts*1000-Date.now();if(d<=0){document.getElementById("epochCountdown").textContent="";return;}
           var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
           document.getElementById("epochCountdown").textContent=(h<10?"0":"")+h+":"+(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
           if(epochStart>0){
@@ -3765,7 +3765,7 @@ function loadCardano(){
     // Anchor History table
     var tbody=document.getElementById("cardanoAnchorTable");
     var countEl=document.getElementById("cardanoAnchorCount");
-    if(countEl)countEl.textContent=anchors.length+" anchors";
+    if(countEl)countEl.textContent=anchors.length?anchors.length+" anchors":"";
     if(tbody){
       if(anchors.length===0){
         tbody.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No anchor data available</td></tr>';
