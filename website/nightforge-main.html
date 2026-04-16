@@ -156,13 +156,13 @@
 
     /* Hide empty stat values — only show when JS populates them */
     .count-up:empty { opacity: 0.3; }
-    .count-up:empty::after { content: '—'; font-size: 0.7em; color: #475569; }
+    .count-up:empty { min-height: 1em; }
 
   </style>
 </head>
 <body class="min-h-screen text-white" style="background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #050a12 100%);">
   <div id="deepLoader" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900" style="background:#0a1628" style="display:none;">
-    <p id="loadingText" class="text-slate-400 text-lg" style="display:none">Fetching…</p>
+    <p id="loadingText" class="text-slate-400 text-lg" style="display:none"></p>
   </div>
   <script>
     var p=location.pathname;
@@ -368,8 +368,8 @@
               </div>
               <span class="text-xs font-medium text-green-400 uppercase tracking-wider" data-i18n="totalExtrinsics">Total Extrinsics</span>
             </div>
-            <p id="totalTxs" class="text-3xl font-bold text-white mb-1 stat-value">—</p>
-            <p class="text-xs text-slate-400">Blocks: <span id="totalBlocksSub">—</span></p>
+            <p id="totalTxs" class="text-3xl font-bold text-white mb-1 stat-value"></p>
+            <p class="text-xs text-slate-400">Blocks: <span id="totalBlocksSub"></span></p>
           </div>
         </div>
         <div class="relative overflow-hidden rounded-2xl glass border border-orange-500/30 p-5 card-hover">
@@ -393,8 +393,8 @@
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white">749,564</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400">—</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white">0</p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400"></p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white"></p></div>
         <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400">267</p></div>
         <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
         <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3">
@@ -537,7 +537,7 @@
             <p class="text-xs text-slate-500">Validator block production distribution</p>
           </div>
           <div id="blockProducersList" class="p-4 space-y-2">
-            <p class="text-center text-slate-500 text-sm py-4">Fetching…</p>
+            <p class="text-center text-slate-500 text-sm py-4"></p>
           </div>
         </div>
       <div class="grid lg:grid-cols-2 gap-6">
@@ -579,7 +579,7 @@
       <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Extrinsics<button onclick="exportExtrinsicsCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allExts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
     <div id="content-contracts" class="tab-content hidden">
-      <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">Smart Contracts (<span id="contractCount">0</span>)</h3><span class="text-xs text-slate-500">Deployed contracts</span></div><div id="allContracts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
+      <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">Smart Contracts (<span id="contractCount"></span>)</h3><span class="text-xs text-slate-500">Deployed contracts</span></div><div id="allContracts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
 
     <!-- Privacy Dashboard Tab -->
@@ -778,7 +778,7 @@
               <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
               <span data-i18n="recentBridgeOps">Recent Bridge Operations</span>
             </h3>
-            <span id="bridgeOpCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0 ops</span>
+            <span id="bridgeOpCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full"></span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -890,7 +890,7 @@
                   </tr>
                 </thead>
                 <tbody id="contractLeaderboard" class="divide-y divide-slate-700/20">
-                  <tr><td colspan="4" class="px-4 py-8 text-center text-slate-600 text-xs">Fetching data...</td></tr>
+                  <tr><td colspan="4" class="px-4 py-8 text-center text-slate-600 text-xs"></td></tr>
                 </tbody>
               </table>
             </div>
@@ -933,7 +933,7 @@
               <span id="deployedContractsTotal" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="deployedContractsList" class="divide-y divide-slate-700/20 max-h-[360px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading contracts...</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
         </div>
@@ -1060,7 +1060,7 @@
                 <div class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center"><span class="text-sm">🏛</span></div>
                 <div><h3 class="font-semibold text-white" data-i18n="councilProposals">Council Proposals</h3><p class="text-xs text-slate-500">Recent council proposals</p></div>
               </div>
-              <span id="govCouncilProposalCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0</span>
+              <span id="govCouncilProposalCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="govCouncilProposalsList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
               <div class="px-4 py-8 text-center text-slate-500">Awaiting data…</div>
@@ -1072,10 +1072,10 @@
                 <div class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center"><span class="text-sm">🗳</span></div>
                 <div><h3 class="font-semibold text-white" data-i18n="councilVotes">Council Votes</h3><p class="text-xs text-slate-500">Recent council voting activity</p></div>
               </div>
-              <span id="govCouncilVoteCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0</span>
+              <span id="govCouncilVoteCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="govCouncilVotesList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
         </div>
@@ -1088,10 +1088,10 @@
                 <div class="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center"><span class="text-sm">⚙</span></div>
                 <div><h3 class="font-semibold text-white" data-i18n="techProposals">Technical Committee Proposals</h3><p class="text-xs text-slate-500">Technical governance activity</p></div>
               </div>
-              <span id="govTechProposalCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0</span>
+              <span id="govTechProposalCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="govTechProposalsList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 overflow-hidden">
@@ -1100,10 +1100,10 @@
                 <div class="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center"><span class="text-sm">🗳</span></div>
                 <div><h3 class="font-semibold text-white" data-i18n="techVotes">Technical Committee Votes</h3><p class="text-xs text-slate-500">Technical voting activity</p></div>
               </div>
-              <span id="govTechVoteCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0</span>
+              <span id="govTechVoteCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="govTechVotesList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
         </div>
@@ -1115,10 +1115,10 @@
               <div class="w-8 h-8 rounded-lg bg-amber-500/30 flex items-center justify-center"><span class="text-sm">🔗</span></div>
               <div><h3 class="font-semibold text-white" data-i18n="authorityResets">Authority Resets</h3><p class="text-xs text-slate-500">Federated authority observation events</p></div>
             </div>
-            <span id="govAuthorityCount" class="text-xs text-amber-400 bg-amber-400/10 px-2 py-1 rounded-full">0</span>
+            <span id="govAuthorityCount" class="text-xs text-amber-400 bg-amber-400/10 px-2 py-1 rounded-full"></span>
           </div>
           <div id="govAuthorityList" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-            <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+            <div class="px-4 py-8 text-center text-slate-500"></div>
           </div>
         </div>
       </div>
@@ -1154,7 +1154,7 @@
             </div>
             <div class="text-center">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="nextEpochIn">Next Epoch In</p>
-              <p id="epochCountdown" class="text-4xl font-bold text-white">--:--:--</p>
+              <p id="epochCountdown" class="text-4xl font-bold text-white"></p>
               <div class="w-full h-2 bg-slate-700 rounded-full mt-3 overflow-hidden">
                 <div id="epochProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-green-500 rounded-full transition-all duration-1000" style="width:0%"></div>
               </div>
@@ -1210,7 +1210,7 @@
                 </div>
               </div>
               <div id="recentEpochsList" class="space-y-2 max-h-64 overflow-y-auto">
-                <p class="text-center text-slate-500 text-sm py-4">Fetching…</p>
+                <p class="text-center text-slate-500 text-sm py-4"></p>
               </div>
             </div>
           </div>
@@ -1261,7 +1261,7 @@
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-pink-500/30 flex items-center justify-center"><span class="text-sm">🔄</span></div>
                 <div><h3 class="font-semibold text-white" data-i18n="sessionChanges">Session Changes</h3><p class="text-xs text-slate-500">Recent session transitions</p></div>
               </div>
-              <span id="epochSessionCount" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full">0</span>
+              <span id="epochSessionCount" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
@@ -1273,7 +1273,7 @@
                   </tr>
                 </thead>
                 <tbody id="epochSessionTable" class="divide-y divide-slate-700/20">
-                  <tr><td colspan="3" class="px-4 py-8 text-center text-slate-600 text-xs">Fetching data...</td></tr>
+                  <tr><td colspan="3" class="px-4 py-8 text-center text-slate-600 text-xs"></td></tr>
                 </tbody>
               </table>
             </div>
@@ -1374,7 +1374,7 @@
               <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/30 to-cyan-500/30 flex items-center justify-center"><span class="text-sm">⚓</span></div>
               <div><h3 class="font-semibold text-white" data-i18n="anchorHistory">Anchor History</h3><p class="text-xs text-slate-500">Cardano ↔ Midnight checkpoint log</p></div>
             </div>
-            <span id="cardanoAnchorCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0 anchors</span>
+            <span id="cardanoAnchorCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full"></span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -1405,7 +1405,7 @@
               </div>
             </div>
             <div id="cardanoRegistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-red-500/20 overflow-hidden">
@@ -1416,7 +1416,7 @@
               </div>
             </div>
             <div id="cardanoDeregistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
@@ -1427,7 +1427,7 @@
               </div>
             </div>
             <div id="cardanoMappings" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
+              <div class="px-4 py-8 text-center text-slate-500"></div>
             </div>
           </div>
         </div>
