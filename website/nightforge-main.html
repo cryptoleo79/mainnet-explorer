@@ -153,11 +153,16 @@
 @keyframes zk-glow{0%,100%{box-shadow:0 0 8px rgba(6,182,212,0.4)}50%{box-shadow:0 0 20px rgba(6,182,212,0.8)}}
 .zk-badge{animation:zk-glow 2s ease-in-out infinite}
 
-</style>
+
+    /* Hide empty stat values — only show when JS populates them */
+    .count-up:empty { opacity: 0.3; }
+    .count-up:empty::after { content: '—'; font-size: 0.7em; color: #475569; }
+
+  </style>
 </head>
 <body class="min-h-screen text-white" style="background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #050a12 100%);">
   <div id="deepLoader" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900" style="background:#0a1628" style="display:none;">
-    <p id="loadingText" class="text-slate-400 text-lg" style="display:none">Loading...</p>
+    <p id="loadingText" class="text-slate-400 text-lg" style="display:none">Fetching…</p>
   </div>
   <script>
     var p=location.pathname;
@@ -458,7 +463,7 @@
                 <img src="/night-logo.webp" alt="NIGHT" class="w-8 h-8 rounded-full"/>
                 <div><p class="font-semibold text-white text-sm">NIGHT</p><p class="text-[10px] text-slate-500">Midnight</p></div>
               </div>
-              <div class="text-right"><p id="priceWidget" class="text-base font-bold text-white"></p><p id="changeWidget" class="text-xs text-slate-500"></p></div>
+              <div class="text-right"><p id="priceWidget" class="text-base font-bold text-white" style="display:none"></p><p id="changeWidget" class="text-xs text-slate-500" style="display:none"></p></div>
             </div>
             <div class="mt-2 h-8 relative">
               <svg class="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
@@ -520,8 +525,8 @@
           <div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between">
             <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span data-i18n="blockCommittee">Block Committee</span></h3>
             <div class="flex items-center gap-2">
-              <span id="committeeEpoch" class="text-xs text-slate-500 bg-slate-700/50 px-2 py-1 rounded-full">Epoch --</span>
-              <span id="committeeCount" class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full">0 validators</span>
+              <span id="committeeEpoch" class="text-xs text-slate-500 bg-slate-700/50 px-2 py-1 rounded-full"></span>
+              <span id="committeeCount" class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full"></span>
             </div>
           </div>
           <div id="validatorGrid" class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2"></div>
@@ -532,7 +537,7 @@
             <p class="text-xs text-slate-500">Validator block production distribution</p>
           </div>
           <div id="blockProducersList" class="p-4 space-y-2">
-            <p class="text-center text-slate-500 text-sm py-4">Loading...</p>
+            <p class="text-center text-slate-500 text-sm py-4">Fetching…</p>
           </div>
         </div>
       <div class="grid lg:grid-cols-2 gap-6">
@@ -734,7 +739,7 @@
             <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="last24h">Last 24h</p>
-              <p id="bridge24h" class="text-3xl font-bold text-cyan-400 count-up">--</p>
+              <p id="bridge24h" class="text-3xl font-bold text-cyan-400 count-up"></p>
               <p class="text-xs text-cyan-400/60 mt-1">Bridge operations</p>
             </div>
           </div>
@@ -1070,7 +1075,7 @@
               <span id="govCouncilVoteCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0</span>
             </div>
             <div id="govCouncilVotesList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
             </div>
           </div>
         </div>
@@ -1086,7 +1091,7 @@
               <span id="govTechProposalCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0</span>
             </div>
             <div id="govTechProposalsList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 overflow-hidden">
@@ -1098,7 +1103,7 @@
               <span id="govTechVoteCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0</span>
             </div>
             <div id="govTechVotesList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
             </div>
           </div>
         </div>
@@ -1113,7 +1118,7 @@
             <span id="govAuthorityCount" class="text-xs text-amber-400 bg-amber-400/10 px-2 py-1 rounded-full">0</span>
           </div>
           <div id="govAuthorityList" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-            <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+            <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
           </div>
         </div>
       </div>
@@ -1205,7 +1210,7 @@
                 </div>
               </div>
               <div id="recentEpochsList" class="space-y-2 max-h-64 overflow-y-auto">
-                <p class="text-center text-slate-500 text-sm py-4">Loading...</p>
+                <p class="text-center text-slate-500 text-sm py-4">Fetching…</p>
               </div>
             </div>
           </div>
@@ -1400,7 +1405,7 @@
               </div>
             </div>
             <div id="cardanoRegistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-red-500/20 overflow-hidden">
@@ -1411,7 +1416,7 @@
               </div>
             </div>
             <div id="cardanoDeregistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
@@ -1422,7 +1427,7 @@
               </div>
             </div>
             <div id="cardanoMappings" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Fetching…</div>
             </div>
           </div>
         </div>
@@ -3845,7 +3850,7 @@ function loadCardano(){
 
 // Show price elements after successful fetch
 function showPriceStrip() {
-  var els = ['headerPrice','headerChange','headerMcap'];
+  var els = ['headerPrice','headerChange','headerMcap','priceWidget','changeWidget'];
   for (var i=0; i<els.length; i++) {
     var el = document.getElementById(els[i]);
     if (el && el.textContent) el.style.display = '';
