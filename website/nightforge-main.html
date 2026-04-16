@@ -166,19 +166,19 @@
   </div>
   <script>
     var p=location.pathname;
-    if(p.startsWith("/ext/"))document.getElementById("loadingText").textContent="Loading Extrinsic...";
-    else if(p.startsWith("/extrinsic/"))document.getElementById("loadingText").textContent="Loading transaction...";
-    else if(p.startsWith("/block/"))document.getElementById("loadingText").textContent="Loading block...";
-    else if(p==="/blocks")document.getElementById("loadingText").textContent="Loading blocks...";
-    else if(p==="/transactions")document.getElementById("loadingText").textContent="Loading transactions...";
-    else if(p==="/extrinsics")document.getElementById("loadingText").textContent="Loading Extrinsics...";
-    else if(p==="/contracts")document.getElementById("loadingText").textContent="Loading contracts...";
-    else if(p==="/privacy")document.getElementById("loadingText").textContent="Loading privacy dashboard...";
-    else if(p==="/bridge")document.getElementById("loadingText").textContent="Loading bridge monitor...";
-    else if(p==="/analytics")document.getElementById("loadingText").textContent="Loading analytics...";
-    else if(p==="/governance")document.getElementById("loadingText").textContent="Loading governance...";
-    else if(p==="/epochs")document.getElementById("loadingText").textContent="Loading epochs...";
-    else if(p==="/cardano")document.getElementById("loadingText").textContent="Loading Cardano anchors...";
+    if(p.startsWith("/ext/"))document.getElementById("loadingText").textContent="";
+    else if(p.startsWith("/extrinsic/"))document.getElementById("loadingText").textContent="";
+    else if(p.startsWith("/block/"))document.getElementById("loadingText").textContent="";
+    else if(p==="/blocks")document.getElementById("loadingText").textContent="";
+    else if(p==="/transactions")document.getElementById("loadingText").textContent="";
+    else if(p==="/extrinsics")document.getElementById("loadingText").textContent="";
+    else if(p==="/contracts")document.getElementById("loadingText").textContent="";
+    else if(p==="/privacy")document.getElementById("loadingText").textContent="";
+    else if(p==="/bridge")document.getElementById("loadingText").textContent="";
+    else if(p==="/analytics")document.getElementById("loadingText").textContent="";
+    else if(p==="/governance")document.getElementById("loadingText").textContent="";
+    else if(p==="/epochs")document.getElementById("loadingText").textContent="";
+    else if(p==="/cardano")document.getElementById("loadingText").textContent="";
     if(p.length<=1||p==="/"){(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";}
     setTimeout(function(){var dl=document.getElementById("deepLoader");if(dl)dl.style.display="none";},5000);
   </script>
@@ -791,7 +791,7 @@
                 </tr>
               </thead>
               <tbody id="bridgeOpsTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Loading bridge data...</td></tr>
+                <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Awaiting data…</td></tr>
               </tbody>
             </table>
           </div>
@@ -1063,7 +1063,7 @@
               <span id="govCouncilProposalCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0</span>
             </div>
             <div id="govCouncilProposalsList" class="divide-y divide-slate-700/20 max-h-[400px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500">Loading governance data...</div>
+              <div class="px-4 py-8 text-center text-slate-500">Awaiting data…</div>
             </div>
           </div>
           <div class="glass rounded-2xl border border-blue-500/20 overflow-hidden">
@@ -1389,7 +1389,7 @@
                 </tr>
               </thead>
               <tbody id="cardanoAnchorTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Loading anchor data...</td></tr>
+                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Awaiting data…</td></tr>
               </tbody>
             </table>
           </div>
@@ -2213,7 +2213,7 @@ function loadHealthScore(){
 function loadStats(){
   fetch(API+"/stats").then(function(r){return r.json()}).then(function(s){
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
-    document.getElementById("indexedBlocks").textContent=fmt(s.totalBlocks);document.getElementById("indexedBlocks").classList.add("loaded");
+    document.getElementById("indexedBlocks").textContent=s.totalBlocks?fmt(s.totalBlocks):"";document.getElementById("indexedBlocks").classList.add("loaded");
     var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
     document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
@@ -2925,7 +2925,7 @@ function loadValidators(){
 function loadCommittee(){
   return fetch(API+"/committee").then(function(r){return r.json()}).then(function(data){
     if(!data)throw new Error("No data");
-    var epoch=data.epoch||"--";
+    var epoch=data.epoch?data.epoch:"";
     var size=data.size||0;
     var members=data.members||[];
     renderCommitteeCards(members, epoch);
@@ -2935,7 +2935,7 @@ function loadCommittee(){
 function renderCommitteeCards(members, epoch){
   var epochEl=document.getElementById("committeeEpoch");
   if(epochEl&&epoch)epochEl.textContent="Epoch "+fmt(parseInt(epoch));
-  document.getElementById("committeeCount").textContent=members.length+" validators";
+  document.getElementById("committeeCount").textContent=(members.length?members.length+" validators":"");
   var html="";
   members.forEach(function(v,i){
     var pk=v.pubKey||v.sidechainPubKey||"";
@@ -3105,7 +3105,7 @@ function loadPrivacy(){
   }).catch(function(e){
     console.log("Privacy data error:",e);
     // Show placeholder data on error
-    document.getElementById("privacyPct").textContent="N/A";
+    document.getElementById("privacyPct").textContent="";
   });
 
   // Set up auto-refresh
@@ -3191,7 +3191,7 @@ function loadBridge(){
           html+='<tr class="hover:bg-slate-800/30 transition">';
           html+='<td class="px-4 py-3"><span class="font-mono text-cyan-400 text-xs cursor-pointer hover:text-orange-400" onclick="copyHash(\''+op.hash+'\')">'+truncHash(op.hash||"",8)+'</span></td>';
           html+='<td class="px-4 py-3 text-sm text-white font-mono">#'+fmt(op.block_height||op.block||0)+'</td>';
-          html+='<td class="px-4 py-3 text-sm text-blue-400 font-mono text-xs">'+(op.args_summary||op.cardano_block||"--")+'</td>';
+          html+='<td class="px-4 py-3 text-sm text-blue-400 font-mono text-xs">'+(op.args_summary||op.cardano_block||"")+'</td>';
           html+='<td class="px-4 py-3 text-right text-xs text-slate-500">'+timeAgo(op.timestamp)+'</td>';
           html+='</tr>';
         });
@@ -3200,9 +3200,9 @@ function loadBridge(){
     }
   }).catch(function(e){
     console.log("Bridge data error:",e);
-    document.getElementById("bridgeTotal").textContent="N/A";
-    document.getElementById("bridge24h").textContent="N/A";
-    document.getElementById("bridgeRate").textContent="N/A";
+    document.getElementById("bridgeTotal").textContent="";
+    document.getElementById("bridge24h").textContent="";
+    document.getElementById("bridgeRate").textContent="";
   });
 
   if(bridgeInterval)clearInterval(bridgeInterval);
@@ -3231,14 +3231,14 @@ function loadAnalyticsDash(){
     document.getElementById("cmpMainTPS").textContent=(data.tps||0).toFixed(3);
     // Fetch preprod and preview stats
     fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(s){
-      document.getElementById("cmpPreprodBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreprodBlocks").textContent=s.blocks?fmt(s.blocks):"";
       document.getElementById("cmpPreprodExts").textContent=fmt(s.extrinsics||0);
-      document.getElementById("cmpPreprodTPS").textContent=(s.tps||0).toFixed(3);
+      document.getElementById("cmpPreprodTPS").textContent=s.tps?s.tps.toFixed(3):"";
     }).catch(function(){});
     fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(s){
-      document.getElementById("cmpPreviewBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreviewBlocks").textContent=s.blocks?fmt(s.blocks):"";
       document.getElementById("cmpPreviewExts").textContent=fmt(s.extrinsics||0);
-      document.getElementById("cmpPreviewTPS").textContent=(s.tps||0).toFixed(3);
+      document.getElementById("cmpPreviewTPS").textContent=s.tps?s.tps.toFixed(3):"";
     }).catch(function(){});
   }).catch(function(e){
     console.log("Analytics overview error:",e);
@@ -3248,9 +3248,9 @@ function loadAnalyticsDash(){
       animateCounter(document.getElementById("anTotalExts"),s.totalExtrinsics||0);
       document.getElementById("anAvgBlock").textContent="~6s";
       document.getElementById("anTPS").textContent="0.50";
-      document.getElementById("cmpMainBlocks").textContent=fmt(s.totalBlocks||0);
+      document.getElementById("cmpMainBlocks").textContent=s.totalBlocks?fmt(s.totalBlocks):"";
       document.getElementById("cmpMainExts").textContent=fmt(s.totalExtrinsics||0);
-      document.getElementById("cmpMainTPS").textContent="0.500";
+      document.getElementById("cmpMainTPS").textContent="";
       fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(ps){
         document.getElementById("cmpPreprodBlocks").textContent=fmt(ps.blocks||0);
         document.getElementById("cmpPreprodExts").textContent=fmt(ps.extrinsics||0);
@@ -3586,7 +3586,7 @@ function loadGovernance(){
     }
   }).catch(function(e){
     console.log("Governance data error:",e);
-    document.getElementById("govTotal").textContent="N/A";
+    document.getElementById("govTotal").textContent="";
     document.getElementById("govCouncilProposalsList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No governance data available</div>';
     document.getElementById("govCouncilVotesList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No data available</div>';
     document.getElementById("govTechProposalsList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No data available</div>';
@@ -3670,7 +3670,7 @@ function loadEpochs(){
       if(avgSec>3600)avgDurEl.textContent=Math.round(avgSec/3600)+"h "+Math.round((avgSec%3600)/60)+"m";
       else if(avgSec>60)avgDurEl.textContent=Math.round(avgSec/60)+"m "+Math.round(avgSec%60)+"s";
       else if(avgSec>0)avgDurEl.textContent=Math.round(avgSec)+"s";
-      else avgDurEl.textContent="--";
+      else avgDurEl.textContent="";
     }
 
     // Epoch Relationship panels
@@ -3684,9 +3684,9 @@ function loadEpochs(){
       animateCounter(document.getElementById("blocksToday"),blocksToday);
 
       // Cardano epoch info
-      var cardanoEp=epochs[0].mainchain_epoch||"--";
+      var cardanoEp=epochs[0].mainchain_epoch||"";
       document.getElementById("cardanoEpochBig").textContent=fmt(cardanoEp);
-      document.getElementById("cardanoSlotBig").textContent=fmt(epochs[0].mainchain_slot||"--");
+      document.getElementById("cardanoSlotBig").textContent=fmt(epochs[0].mainchain_slot||"");
       // How many midnight epochs share this cardano epoch
       var sameCardano=epochs.filter(function(e){return e.mainchain_epoch===cardanoEp}).length;
       document.getElementById("midnightEpochsInCardano").textContent=sameCardano+"+ (in last "+epochs.length+" recorded)";
@@ -3757,9 +3757,9 @@ function loadCardano(){
     // Update bridge visualization with latest anchor
     if(current.midnightEpoch){
       document.getElementById("cardanoMidEpoch").textContent=fmt(current.midnightEpoch);
-      document.getElementById("cardanoMidSlot").textContent=fmt(current.midnightSlot||"--");
-      document.getElementById("cardanoCardEpoch").textContent=fmt(current.cardanoEpoch||"--");
-      document.getElementById("cardanoCardSlot").textContent=fmt(current.cardanoSlot||"--");
+      document.getElementById("cardanoMidSlot").textContent=fmt(current.midnightSlot||"");
+      document.getElementById("cardanoCardEpoch").textContent=fmt(current.cardanoEpoch||"");
+      document.getElementById("cardanoCardSlot").textContent=fmt(current.cardanoSlot||"");
     }
 
     // Anchor History table
@@ -3772,10 +3772,10 @@ function loadCardano(){
       }else{
         var html="";
         anchors.forEach(function(a){
-          var midEp=a.midnightEpoch||a.epoch||"--";
-          var midSlot=a.midnightSlot||a.sidechain_slot||"--";
-          var cardEp=a.cardanoEpoch||a.mainchain_epoch||"--";
-          var cardSlot=a.cardanoSlot||a.mainchain_slot||"--";
+          var midEp=a.midnightEpoch||a.epoch||"";
+          var midSlot=a.midnightSlot||a.sidechain_slot||"";
+          var cardEp=a.cardanoEpoch||a.mainchain_epoch||"";
+          var cardSlot=a.cardanoSlot||a.mainchain_slot||"";
           html+='<tr class="hover:bg-slate-800/30 transition">';
           html+='<td class="px-4 py-3"><span class="text-cyan-400 font-bold">'+fmt(midEp)+'</span></td>';
           html+='<td class="px-4 py-3 font-mono text-sm text-white">'+fmt(midSlot)+'</td>';
