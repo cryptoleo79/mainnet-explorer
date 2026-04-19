@@ -2176,6 +2176,228 @@ app.get('/api/widget/dust-rate', (req, res) => {
   res.type('image/svg+xml').send(svg);
 });
 
+// ─── Indexer GraphQL helper ─────────────────────────────────────
+const INDEXER_URL = 'https://indexer.mainnet.midnight.network/api/v4/graphql';
+
+async function queryIndexer(query: string, variables?: Record<string, any>): Promise<any> {
+  const body: any = { query };
+  if (variables) body.variables = variables;
+  const resp = await fetch(INDEXER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10000),
+  });
+  const json = await resp.json() as any;
+  if (json.errors) throw new Error(json.errors[0]?.message || 'GraphQL error');
+  return json.data;
+}
+
+// ─── Validator / SPO Directory ──────────────────────────────────
+let validatorDirCache: { data: any; ts: number } | null = null;
+
+app.get('/api/validators/directory', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (validatorDirCache && now - validatorDirCache.ts < 60000) {
+      return res.json(validatorDirCache.data);
+    }
+
+    let validators: any[] = [];
+    let count = 0;
+    let phase: 'federated' | 'mohalu' = 'federated';
+
+    try {
+      const data = await queryIndexer(`{
+        spoList(limit: 100) { poolIdHex name ticker homepageUrl logoUrl }
+        spoCount
+        stakeDistribution(limit: 100) { poolIdHex name ticker liveStake activeStake liveDelegators liveSaturation stakeShare }
+      }`);
+
+      count = data.spoCount || 0;
+      const spoMap: Record<string, any> = {};
+      for (const spo of (data.spoList || [])) {
+        spoMap[spo.poolIdHex] = { ...spo };
+      }
+      for (const sd of (data.stakeDistribution || [])) {
+        if (spoMap[sd.poolIdHex]) {
+          spoMap[sd.poolIdHex] = { ...spoMap[sd.poolIdHex], ...sd };
+        } else {
+          spoMap[sd.poolIdHex] = { ...sd };
+        }
+      }
+      validators = Object.values(spoMap);
+      if (validators.length > 0) phase = 'mohalu';
+    } catch {}
+
+    const result = validators.length > 0
+      ? { count, validators, phase }
+      : { count: 0, validators: [], phase: 'federated' as const, message: 'Validator registration not populated in the current federated phase' };
+
+    validatorDirCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+let validatorPerfCache: { data: any; ts: number } | null = null;
+
+app.get('/api/validators/performance', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (validatorPerfCache && now - validatorPerfCache.ts < 60000) {
+      return res.json(validatorPerfCache.data);
+    }
+
+    const data = await queryIndexer(`{
+      spoPerformanceLatest { poolIdHex epochNo produced expected identityLabel stakeSnapshot validatorClass }
+    }`);
+
+    const result = {
+      performances: data.spoPerformanceLatest || [],
+      timestamp: new Date().toISOString(),
+    };
+
+    validatorPerfCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    if (validatorPerfCache) return res.json(validatorPerfCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── Epoch Utilization ──────────────────────────────────────────
+app.get('/api/epoch/current', async (req, res) => {
+  try {
+    const data = await queryIndexer(`{ currentEpochInfo { epochNo durationSeconds elapsedSeconds } }`);
+    const info = data.currentEpochInfo;
+    if (!info) {
+      return res.status(404).json({ error: 'No epoch info available from indexer' });
+    }
+    res.json({
+      epochNo: info.epochNo,
+      durationSeconds: info.durationSeconds,
+      elapsedSeconds: info.elapsedSeconds,
+      percentComplete: info.durationSeconds > 0
+        ? Math.round((info.elapsedSeconds / info.durationSeconds) * 10000) / 100
+        : 0,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+let epochUtilCache: { data: any; ts: number } | null = null;
+
+app.get('/api/epoch/utilization', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (epochUtilCache && now - epochUtilCache.ts < 30000) {
+      return res.json(epochUtilCache.data);
+    }
+
+    // Get current epoch number first
+    const epochData = await queryIndexer(`{ currentEpochInfo { epochNo } }`);
+    const currentEpoch = epochData?.currentEpochInfo?.epochNo;
+    if (!currentEpoch) {
+      return res.status(404).json({ error: 'Could not determine current epoch' });
+    }
+
+    // Query utilization for recent epochs
+    const count = Math.min(parseInt(req.query.count as string) || 10, 50);
+    const startEpoch = Math.max(1, currentEpoch - count + 1);
+    const queries = [];
+    for (let e = startEpoch; e <= currentEpoch; e++) {
+      queries.push(`e${e}: epochUtilization(epoch: ${e})`);
+    }
+
+    const utilData = await queryIndexer(`{ ${queries.join('\n')} }`);
+    const epochs = [];
+    for (let e = startEpoch; e <= currentEpoch; e++) {
+      epochs.push({
+        epoch: e,
+        utilization: utilData[`e${e}`] ?? null,
+      });
+    }
+
+    const result = { currentEpoch, epochs, timestamp: new Date().toISOString() };
+    epochUtilCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    if (epochUtilCache) return res.json(epochUtilCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── Governance D-Parameter History ─────────────────────────────
+let dParamCache: { data: any; ts: number } | null = null;
+
+app.get('/api/governance/d-parameter', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (dParamCache && now - dParamCache.ts < 300000) {
+      return res.json(dParamCache.data);
+    }
+
+    const data = await queryIndexer(`{
+      dParameterHistory { blockHeight timestamp numPermissionedCandidates numRegisteredCandidates }
+    }`);
+
+    const result = {
+      history: data.dParameterHistory || [],
+      timestamp: new Date().toISOString(),
+    };
+
+    dParamCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    if (dParamCache) return res.json(dParamCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── Live Feed (Recent Activity Snapshot) ───────────────────────
+app.get('/api/live/recent', (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 15, 50);
+
+    const blocks = db.prepare(`
+      SELECT height, hash, extrinsics_count, timestamp
+      FROM blocks ORDER BY height DESC LIMIT ?
+    `).all(limit);
+
+    const contractActions = db.prepare(`
+      SELECT e.block_height, e.section, e.method, e.data, e.timestamp,
+             b.hash as block_hash
+      FROM events e
+      LEFT JOIN blocks b ON e.block_height = b.height
+      WHERE e.section IN ('contracts', 'midnight')
+        AND e.method IN ('ContractDeployed', 'ContractCall', 'Called', 'Instantiated', 'CodeStored')
+      ORDER BY e.block_height DESC, e.block_height DESC
+      LIMIT ?
+    `).all(limit);
+
+    const dustEvents = db.prepare(`
+      SELECT e.block_height, e.section, e.method, e.data, e.timestamp
+      FROM events e
+      WHERE e.section IN ('dust', 'dustSystem', 'midnightSystem')
+         OR (e.method LIKE '%dust%' OR e.method LIKE '%Dust%' OR e.method LIKE '%fee%' OR e.method LIKE '%Fee%')
+      ORDER BY e.block_height DESC, e.block_height DESC
+      LIMIT ?
+    `).all(limit);
+
+    res.json({
+      blocks,
+      contractActions,
+      dustEvents,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/docs', (req, res) => {
   res.type('html').send(getDocsHTML('https://mainnet.nightforge.jp'));
 });
@@ -2216,6 +2438,12 @@ export function startAPI() {
     console.log(`  GET /api/address/:address - Address activity lookup`);
     console.log(`  GET /api/privacy-score - Privacy Health Score (composite metric)`);
     console.log(`  GET /api/dust-economics - DUST Economics Observatory`);
+    console.log(`  GET /api/validators/directory - Validator / SPO directory`);
+    console.log(`  GET /api/validators/performance - Validator performance metrics`);
+    console.log(`  GET /api/epoch/current - Current epoch info from indexer`);
+    console.log(`  GET /api/epoch/utilization - Epoch utilization history`);
+    console.log(`  GET /api/governance/d-parameter - Decentralization parameter history`);
+    console.log(`  GET /api/live/recent - Live feed recent activity snapshot`);
   });
 }
 

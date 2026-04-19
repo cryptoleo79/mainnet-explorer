@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Epoch Monitor - NightForge Explorer</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Track epoch production, utilization, and network health on the Midnight network in real-time." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; }
+
+    /* Header */
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #e2e8f0;
+    }
+    .header-brand img {
+      height: 32px;
+      width: 32px;
+      border-radius: 6px;
+    }
+    .header-brand span {
+      font-weight: 700;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .header-nav a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: #f97316; }
+    .header-nav a.active { color: #f97316; }
+
+    /* Main content */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* Page header */
+    .page-title {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .page-title h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #22c55e, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-title p {
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    /* Current epoch card */
+    .epoch-hero {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .epoch-number {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #22d3ee;
+      line-height: 1;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+    .epoch-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .epoch-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .epoch-meta-item {
+      text-align: center;
+    }
+    .epoch-meta-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+    .epoch-meta-value.cyan { color: #22d3ee; }
+    .epoch-meta-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.125rem;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #06b6d4, #22c55e);
+      transition: width 0.6s ease;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+    .progress-label .pct {
+      color: #22d3ee;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    /* Epoch health */
+    .health-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .health-gauge {
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .health-pct {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+    .health-pct.green { color: #4ade80; }
+    .health-pct.amber { color: #fbbf24; }
+    .health-pct.red { color: #fca5a5; }
+    .health-sub {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.5rem;
+    }
+    .health-detail {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .health-detail-item {
+      text-align: center;
+    }
+    .health-detail-num {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+    .health-detail-lbl {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.125rem;
+    }
+
+    /* Countdown card */
+    .countdown-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #06b6d4;
+      text-align: center;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      line-height: 1;
+      padding: 1rem 0;
+    }
+    .countdown-label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    /* Epoch history table */
+    .htable-wrap {
+      overflow-x: auto;
+    }
+    .htable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .htable th {
+      text-align: left;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+    .htable td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .htable tr:last-child td { border-bottom: none; }
+    .htable tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .util-bar {
+      width: 80px;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    .util-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s;
+    }
+    .util-green { background: #22c55e; }
+    .util-amber { background: #f59e0b; }
+    .util-red { background: #ef4444; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      color: #64748b;
+      padding: 3rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(34,197,94,0.3);
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .footer a { color: #64748b; text-decoration: none; }
+    .footer a:hover { color: #f97316; }
+
+    @media (max-width: 900px) {
+      .health-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .page-title h1 { font-size: 1.5rem; }
+      .header-nav { gap: 0.75rem; }
+      .epoch-number { font-size: 2.5rem; }
+      .epoch-meta { gap: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="/favicon.ico" alt="NightForge" style="height:32px;width:32px;border-radius:6px;" />
+        <span>NightForge</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Explorer</a>
+        <a href="/tools/">Tools</a>
+        <a href="/tools/epochs.html" class="active">Epoch Monitor</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-title">
+      <h1>Epoch Monitor</h1>
+      <p>Track epoch production, utilization, and network health in real-time.</p>
+    </div>
+
+    <!-- Current epoch card -->
+    <div class="epoch-hero" id="epochHero">
+      <div class="epoch-number" id="epochNumber">--</div>
+      <div class="epoch-label">Current Epoch</div>
+      <div class="epoch-meta">
+        <div class="epoch-meta-item">
+          <div class="epoch-meta-value cyan" id="epochDuration">30 min</div>
+          <div class="epoch-meta-label">Duration</div>
+        </div>
+        <div class="epoch-meta-item">
+          <div class="epoch-meta-value" id="epochElapsed">--</div>
+          <div class="epoch-meta-label">Elapsed</div>
+        </div>
+        <div class="epoch-meta-item">
+          <div class="epoch-meta-value cyan" id="epochRemaining">--</div>
+          <div class="epoch-meta-label">Remaining</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="epochProgress" style="width:0%"></div>
+        </div>
+        <div class="progress-label">
+          <span>Epoch progress</span>
+          <span class="pct" id="epochPct">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health + Countdown -->
+    <div class="health-row">
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Epoch Health
+        </div>
+        <div class="health-gauge">
+          <div class="health-pct green" id="healthPct">--%</div>
+          <div class="health-sub">Block production ratio</div>
+        </div>
+        <div class="health-detail">
+          <div class="health-detail-item">
+            <div class="health-detail-num" id="blocksProduced">--</div>
+            <div class="health-detail-lbl">Produced</div>
+          </div>
+          <div class="health-detail-item">
+            <div class="health-detail-num" id="blocksExpected">--</div>
+            <div class="health-detail-lbl">Expected</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Next Epoch Countdown
+        </div>
+        <div class="countdown-value" id="countdown">--:--</div>
+        <div class="countdown-label">until epoch transition</div>
+      </div>
+    </div>
+
+    <!-- Epoch history -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 16l4-6 4 4 5-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Epoch History
+      </div>
+      <div id="epochHistory">
+        <div style="text-align:center;color:#64748b;padding:2rem 0;font-size:0.85rem;">
+          <span class="spinner"></span> Loading epoch history...
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 <a href="/">NightForge Explorer</a> &mdash; Built for the Midnight Network</p>
+  </footer>
+
+  <script>
+    const POLL_MS = 10000;
+    const EPOCH_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+
+    let epochStartTime = null;
+    let epochEndTime = null;
+    let countdownInterval = null;
+
+    function formatNum(n) {
+      if (n == null) return '--';
+      const num = Number(n);
+      if (isNaN(num)) return '--';
+      return num.toLocaleString();
+    }
+
+    function formatTime(ms) {
+      if (ms < 0) ms = 0;
+      const totalSec = Math.floor(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return m + 'm ' + s.toString().padStart(2, '0') + 's';
+    }
+
+    function formatCountdown(ms) {
+      if (ms < 0) ms = 0;
+      const totalSec = Math.floor(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+    }
+
+    function updateCountdown() {
+      if (!epochEndTime) return;
+      const now = Date.now();
+      const remaining = epochEndTime - now;
+      const elapsed = now - (epochStartTime || (epochEndTime - EPOCH_DURATION_MS));
+      const progress = Math.min(100, Math.max(0, (elapsed / EPOCH_DURATION_MS) * 100));
+
+      document.getElementById('epochElapsed').textContent = formatTime(Math.max(0, elapsed));
+      document.getElementById('epochRemaining').textContent = formatTime(remaining);
+      document.getElementById('countdown').textContent = formatCountdown(remaining);
+      document.getElementById('epochProgress').style.width = progress.toFixed(1) + '%';
+      document.getElementById('epochPct').textContent = progress.toFixed(1) + '%';
+    }
+
+    function renderEpochHistory(history) {
+      const container = document.getElementById('epochHistory');
+      if (!history || history.length === 0) {
+        container.innerHTML = '<div class="empty-state">No epoch history available yet.</div>';
+        return;
+      }
+
+      let html = '<div class="htable-wrap"><table class="htable"><thead><tr>';
+      html += '<th>Epoch</th><th>Blocks</th><th>Expected</th><th>Utilization</th><th>Status</th>';
+      html += '</tr></thead><tbody>';
+
+      history.forEach(ep => {
+        const produced = Number(ep.blocksProduced || ep.blocks || 0);
+        const expected = Number(ep.blocksExpected || ep.expected || 0);
+        const ratio = expected > 0 ? (produced / expected * 100) : 0;
+        const cls = ratio >= 95 ? 'util-green' : (ratio >= 80 ? 'util-amber' : 'util-red');
+        const statusColor = ratio >= 95 ? '#4ade80' : (ratio >= 80 ? '#fbbf24' : '#fca5a5');
+        const statusText = ratio >= 95 ? 'Healthy' : (ratio >= 80 ? 'Degraded' : 'Poor');
+
+        html += `<tr>
+          <td class="mono" style="font-weight:700;color:#22d3ee;">${ep.epoch || ep.number || '--'}</td>
+          <td class="mono">${formatNum(produced)}</td>
+          <td class="mono">${formatNum(expected)}</td>
+          <td>
+            <span class="util-bar"><span class="util-fill ${cls}" style="width:${Math.min(100, ratio)}%"></span></span>
+            <span class="mono">${ratio.toFixed(1)}%</span>
+          </td>
+          <td style="color:${statusColor};font-weight:600;font-size:0.8rem;">${statusText}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+
+    async function fetchEpoch() {
+      try {
+        const res = await fetch('/api/epoch/current');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        const data = await res.json();
+
+        if (!data || (data.epoch == null && data.number == null)) {
+          document.getElementById('epochNumber').textContent = '--';
+          document.getElementById('epochHistory').innerHTML = '<div class="empty-state">Awaiting epoch data...</div>';
+          return;
+        }
+
+        // Current epoch
+        const epochNum = data.epoch || data.number || '--';
+        document.getElementById('epochNumber').textContent = epochNum;
+
+        // Duration
+        const durationMs = (data.durationMs || data.duration || EPOCH_DURATION_MS);
+        const durationMin = Math.round(durationMs / 60000);
+        document.getElementById('epochDuration').textContent = durationMin + ' min';
+
+        // Calculate times
+        if (data.startTime) {
+          epochStartTime = new Date(data.startTime).getTime();
+          epochEndTime = epochStartTime + durationMs;
+        } else if (data.endTime) {
+          epochEndTime = new Date(data.endTime).getTime();
+          epochStartTime = epochEndTime - durationMs;
+        } else if (data.elapsed != null) {
+          const elapsedMs = Number(data.elapsed) * (data.elapsed < 10000 ? 1000 : 1);
+          epochStartTime = Date.now() - elapsedMs;
+          epochEndTime = epochStartTime + durationMs;
+        }
+
+        // Health
+        const produced = Number(data.blocksProduced || data.produced || 0);
+        const expected = Number(data.blocksExpected || data.expected || 0);
+        const ratio = expected > 0 ? (produced / expected * 100) : (produced > 0 ? 100 : 0);
+
+        const healthEl = document.getElementById('healthPct');
+        healthEl.textContent = ratio.toFixed(1) + '%';
+        healthEl.classList.remove('green', 'amber', 'red');
+        if (ratio >= 95) healthEl.classList.add('green');
+        else if (ratio >= 80) healthEl.classList.add('amber');
+        else healthEl.classList.add('red');
+
+        document.getElementById('blocksProduced').textContent = formatNum(produced);
+        document.getElementById('blocksExpected').textContent = formatNum(expected);
+
+        // Epoch history
+        const history = data.history || data.recentEpochs || [];
+        renderEpochHistory(history);
+
+        // Update countdown immediately
+        updateCountdown();
+
+      } catch (err) {
+        console.error('Epoch fetch error:', err);
+        // Don't overwrite existing data on transient errors
+      }
+    }
+
+    // Initial fetch
+    fetchEpoch();
+
+    // Poll every 10 seconds
+    setInterval(fetchEpoch, POLL_MS);
+
+    // Update countdown every second
+    countdownInterval = setInterval(updateCountdown, 1000);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Network Feed - NightForge Explorer</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Real-time block and transaction activity stream from the Midnight network." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; }
+
+    /* Header */
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #e2e8f0;
+    }
+    .header-brand img {
+      height: 32px;
+      width: 32px;
+      border-radius: 6px;
+    }
+    .header-brand span {
+      font-weight: 700;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .header-nav a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: #f97316; }
+    .header-nav a.active { color: #f97316; }
+
+    /* Main content */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* Page header */
+    .page-title {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .page-title h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #22c55e, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-title p {
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    /* Connection status */
+    .conn-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 14px;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.03em;
+      transition: all 0.3s;
+    }
+    .conn-status.live {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80;
+    }
+    .conn-status.reconnecting {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: #fbbf24;
+    }
+    .conn-status.offline {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+    }
+    .conn-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .live .conn-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse-dot 2s ease-in-out infinite; }
+    .reconnecting .conn-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: pulse-dot 1s ease-in-out infinite; }
+    .offline .conn-dot { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Network pulse row */
+    .pulse-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .pulse-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .pulse-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+    .pulse-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .pulse-value.green { color: #4ade80; }
+    .pulse-value.cyan { color: #22d3ee; }
+    .pulse-value.orange { color: #fb923c; }
+
+    /* Feed columns */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    /* Card */
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    /* Feed list */
+    .feed-list {
+      list-style: none;
+      max-height: 520px;
+      overflow-y: auto;
+    }
+    .feed-list::-webkit-scrollbar { width: 4px; }
+    .feed-list::-webkit-scrollbar-track { background: transparent; }
+    .feed-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .feed-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.85rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-item.flash {
+      animation: flashGreen 0.6s ease-out;
+    }
+    @keyframes flashGreen {
+      0% { background: rgba(34,197,94,0.15); }
+      100% { background: transparent; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .feed-height {
+      font-weight: 700;
+      color: #4ade80;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      min-width: 70px;
+    }
+    .feed-hash {
+      color: #64748b;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.75rem;
+      min-width: 90px;
+    }
+    .feed-txcount {
+      color: #94a3b8;
+      font-size: 0.8rem;
+    }
+    .feed-time {
+      margin-left: auto;
+      color: #64748b;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+    .feed-addr {
+      color: #22d3ee;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.75rem;
+      min-width: 90px;
+    }
+    .feed-action {
+      color: #fbbf24;
+      font-size: 0.8rem;
+      font-weight: 600;
+      min-width: 80px;
+    }
+    .feed-block {
+      color: #94a3b8;
+      font-size: 0.8rem;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      color: #64748b;
+      padding: 3rem 1rem;
+      font-size: 0.9rem;
+    }
+    .empty-state .pulse-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #64748b;
+      margin-right: 0.5rem;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .footer a { color: #64748b; text-decoration: none; }
+    .footer a:hover { color: #f97316; }
+
+    @media (max-width: 900px) {
+      .feed-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .pulse-row { grid-template-columns: 1fr; }
+      .page-title h1 { font-size: 1.5rem; }
+      .header-nav { gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="/favicon.ico" alt="NightForge" style="height:32px;width:32px;border-radius:6px;" />
+        <span>NightForge</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Explorer</a>
+        <a href="/tools/">Tools</a>
+        <a href="/tools/live-feed.html" class="active">Live Feed</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-title">
+      <h1>Live Network Feed</h1>
+      <p>Real-time block and transaction activity stream from the Midnight network.</p>
+    </div>
+
+    <!-- Connection status -->
+    <div class="conn-status offline" id="connStatus">
+      <span class="conn-dot"></span>
+      <span id="connText">Connecting...</span>
+    </div>
+
+    <!-- Network pulse -->
+    <div class="pulse-row">
+      <div class="pulse-card">
+        <div class="pulse-label">Blocks / min</div>
+        <div class="pulse-value green mono" id="blocksPerMin">--</div>
+      </div>
+      <div class="pulse-card">
+        <div class="pulse-label">Txs / min</div>
+        <div class="pulse-value cyan mono" id="txsPerMin">--</div>
+      </div>
+      <div class="pulse-card">
+        <div class="pulse-label">Active Contracts</div>
+        <div class="pulse-value orange mono" id="activeContracts">--</div>
+      </div>
+    </div>
+
+    <!-- Feed columns -->
+    <div class="feed-grid">
+      <!-- Block stream -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M9 3v18" stroke="currentColor" stroke-width="2"/></svg>
+          Block Stream
+        </div>
+        <ul class="feed-list" id="blockFeed">
+          <li class="empty-state" id="blockEmpty">
+            <span class="pulse-indicator"></span>Waiting for network activity...
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contract activity -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Contract Activity
+        </div>
+        <ul class="feed-list" id="contractFeed">
+          <li class="empty-state" id="contractEmpty">
+            <span class="pulse-indicator"></span>Waiting for network activity...
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 <a href="/">NightForge Explorer</a> &mdash; Built for the Midnight Network</p>
+  </footer>
+
+  <script>
+    const POLL_MS = 5000;
+    const MAX_BLOCKS = 20;
+    const MAX_CONTRACTS = 15;
+
+    let knownBlockHeights = new Set();
+    let knownContractIds = new Set();
+    let lastFetchOk = false;
+    let consecutiveErrors = 0;
+
+    function timeAgo(ts) {
+      if (!ts) return '';
+      const now = Date.now();
+      const then = new Date(ts).getTime();
+      const diff = Math.max(0, Math.floor((now - then) / 1000));
+      if (diff < 60) return diff + 's ago';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      return Math.floor(diff / 86400) + 'd ago';
+    }
+
+    function truncHash(h) {
+      if (!h || h.length < 16) return h || '';
+      return h.slice(0, 8) + '...' + h.slice(-6);
+    }
+
+    function truncAddr(a) {
+      if (!a || a.length < 20) return a || '';
+      return a.slice(0, 10) + '...' + a.slice(-6);
+    }
+
+    function setConnection(state) {
+      const el = document.getElementById('connStatus');
+      const txt = document.getElementById('connText');
+      el.classList.remove('live', 'reconnecting', 'offline');
+      if (state === 'live') {
+        el.classList.add('live');
+        txt.textContent = 'Live';
+      } else if (state === 'reconnecting') {
+        el.classList.add('reconnecting');
+        txt.textContent = 'Reconnecting...';
+      } else {
+        el.classList.add('offline');
+        txt.textContent = 'Offline';
+      }
+    }
+
+    function renderBlockItem(block) {
+      const li = document.createElement('li');
+      li.className = 'feed-item flash';
+      li.innerHTML = `
+        <span class="feed-height">#${Number(block.height || block.number || 0).toLocaleString()}</span>
+        <span class="feed-hash">${truncHash(block.hash || '')}</span>
+        <span class="feed-txcount">${block.txCount || block.extrinsics || 0} txs</span>
+        <span class="feed-time" data-ts="${block.timestamp || block.time || ''}">${timeAgo(block.timestamp || block.time)}</span>
+      `;
+      return li;
+    }
+
+    function renderContractItem(c) {
+      const li = document.createElement('li');
+      li.className = 'feed-item flash';
+      li.innerHTML = `
+        <span class="feed-addr">${truncAddr(c.address || c.contractAddress || '')}</span>
+        <span class="feed-action">${c.action || c.type || 'interact'}</span>
+        <span class="feed-block">#${Number(c.block || c.blockHeight || 0).toLocaleString()}</span>
+        <span class="feed-time" data-ts="${c.timestamp || c.time || ''}">${timeAgo(c.timestamp || c.time)}</span>
+      `;
+      return li;
+    }
+
+    function updateTimestamps() {
+      document.querySelectorAll('.feed-time[data-ts]').forEach(el => {
+        const ts = el.getAttribute('data-ts');
+        if (ts) el.textContent = timeAgo(ts);
+      });
+    }
+
+    async function poll() {
+      try {
+        const res = await fetch('/api/live/recent');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        const data = await res.json();
+        consecutiveErrors = 0;
+        setConnection('live');
+
+        // Pulse metrics
+        if (data.blocksPerMin != null) document.getElementById('blocksPerMin').textContent = Number(data.blocksPerMin).toFixed(1);
+        if (data.txsPerMin != null) document.getElementById('txsPerMin').textContent = Number(data.txsPerMin).toFixed(1);
+        if (data.activeContracts != null) document.getElementById('activeContracts').textContent = Number(data.activeContracts).toLocaleString();
+
+        // Block feed
+        const blocks = data.blocks || data.recentBlocks || [];
+        if (blocks.length > 0) {
+          const blockFeed = document.getElementById('blockFeed');
+          const emptyEl = document.getElementById('blockEmpty');
+          if (emptyEl) emptyEl.remove();
+
+          blocks.forEach(b => {
+            const key = b.height || b.number || '';
+            if (key && knownBlockHeights.has(String(key))) return;
+            knownBlockHeights.add(String(key));
+            const li = renderBlockItem(b);
+            blockFeed.insertBefore(li, blockFeed.firstChild);
+          });
+
+          // Trim to max
+          while (blockFeed.children.length > MAX_BLOCKS) {
+            blockFeed.removeChild(blockFeed.lastChild);
+          }
+        }
+
+        // Contract feed
+        const contracts = data.contracts || data.contractActivity || [];
+        if (contracts.length > 0) {
+          const contractFeed = document.getElementById('contractFeed');
+          const emptyEl = document.getElementById('contractEmpty');
+          if (emptyEl) emptyEl.remove();
+
+          contracts.forEach(c => {
+            const key = (c.address || c.contractAddress || '') + (c.block || c.blockHeight || '') + (c.timestamp || c.time || '');
+            if (knownContractIds.has(key)) return;
+            knownContractIds.add(key);
+            const li = renderContractItem(c);
+            contractFeed.insertBefore(li, contractFeed.firstChild);
+          });
+
+          while (contractFeed.children.length > MAX_CONTRACTS) {
+            contractFeed.removeChild(contractFeed.lastChild);
+          }
+        }
+
+      } catch (err) {
+        console.error('Live feed poll error:', err);
+        consecutiveErrors++;
+        if (consecutiveErrors >= 3) {
+          setConnection('offline');
+        } else {
+          setConnection('reconnecting');
+        }
+      }
+    }
+
+    // Initial poll
+    poll();
+
+    // Poll every 5 seconds
+    setInterval(poll, POLL_MS);
+
+    // Update relative timestamps every 10 seconds
+    setInterval(updateTimestamps, 10000);
+  </script>
+
+</body>
+</html>
