@@ -2251,7 +2251,7 @@ app.get('/api/validators/performance', async (req, res) => {
     }
 
     const data = await queryIndexer(`{
-      spoPerformanceLatest { poolIdHex name ticker blocksProduced leaderSlots missedSlots liveStake activeStake liveSaturation }
+      spoPerformanceLatest { poolIdHex epochNo produced expected identityLabel stakeSnapshot validatorClass }
     }`);
 
     const result = {
@@ -2363,7 +2363,7 @@ app.get('/api/live/recent', (req, res) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 15, 50);
 
     const blocks = db.prepare(`
-      SELECT height, hash, extrinsics_count, events_count, timestamp
+      SELECT height, hash, extrinsics_count, timestamp
       FROM blocks ORDER BY height DESC LIMIT ?
     `).all(limit);
 
