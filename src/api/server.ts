@@ -2374,7 +2374,7 @@ app.get('/api/live/recent', (req, res) => {
       LEFT JOIN blocks b ON e.block_height = b.height
       WHERE e.section IN ('contracts', 'midnight')
         AND e.method IN ('ContractDeployed', 'ContractCall', 'Called', 'Instantiated', 'CodeStored')
-      ORDER BY e.block_height DESC, e.index DESC
+      ORDER BY e.block_height DESC, e.block_height DESC
       LIMIT ?
     `).all(limit);
 
@@ -2383,7 +2383,7 @@ app.get('/api/live/recent', (req, res) => {
       FROM events e
       WHERE e.section IN ('dust', 'dustSystem', 'midnightSystem')
          OR (e.method LIKE '%dust%' OR e.method LIKE '%Dust%' OR e.method LIKE '%fee%' OR e.method LIKE '%Fee%')
-      ORDER BY e.block_height DESC, e.index DESC
+      ORDER BY e.block_height DESC, e.block_height DESC
       LIMIT ?
     `).all(limit);
 
