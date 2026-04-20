@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contract Observatory - NightForge Explorer</title>
+  <title>Contract Explorer - NightForge Explorer</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="description" content="Explore smart contracts deployed on the Midnight Network. View deployment timeline, activity heatmap, and interaction stats." />
+  <meta name="description" content="Explore smart contracts deployed on the Midnight network. Deployment timelines, activity stats, and contract analytics." />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -67,25 +67,25 @@
       transition: color 0.2s;
     }
     .header-nav a:hover { color: #f97316; }
-    .header-nav a.active { color: #8b5cf6; }
+    .header-nav a.active { color: #f97316; }
 
     /* Main content */
     .main {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 3rem 1.5rem 4rem;
+      padding: 2.5rem 1.5rem 4rem;
     }
 
     /* Page header */
     .page-title {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
     .page-title h1 {
       font-size: 2rem;
       font-weight: 800;
       margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -95,10 +95,53 @@
       line-height: 1.6;
     }
 
-    /* Stat cards row */
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 14px;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.03em;
+      transition: all 0.3s;
+    }
+    .status-bar.live {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80;
+    }
+    .status-bar.loading {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: #fbbf24;
+    }
+    .status-bar.error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .live .status-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse-dot 2s ease-in-out infinite; }
+    .loading .status-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: pulse-dot 1s ease-in-out infinite; }
+    .error .status-dot { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Summary stats */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
@@ -106,273 +149,196 @@
       background: rgba(30, 41, 59, 0.6);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 14px;
-      padding: 1.5rem;
+      padding: 1.25rem;
       text-align: center;
     }
-    .stat-card .stat-label {
-      font-size: 0.75rem;
+    .stat-label {
+      font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       color: #64748b;
       margin-bottom: 0.5rem;
     }
-    .stat-card .stat-value {
-      font-size: 1.75rem;
+    .stat-value {
+      font-size: 1.5rem;
       font-weight: 800;
-      color: #a78bfa;
+      line-height: 1.2;
     }
-    .stat-card .stat-sub {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
+    .stat-value.purple { color: #a78bfa; }
+    .stat-value.cyan { color: #22d3ee; }
+    .stat-value.green { color: #4ade80; }
+    .stat-value.orange { color: #fb923c; }
 
-    /* Section headings */
-    .section-title {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: #f1f5f9;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .section-title .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #8b5cf6;
-      box-shadow: 0 0 8px rgba(139,92,246,0.5);
-    }
-
-    /* Table */
-    .table-wrap {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 2rem;
-    }
-    .table-scroll {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 700px;
-    }
-    thead th {
-      background: rgba(15, 23, 42, 0.6);
-      padding: 0.875rem 1rem;
-      text-align: left;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      white-space: nowrap;
-      cursor: pointer;
-      user-select: none;
-    }
-    thead th:hover { color: #8b5cf6; }
-    thead th.sorted { color: #a78bfa; }
-    tbody tr {
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.15s;
-    }
-    tbody tr:hover { background: rgba(139,92,246,0.05); }
-    tbody tr:last-child { border-bottom: none; }
-    td {
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      white-space: nowrap;
-    }
-    .addr-cell {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .addr-text {
-      font-family: 'JetBrains Mono', 'SF Mono', monospace;
-      font-size: 0.8rem;
-      color: #a78bfa;
-    }
-    .copy-btn {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #64748b;
-      border-radius: 4px;
-      padding: 2px 6px;
-      cursor: pointer;
-      font-size: 0.7rem;
-      transition: all 0.2s;
-    }
-    .copy-btn:hover {
-      border-color: #8b5cf6;
-      color: #a78bfa;
-    }
-    .interactions-bar {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .bar-bg {
-      width: 60px;
-      height: 6px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #8b5cf6, #a78bfa);
-      border-radius: 3px;
-    }
-
-    /* Chart section */
-    .chart-section {
+    /* Card */
+    .card {
       background: rgba(30, 41, 59, 0.6);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px;
       padding: 1.75rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
-    .chart-section svg {
-      width: 100%;
-      display: block;
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .chart-bar {
-      fill: #8b5cf6;
-      rx: 3;
-      transition: fill 0.2s;
-    }
-    .chart-bar:hover {
-      fill: #a78bfa;
-    }
-    .chart-label {
-      fill: #64748b;
-      font-size: 11px;
-      font-family: 'Inter', system-ui, sans-serif;
-    }
-    .chart-count {
-      fill: #a78bfa;
-      font-size: 11px;
-      font-weight: 600;
-      font-family: 'Inter', system-ui, sans-serif;
-    }
-    .chart-grid {
-      stroke: rgba(255,255,255,0.04);
-      stroke-width: 1;
-    }
+    .card-title svg { flex-shrink: 0; }
 
-    /* Heatmap */
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
-      gap: 4px;
+    /* Timeline chart */
+    .timeline-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 120px;
+      padding: 0.5rem 0;
     }
-    .heatmap-cell {
-      aspect-ratio: 1;
-      border-radius: 6px;
-      background: rgba(139,92,246,0.08);
+    .timeline-bar {
+      flex: 1;
+      min-width: 0;
+      border-radius: 3px 3px 0 0;
+      background: linear-gradient(to top, #8b5cf6, #06b6d4);
+      transition: height 0.3s, opacity 0.2s;
       position: relative;
       cursor: default;
-      transition: transform 0.15s;
     }
-    .heatmap-cell:hover {
-      transform: scale(1.15);
-      z-index: 2;
+    .timeline-bar:hover {
+      opacity: 0.8;
     }
-    .heatmap-tooltip {
+    .timeline-bar .tooltip {
       display: none;
       position: absolute;
-      bottom: calc(100% + 6px);
+      bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
       background: #1e293b;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: 0.5rem 0.75rem;
-      white-space: nowrap;
-      font-size: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.7rem;
       color: #e2e8f0;
+      white-space: nowrap;
       pointer-events: none;
       z-index: 10;
+      margin-bottom: 4px;
     }
-    .heatmap-cell:hover .heatmap-tooltip { display: block; }
-    .heatmap-legend {
+    .timeline-bar:hover .tooltip { display: block; }
+    .timeline-labels {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      font-size: 0.75rem;
+      justify-content: space-between;
+      font-size: 0.65rem;
       color: #64748b;
-    }
-    .legend-block {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
+      margin-top: 0.25rem;
     }
 
-    /* Info box */
-    .info-box {
-      background: rgba(139,92,246,0.06);
-      border: 1px solid rgba(139,92,246,0.15);
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-top: 2rem;
+    /* Contract table */
+    .contract-table {
+      width: 100%;
+      border-collapse: collapse;
     }
-    .info-box h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #a78bfa;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .contract-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-    .info-box p {
-      color: #94a3b8;
+    .contract-table td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
       font-size: 0.85rem;
-      line-height: 1.7;
-      margin-bottom: 0.75rem;
+      color: #cbd5e1;
     }
-    .info-box p:last-child { margin-bottom: 0; }
-
-    /* Loading state */
-    .loading-state {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: #64748b;
+    .contract-table tr:hover td {
+      background: rgba(255,255,255,0.02);
     }
-    .spinner {
+    .addr-cell {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.75rem;
+      color: #22d3ee;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .addr-cell:hover { color: #67e8f9; }
+    .addr-cell .copied-tip {
       display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(139,92,246,0.3);
-      border-top-color: #8b5cf6;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      margin-right: 0.5rem;
-      vertical-align: middle;
+      font-size: 0.65rem;
+      color: #4ade80;
+      margin-left: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .addr-cell .copied-tip.show { opacity: 1; }
+    .block-link {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.75rem;
+      color: #a78bfa;
+    }
+    .interactions-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .interactions-badge.high {
+      background: rgba(34,197,94,0.15);
+      color: #4ade80;
+    }
+    .interactions-badge.medium {
+      background: rgba(245,158,11,0.15);
+      color: #fbbf24;
+    }
+    .interactions-badge.low {
+      background: rgba(100,116,139,0.15);
+      color: #94a3b8;
+    }
 
-    /* Error */
-    .error-msg {
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    .pagination button {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #94a3b8;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pagination button:hover:not(:disabled) {
+      border-color: rgba(139,92,246,0.4);
+      color: #e2e8f0;
+    }
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination .page-info {
+      color: #64748b;
+      font-size: 0.8rem;
+    }
+
+    /* Empty state */
+    .empty-state {
       text-align: center;
-      padding: 2rem;
-      color: #fca5a5;
-      background: rgba(239,68,68,0.08);
-      border: 1px solid rgba(239,68,68,0.2);
-      border-radius: 12px;
-      font-size: 0.875rem;
-      display: none;
+      color: #64748b;
+      padding: 3rem 1rem;
+      font-size: 0.9rem;
     }
 
     /* Footer */
@@ -386,12 +352,15 @@
     .footer a { color: #64748b; text-decoration: none; }
     .footer a:hover { color: #f97316; }
 
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
       .stats-row { grid-template-columns: 1fr; }
       .page-title h1 { font-size: 1.5rem; }
       .header-nav { gap: 0.75rem; }
-      .header-nav a { font-size: 0.8rem; }
-      .heatmap-grid { grid-template-columns: repeat(auto-fill, minmax(28px, 1fr)); }
+      .contract-table { font-size: 0.75rem; }
+      .contract-table th, .contract-table td { padding: 0.5rem 0.25rem; }
     }
   </style>
 </head>
@@ -416,89 +385,62 @@
   <main class="main">
 
     <div class="page-title">
-      <h1>Contract Observatory</h1>
-      <p>Explore smart contracts deployed on the Midnight Network. Track deployments, activity, and interactions over time.</p>
+      <h1>Contract Explorer</h1>
+      <p>Deployed smart contracts, activity timelines, and interaction stats on the Midnight network.</p>
     </div>
 
-    <!-- Header Stats -->
-    <div class="stats-row" id="statsRow">
+    <!-- Status -->
+    <div class="status-bar loading" id="statusBar">
+      <span class="status-dot"></span>
+      <span id="statusText">Loading...</span>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-label">Contracts Deployed</div>
-        <div class="stat-value" id="statTotal">--</div>
-        <div class="stat-sub">since launch</div>
+        <div class="stat-label">Total Deployed</div>
+        <div class="stat-value purple mono" id="totalDeployed">--</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Calls</div>
-        <div class="stat-value" id="statCalls">--</div>
-        <div class="stat-sub">contract interactions</div>
+        <div class="stat-value cyan mono" id="totalCalls">--</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Avg Calls / Contract</div>
-        <div class="stat-value" id="statAvg">--</div>
-        <div class="stat-sub">mean interactions</div>
+        <div class="stat-label">Deploys / Day</div>
+        <div class="stat-value green mono" id="deploysPerDay">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Most Active</div>
+        <div class="stat-value orange mono" id="mostActive" style="font-size:0.85rem;word-break:break-all;">--</div>
       </div>
     </div>
 
-    <!-- Error message -->
-    <div class="error-msg" id="errorMsg"></div>
-
-    <!-- Loading -->
-    <div class="loading-state" id="loadingState">
-      <span class="spinner"></span> Loading contract data...
+    <!-- Deploy timeline -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 16l4-6 4 4 5-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Deploy Activity (Last 30 Days)
+      </div>
+      <div class="timeline-chart" id="timelineChart">
+        <div class="empty-state" id="chartEmpty">Loading chart data...</div>
+      </div>
+      <div class="timeline-labels" id="timelineLabels"></div>
     </div>
 
-    <!-- Content (hidden until loaded) -->
-    <div id="content" style="display:none;">
-
-      <!-- Top Contracts Table -->
-      <div class="section-title"><span class="dot"></span> Top Contracts</div>
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table id="contractsTable">
-            <thead>
-              <tr>
-                <th data-sort="address">Address</th>
-                <th data-sort="firstSeen">First Seen</th>
-                <th data-sort="lastSeen">Last Seen</th>
-                <th data-sort="block">Block</th>
-                <th data-sort="interactions" class="sorted">Interactions</th>
-              </tr>
-            </thead>
-            <tbody id="contractsBody"></tbody>
-          </table>
-        </div>
+    <!-- Contract list -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Deployed Contracts
       </div>
-
-      <!-- Deployment Timeline -->
-      <div class="section-title"><span class="dot"></span> Deployment Timeline</div>
-      <div class="chart-section" id="timelineChart"></div>
-
-      <!-- Activity Heatmap -->
-      <div class="section-title"><span class="dot"></span> Contract Activity Heatmap</div>
-      <div class="chart-section">
-        <div class="heatmap-grid" id="heatmapGrid"></div>
-        <div class="heatmap-legend">
-          <span>Less</span>
-          <span class="legend-block" style="background:rgba(139,92,246,0.1)"></span>
-          <span class="legend-block" style="background:rgba(139,92,246,0.3)"></span>
-          <span class="legend-block" style="background:rgba(139,92,246,0.55)"></span>
-          <span class="legend-block" style="background:rgba(139,92,246,0.8)"></span>
-          <span class="legend-block" style="background:#8b5cf6"></span>
-          <span>More</span>
-        </div>
+      <div id="contractTableWrap">
+        <div class="empty-state" id="tableEmpty">Loading contracts...</div>
       </div>
-
-    </div>
-
-    <!-- Info box -->
-    <div class="info-box">
-      <h3>
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a1 1 0 110 2 1 1 0 010-2zm-1 4h2v6h-2v-6z" fill="currentColor"/></svg>
-        About Midnight Smart Contracts
-      </h3>
-      <p>Midnight smart contracts are written in Compact (now called Minokawa), a TypeScript-based domain-specific language designed for privacy-preserving computation using zero-knowledge proofs.</p>
-      <p>As of April 2026, 105 contracts have been deployed on mainnet since the network launched on March 31, 2026. These contracts range from token transfers and DeFi protocols to privacy-preserving identity and governance applications.</p>
-      <p>Compact/Minokawa compiles to zero-knowledge circuits that run inside the Midnight virtual machine, enabling developers to build applications where sensitive data stays private while still being verifiable on-chain.</p>
+      <div class="pagination" id="pagination" style="display:none;">
+        <button id="prevBtn" disabled>Prev</button>
+        <span class="page-info" id="pageInfo"></span>
+        <button id="nextBtn">Next</button>
+      </div>
     </div>
 
   </main>
@@ -509,242 +451,350 @@
   </footer>
 
   <script>
-    let contracts = [];
-    let currentSort = { key: 'interactions', dir: 'desc' };
+    const REFRESH_MS = 15000;
+    const PAGE_SIZE = 20;
+    let currentPage = 0;
+    let allContracts = [];
+    let consecutiveErrors = 0;
 
-    async function loadData() {
-      const loading = document.getElementById('loadingState');
-      const content = document.getElementById('content');
-      const errorMsg = document.getElementById('errorMsg');
+    // --- Utilities ---
 
-      try {
-        const [contractsResp, overviewResp] = await Promise.all([
-          fetch('/api/analytics/contracts'),
-          fetch('/api/analytics/overview')
-        ]);
-
-        if (!contractsResp.ok) throw new Error('Failed to fetch contracts data');
-
-        const contractsData = await contractsResp.json();
-        const overviewData = overviewResp.ok ? await overviewResp.json() : {};
-
-        const total = contractsData.totalContracts || overviewData.contractDeploys || 0;
-        const calls = contractsData.totalCalls || overviewData.contractCalls || 0;
-        const avg = total > 0 ? (calls / total).toFixed(1) : '0';
-
-        document.getElementById('statTotal').textContent = total.toLocaleString();
-        document.getElementById('statCalls').textContent = calls.toLocaleString();
-        document.getElementById('statAvg').textContent = avg;
-
-        contracts = contractsData.topContracts || [];
-
-        renderTable();
-        renderTimeline();
-        renderHeatmap();
-
-        loading.style.display = 'none';
-        content.style.display = 'block';
-        content.classList.add('fade-in');
-
-      } catch (err) {
-        loading.style.display = 'none';
-        errorMsg.textContent = 'Failed to load contract data: ' + err.message;
-        errorMsg.style.display = 'block';
-      }
+    function setStatus(state, text) {
+      var bar = document.getElementById('statusBar');
+      var txt = document.getElementById('statusText');
+      bar.classList.remove('live', 'loading', 'error');
+      bar.classList.add(state);
+      txt.textContent = text;
     }
 
-    function truncateAddr(addr) {
-      if (!addr || addr.length < 20) return addr || '';
-      return addr.slice(0, 12) + '...' + addr.slice(-8);
+    function truncAddr(a) {
+      if (!a || a.length < 20) return a || '';
+      return a.slice(0, 14) + '...' + a.slice(-8);
     }
 
     function formatDate(ts) {
       if (!ts) return '--';
-      const d = new Date(ts);
-      if (isNaN(d.getTime())) return ts;
-      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      var d = new Date(ts * 1000);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    function copyAddress(addr) {
-      navigator.clipboard.writeText(addr).then(() => {
-        // brief visual feedback would go here
-      }).catch(() => {});
+    function timeAgo(ts) {
+      if (!ts) return '--';
+      var now = Math.floor(Date.now() / 1000);
+      var diff = Math.max(0, now - ts);
+      if (diff < 60) return diff + 's ago';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      return Math.floor(diff / 86400) + 'd ago';
     }
 
-    function sortContracts(key) {
-      if (currentSort.key === key) {
-        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
-      } else {
-        currentSort.key = key;
-        currentSort.dir = 'desc';
+    function copyToClipboard(text, tipEl) {
+      navigator.clipboard.writeText(text).then(function() {
+        if (tipEl) {
+          tipEl.classList.add('show');
+          setTimeout(function() { tipEl.classList.remove('show'); }, 1200);
+        }
+      }).catch(function() {});
+    }
+
+    // --- Parse contracts from deployed endpoint ---
+    function parseDeployedContracts(data) {
+      var contracts = data.contracts || [];
+      var seen = {};
+      var unique = [];
+
+      for (var i = 0; i < contracts.length; i++) {
+        var c = contracts[i];
+        var contractAddress = c.address;
+        var txHash = c.txHash;
+
+        // txHash may be a JSON string with embedded contractAddress
+        if (typeof txHash === 'string' && txHash.charAt(0) === '{') {
+          try {
+            var parsed = JSON.parse(txHash);
+            txHash = parsed.txHash || txHash;
+            if (!contractAddress) contractAddress = parsed.contractAddress || null;
+          } catch (e) {}
+        }
+
+        var key = (contractAddress || txHash || '') + ':' + (c.block || '');
+        if (seen[key]) continue;
+        seen[key] = true;
+
+        unique.push({
+          address: contractAddress,
+          txHash: txHash,
+          block: c.block,
+          blockHash: c.blockHash,
+          timestamp: c.timestamp,
+          interactions: c.interactions || 0
+        });
       }
 
-      // Update header styles
-      document.querySelectorAll('#contractsTable thead th').forEach(th => {
-        th.classList.toggle('sorted', th.dataset.sort === key);
-      });
-
-      renderTable();
+      return unique;
     }
 
+    // --- Merge interaction counts from analytics ---
+    function mergeInteractions(contracts, topContracts) {
+      if (!topContracts || !topContracts.length) return;
+      var interMap = {};
+      var seen = {};
+      for (var i = 0; i < topContracts.length; i++) {
+        var tc = topContracts[i];
+        if (!tc.address || seen[tc.address]) continue;
+        seen[tc.address] = true;
+        interMap[tc.address] = tc.interactions || 0;
+      }
+      for (var j = 0; j < contracts.length; j++) {
+        var c = contracts[j];
+        if (c.address && interMap[c.address] != null) {
+          c.interactions = interMap[c.address];
+        }
+      }
+    }
+
+    // --- Build timeline data (deploys per day, last 30 days) ---
+    function buildTimeline(contracts) {
+      var now = Math.floor(Date.now() / 1000);
+      var daySeconds = 86400;
+      var days = 30;
+      var buckets = [];
+      for (var i = 0; i < days; i++) buckets.push(0);
+      var startTs = now - (days * daySeconds);
+
+      for (var j = 0; j < contracts.length; j++) {
+        var c = contracts[j];
+        if (!c.timestamp || c.timestamp < startTs) continue;
+        var dayIdx = Math.floor((c.timestamp - startTs) / daySeconds);
+        if (dayIdx >= 0 && dayIdx < days) {
+          buckets[dayIdx]++;
+        }
+      }
+
+      return buckets;
+    }
+
+    function renderTimeline(buckets) {
+      var chart = document.getElementById('timelineChart');
+      var labels = document.getElementById('timelineLabels');
+      chart.innerHTML = '';
+      labels.innerHTML = '';
+
+      var max = 1;
+      for (var i = 0; i < buckets.length; i++) {
+        if (buckets[i] > max) max = buckets[i];
+      }
+
+      var now = new Date();
+
+      for (var i = 0; i < buckets.length; i++) {
+        var bar = document.createElement('div');
+        bar.className = 'timeline-bar';
+        var h = Math.max(2, (buckets[i] / max) * 100);
+        bar.style.height = h + '%';
+        if (buckets[i] === 0) {
+          bar.style.background = 'rgba(100,116,139,0.2)';
+        }
+
+        var dayDate = new Date(now.getTime() - (buckets.length - 1 - i) * 86400000);
+        var label = dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        var tooltip = document.createElement('span');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = label + ': ' + buckets[i] + ' deploy' + (buckets[i] !== 1 ? 's' : '');
+        bar.appendChild(tooltip);
+
+        chart.appendChild(bar);
+      }
+
+      // Labels: show first, middle, last
+      var startDate = new Date(now.getTime() - 29 * 86400000);
+      var midDate = new Date(now.getTime() - 14 * 86400000);
+      var fmt = { month: 'short', day: 'numeric' };
+      labels.innerHTML =
+        '<span>' + startDate.toLocaleDateString('en-US', fmt) + '</span>' +
+        '<span>' + midDate.toLocaleDateString('en-US', fmt) + '</span>' +
+        '<span>Today</span>';
+    }
+
+    // --- Render contract table ---
     function renderTable() {
-      const sorted = [...contracts].sort((a, b) => {
-        let va = a[currentSort.key];
-        let vb = b[currentSort.key];
+      var wrap = document.getElementById('contractTableWrap');
+      var pag = document.getElementById('pagination');
 
-        if (currentSort.key === 'firstSeen' || currentSort.key === 'lastSeen') {
-          va = new Date(va || 0).getTime();
-          vb = new Date(vb || 0).getTime();
-        }
-        if (currentSort.key === 'interactions' || currentSort.key === 'block') {
-          va = Number(va) || 0;
-          vb = Number(vb) || 0;
-        }
-        if (typeof va === 'string') va = va.toLowerCase();
-        if (typeof vb === 'string') vb = vb.toLowerCase();
-
-        if (va < vb) return currentSort.dir === 'asc' ? -1 : 1;
-        if (va > vb) return currentSort.dir === 'asc' ? 1 : -1;
-        return 0;
-      });
-
-      const maxInteractions = Math.max(...contracts.map(c => c.interactions || 0), 1);
-      const tbody = document.getElementById('contractsBody');
-
-      tbody.innerHTML = sorted.map(c => {
-        const pct = ((c.interactions || 0) / maxInteractions * 100).toFixed(0);
-        return `<tr>
-          <td>
-            <div class="addr-cell">
-              <span class="addr-text">${truncateAddr(c.address)}</span>
-              <button class="copy-btn" onclick="copyAddress('${c.address}')" title="Copy full address">Copy</button>
-            </div>
-          </td>
-          <td>${formatDate(c.firstSeen)}</td>
-          <td>${formatDate(c.lastSeen)}</td>
-          <td class="mono">${(c.block || 0).toLocaleString()}</td>
-          <td>
-            <div class="interactions-bar">
-              <span>${(c.interactions || 0).toLocaleString()}</span>
-              <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
-            </div>
-          </td>
-        </tr>`;
-      }).join('');
-    }
-
-    function renderTimeline() {
-      if (!contracts.length) return;
-
-      // Group by week
-      const weekMap = {};
-      contracts.forEach(c => {
-        if (!c.firstSeen) return;
-        const d = new Date(c.firstSeen);
-        if (isNaN(d.getTime())) return;
-        // Get start of week (Monday)
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        const weekStart = new Date(d.setDate(diff));
-        const key = weekStart.toISOString().split('T')[0];
-        weekMap[key] = (weekMap[key] || 0) + 1;
-      });
-
-      const weeks = Object.entries(weekMap).sort((a, b) => a[0].localeCompare(b[0]));
-      if (!weeks.length) {
-        document.getElementById('timelineChart').innerHTML = '<p style="color:#64748b;text-align:center;padding:1rem;">No timeline data available</p>';
+      if (allContracts.length === 0) {
+        wrap.innerHTML = '<div class="empty-state">No contracts deployed yet</div>';
+        pag.style.display = 'none';
         return;
       }
 
-      const maxCount = Math.max(...weeks.map(w => w[1]));
-      const barWidth = 40;
-      const gap = 8;
-      const chartWidth = weeks.length * (barWidth + gap) + 60;
-      const chartHeight = 200;
-      const topPad = 30;
-      const bottomPad = 45;
-      const leftPad = 40;
-      const plotHeight = chartHeight - topPad - bottomPad;
+      var totalPages = Math.ceil(allContracts.length / PAGE_SIZE);
+      if (currentPage >= totalPages) currentPage = totalPages - 1;
+      if (currentPage < 0) currentPage = 0;
 
-      let bars = '';
-      let labels = '';
-      let counts = '';
+      var start = currentPage * PAGE_SIZE;
+      var slice = allContracts.slice(start, start + PAGE_SIZE);
 
-      // Grid lines
-      let gridLines = '';
-      const gridSteps = 4;
-      for (let i = 0; i <= gridSteps; i++) {
-        const y = topPad + (plotHeight / gridSteps) * i;
-        gridLines += `<line x1="${leftPad}" y1="${y}" x2="${chartWidth}" y2="${y}" class="chart-grid"/>`;
+      var html = '<table class="contract-table"><thead><tr>' +
+        '<th>Contract Address</th>' +
+        '<th>Block</th>' +
+        '<th>Deployed</th>' +
+        '<th>Last Activity</th>' +
+        '<th>Interactions</th>' +
+        '</tr></thead><tbody>';
+
+      for (var i = 0; i < slice.length; i++) {
+        var c = slice[i];
+        var addr = c.address || c.txHash || '--';
+        var truncated = truncAddr(addr);
+        var intClass = c.interactions > 100 ? 'high' : c.interactions > 10 ? 'medium' : 'low';
+        var safeAddr = addr.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        html += '<tr>' +
+          '<td class="addr-cell" onclick="copyToClipboard(\'' + safeAddr + '\', this.querySelector(\'.copied-tip\'))">' +
+            truncated + '<span class="copied-tip">Copied</span></td>' +
+          '<td class="block-link">#' + Number(c.block || 0).toLocaleString() + '</td>' +
+          '<td>' + formatDate(c.timestamp) + '</td>' +
+          '<td>' + timeAgo(c.timestamp) + '</td>' +
+          '<td><span class="interactions-badge ' + intClass + '">' + Number(c.interactions || 0).toLocaleString() + '</span></td>' +
+          '</tr>';
       }
 
-      weeks.forEach(([weekKey, count], i) => {
-        const x = leftPad + i * (barWidth + gap);
-        const barH = (count / maxCount) * plotHeight;
-        const y = topPad + plotHeight - barH;
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
 
-        bars += `<rect class="chart-bar" x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="3"/>`;
-
-        // Label: show abbreviated date
-        const d = new Date(weekKey);
-        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        labels += `<text class="chart-label" x="${x + barWidth/2}" y="${chartHeight - 8}" text-anchor="middle">${label}</text>`;
-
-        // Count above bar
-        counts += `<text class="chart-count" x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle">${count}</text>`;
-      });
-
-      const svgWidth = Math.max(chartWidth + 20, 300);
-      document.getElementById('timelineChart').innerHTML = `
-        <div style="overflow-x:auto;">
-          <svg viewBox="0 0 ${svgWidth} ${chartHeight}" style="min-width:${svgWidth}px;height:${chartHeight}px;">
-            ${gridLines}
-            ${bars}
-            ${labels}
-            ${counts}
-          </svg>
-        </div>
-      `;
+      // Pagination
+      if (totalPages > 1) {
+        pag.style.display = 'flex';
+        document.getElementById('prevBtn').disabled = currentPage === 0;
+        document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+        document.getElementById('pageInfo').textContent = 'Page ' + (currentPage + 1) + ' of ' + totalPages;
+      } else {
+        pag.style.display = 'none';
+      }
     }
 
-    function renderHeatmap() {
-      if (!contracts.length) return;
+    // --- Fetch and update ---
+    async function fetchData() {
+      try {
+        var responses = await Promise.all([
+          fetch('/api/analytics/contracts'),
+          fetch('/api/contracts/deployed'),
+          fetch('/api/analytics/overview')
+        ]);
 
-      const grid = document.getElementById('heatmapGrid');
-      const maxInteractions = Math.max(...contracts.map(c => c.interactions || 0), 1);
+        var analyticsRes = responses[0];
+        var deployedRes = responses[1];
+        var overviewRes = responses[2];
 
-      // Sort by firstSeen for a chronological grid
-      const sorted = [...contracts].sort((a, b) => {
-        return new Date(a.firstSeen || 0).getTime() - new Date(b.firstSeen || 0).getTime();
-      });
+        if (!analyticsRes.ok && !deployedRes.ok) throw new Error('API unavailable');
 
-      grid.innerHTML = sorted.map(c => {
-        const ratio = (c.interactions || 0) / maxInteractions;
-        // Map to opacity tiers
-        let opacity;
-        if (ratio > 0.8) opacity = 1;
-        else if (ratio > 0.6) opacity = 0.8;
-        else if (ratio > 0.4) opacity = 0.55;
-        else if (ratio > 0.2) opacity = 0.3;
-        else opacity = 0.1;
+        var analytics = analyticsRes.ok ? await analyticsRes.json() : {};
+        var deployed = deployedRes.ok ? await deployedRes.json() : {};
+        var overview = overviewRes.ok ? await overviewRes.json() : {};
 
-        return `<div class="heatmap-cell" style="background:rgba(139,92,246,${opacity})">
-          <div class="heatmap-tooltip">
-            <strong>${truncateAddr(c.address)}</strong><br>
-            ${(c.interactions || 0).toLocaleString()} interactions<br>
-            ${formatDate(c.firstSeen)}
-          </div>
-        </div>`;
-      }).join('');
+        consecutiveErrors = 0;
+        setStatus('live', 'Live - refreshing every 15s');
+
+        // Stats
+        var totalDeploys = analytics.totalContracts || overview.contractDeploys || deployed.total || 0;
+        var totalCallsNum = analytics.totalCalls || overview.contractCalls || 0;
+
+        document.getElementById('totalDeployed').textContent = Number(totalDeploys).toLocaleString();
+        document.getElementById('totalCalls').textContent = Number(totalCallsNum).toLocaleString();
+
+        // Parse contracts
+        var contractsFromDeployed = deployedRes.ok ? parseDeployedContracts(deployed) : [];
+        var topContracts = analytics.topContracts || [];
+
+        // Merge interaction data
+        mergeInteractions(contractsFromDeployed, topContracts);
+
+        // Use deployed list if available, otherwise fall back to analytics
+        if (contractsFromDeployed.length > 0) {
+          allContracts = contractsFromDeployed;
+        } else if (topContracts.length > 0) {
+          var seen = {};
+          allContracts = [];
+          for (var i = 0; i < topContracts.length; i++) {
+            var tc = topContracts[i];
+            var key = tc.address + ':' + (tc.block || '');
+            if (seen[key]) continue;
+            seen[key] = true;
+            allContracts.push({
+              address: tc.address,
+              txHash: tc.txHash,
+              block: tc.block,
+              timestamp: tc.firstSeen,
+              interactions: tc.interactions || 0
+            });
+          }
+        }
+
+        // Sort by timestamp descending (newest first)
+        allContracts.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+
+        // Deploy rate
+        var deploysPerDay = '--';
+        if (allContracts.length > 0) {
+          var oldest = allContracts[allContracts.length - 1].timestamp || 0;
+          var now = Math.floor(Date.now() / 1000);
+          var days = Math.max(1, (now - oldest) / 86400);
+          deploysPerDay = (totalDeploys / days).toFixed(2);
+        }
+        document.getElementById('deploysPerDay').textContent = deploysPerDay;
+
+        // Most active contract
+        var mostActiveAddr = '--';
+        if (topContracts.length > 0) {
+          var seenAddr = {};
+          var best = null;
+          for (var j = 0; j < topContracts.length; j++) {
+            var tc = topContracts[j];
+            if (seenAddr[tc.address]) continue;
+            seenAddr[tc.address] = true;
+            if (!best || (tc.interactions || 0) > (best.interactions || 0)) {
+              best = tc;
+            }
+          }
+          if (best && best.address) {
+            mostActiveAddr = truncAddr(best.address);
+          }
+        }
+        document.getElementById('mostActive').textContent = mostActiveAddr;
+
+        // Timeline
+        var buckets = buildTimeline(allContracts);
+        renderTimeline(buckets);
+
+        // Table
+        renderTable();
+
+      } catch (err) {
+        console.error('Contract explorer fetch error:', err);
+        consecutiveErrors++;
+        if (consecutiveErrors >= 3) {
+          setStatus('error', 'Unable to reach API');
+        } else {
+          setStatus('loading', 'Reconnecting...');
+        }
+      }
     }
 
-    // Table sorting click handler
-    document.querySelectorAll('#contractsTable thead th').forEach(th => {
-      th.addEventListener('click', () => sortContracts(th.dataset.sort));
+    // Pagination handlers
+    document.getElementById('prevBtn').addEventListener('click', function() {
+      if (currentPage > 0) { currentPage--; renderTable(); }
+    });
+    document.getElementById('nextBtn').addEventListener('click', function() {
+      var totalPages = Math.ceil(allContracts.length / PAGE_SIZE);
+      if (currentPage < totalPages - 1) { currentPage++; renderTable(); }
     });
 
-    // Init
-    loadData();
+    // Initial fetch
+    fetchData();
+
+    // Refresh every 15 seconds
+    setInterval(fetchData, REFRESH_MS);
   </script>
 
 </body>

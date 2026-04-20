@@ -285,7 +285,7 @@
       <!-- Network Pulse -->
       <div id="nfPulseCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(10,186,181,0.12);border-radius:10px;padding:12px 14px;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-          <span id="nfPulseDot" style="width:7px;height:7px;border-radius:50%;background:#0ABAB5;box-shadow:0 0 6px rgba(10,186,181,0.5);transition:box-shadow 0.3s;"></span>
+          <span id="nfHeartbeat" class="nf-heartbeat"><span id="nfHeartbeatRing" class="nf-hb-ring"></span><span id="nfHeartbeatBpm" class="nf-hb-num">—</span></span>
           <span style="color:#0ABAB5;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Network Pulse</span>
         </div>
         <div id="nfPulseBody" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
@@ -398,6 +398,14 @@
       margin-left:4px; display:inline-block; vertical-align:middle;
     }
     .nf-pulse-beat { animation: nfPulseBeat 0.5s ease-out; }
+    .nf-heartbeat { position:relative;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .nf-hb-ring { position:absolute;inset:0;border-radius:50%;border:2px solid currentColor;opacity:0.18;transition:border-color 0.4s; }
+    .nf-hb-num { position:relative;font-size:8px;font-weight:700;color:currentColor;font-variant-numeric:tabular-nums; }
+    .nf-heartbeat { color:#0ABAB5; }
+    .nf-heartbeat.nf-hb-slow { color:#facc15; }
+    .nf-heartbeat.nf-hb-stalled { color:#ef4444; }
+    @keyframes nfHeartbeatRing { 0%{transform:scale(1);opacity:0.6;} 50%{transform:scale(1.4);opacity:0;} 100%{transform:scale(1);opacity:0;} }
+    .nf-hb-ring.nf-beating { animation:nfHeartbeatRing 0.6s ease-out; }
     @media (max-width:640px) {
       #nfPulseCard, #nfEpochCard { padding:10px 12px; }
       #nfPulseBody { grid-template-columns:1fr 1fr; gap:4px; }
@@ -408,7 +416,10 @@
     // ─── SHARED STATE ──────────────────────────────────
     var tickerEl=document.getElementById("nfTickerItems");
     var dotEl=document.getElementById("nfTickerDot");
-    var pulseDot=document.getElementById("nfPulseDot");
+    var hbEl=document.getElementById("nfHeartbeat");
+    var hbRing=document.getElementById("nfHeartbeatRing");
+    var hbNum=document.getElementById("nfHeartbeatBpm");
+    var hbStalled=0;
     var lastHeight=0;
     var blockHistory=[];     // rolling window for rate computation
     var avgTxPerBlock=1.5;   // running average for signal detection
@@ -451,10 +462,13 @@
       if(shieldEl&&overview&&typeof overview.shieldedRatio==='number'){
         shieldEl.textContent=Math.round(overview.shieldedRatio*100)+"%";
       }
-      // Pulse dot beat on update
-      if(pulseDot){
-        pulseDot.classList.add("nf-pulse-beat");
-        setTimeout(function(){pulseDot.classList.remove("nf-pulse-beat");},600);
+      // Heartbeat ring: update BPM number and health color
+      if(hbEl){
+        var bpmVal=parseFloat(bpm);
+        hbEl.classList.remove("nf-hb-slow","nf-hb-stalled");
+        if(bpmVal<=0||hbStalled>=2)hbEl.classList.add("nf-hb-stalled");
+        else if(bpmVal<8)hbEl.classList.add("nf-hb-slow");
+        if(hbNum)hbNum.textContent=bpmVal>0?Math.round(bpmVal):"—";
       }
     }
 
@@ -592,7 +606,9 @@
       if(newBlocks.length>0){
         dotEl.style.boxShadow="0 0 10px #22c55e";
         setTimeout(function(){dotEl.style.boxShadow="0 0 6px #22c55e";},400);
-      }
+        hbStalled=0;
+        if(hbRing){hbRing.classList.remove("nf-beating");void hbRing.offsetWidth;hbRing.classList.add("nf-beating");setTimeout(function(){hbRing.classList.remove("nf-beating");},600);}
+      } else { hbStalled++; }
     }
 
     // ─── FETCH ORCHESTRATION ───────────────────────────
