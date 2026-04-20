@@ -2418,7 +2418,7 @@ function loadPrice(){
 var networkGenesisTimestamp=null;
 function loadNetworkAge(){
   if(networkGenesisTimestamp){updateNetworkAge();return;}
-  fetch(API+"/blocks/1").then(function(r){return r.json()}).then(function(b){
+  fetch("/api/blocks/1").then(function(r){return r.json()}).then(function(b){
     if(b&&b.timestamp){
       networkGenesisTimestamp=b.timestamp*1000;
       updateNetworkAge();
