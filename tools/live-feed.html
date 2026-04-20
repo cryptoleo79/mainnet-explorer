@@ -396,9 +396,11 @@
 
     function timeAgo(ts) {
       if (!ts) return '';
-      const now = Date.now();
-      const then = new Date(ts).getTime();
-      const diff = Math.max(0, Math.floor((now - then) / 1000));
+      const now = Math.floor(Date.now() / 1000);
+      // Handle both seconds and milliseconds timestamps
+      const then = Number(ts) > 1e12 ? Math.floor(Number(ts) / 1000) : Number(ts);
+      const diff = Math.max(0, now - then);
+      if (diff < 5) return 'just now';
       if (diff < 60) return diff + 's ago';
       if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
       if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
@@ -437,7 +439,7 @@
       li.innerHTML = `
         <span class="feed-height">#${Number(block.height || block.number || 0).toLocaleString()}</span>
         <span class="feed-hash">${truncHash(block.hash || '')}</span>
-        <span class="feed-txcount">${block.txCount || block.extrinsics || 0} txs</span>
+        <span class="feed-txcount">${block.extrinsics_count || block.txCount || block.extrinsics || 0} txs</span>
         <span class="feed-time" data-ts="${block.timestamp || block.time || ''}">${timeAgo(block.timestamp || block.time)}</span>
       `;
       return li;
@@ -471,13 +473,29 @@
         consecutiveErrors = 0;
         setConnection('live');
 
-        // Pulse metrics
-        if (data.blocksPerMin != null) document.getElementById('blocksPerMin').textContent = Number(data.blocksPerMin).toFixed(1);
-        if (data.txsPerMin != null) document.getElementById('txsPerMin').textContent = Number(data.txsPerMin).toFixed(1);
-        if (data.activeContracts != null) document.getElementById('activeContracts').textContent = Number(data.activeContracts).toLocaleString();
-
         // Block feed
         const blocks = data.blocks || data.recentBlocks || [];
+
+        // Compute pulse metrics from real block data
+        if (blocks.length >= 2) {
+          const newest = blocks[0].timestamp || 0;
+          const oldest = blocks[blocks.length - 1].timestamp || 0;
+          const span = newest - oldest;
+          if (span > 0) {
+            const bpm = (blocks.length / span * 60).toFixed(1);
+            let totalTx = 0;
+            blocks.forEach(b => totalTx += (b.extrinsics_count || b.txCount || 0));
+            const tpm = (totalTx / span * 60).toFixed(1);
+            document.getElementById('blocksPerMin').textContent = bpm;
+            document.getElementById('txsPerMin').textContent = tpm;
+          }
+        }
+        const contracts = data.contracts || data.contractActivity || [];
+        if (contracts.length > 0) {
+          document.getElementById('activeContracts').textContent = contracts.length;
+        } else {
+          document.getElementById('activeContracts').textContent = '0';
+        }
         if (blocks.length > 0) {
           const blockFeed = document.getElementById('blockFeed');
           const emptyEl = document.getElementById('blockEmpty');
@@ -497,8 +515,7 @@
           }
         }
 
-        // Contract feed
-        const contracts = data.contracts || data.contractActivity || [];
+        // Contract feed (uses contracts already defined above)
         if (contracts.length > 0) {
           const contractFeed = document.getElementById('contractFeed');
           const emptyEl = document.getElementById('contractEmpty');
