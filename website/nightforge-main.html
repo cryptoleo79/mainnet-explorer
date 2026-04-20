@@ -2348,8 +2348,14 @@ function loadStats(){
     var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;var is=document.getElementById("indexedStrip");if(is&&newVal)is.style.display="";showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
     document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
-    document.getElementById("currentEpoch").classList.add("loaded");document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
-    
+    // Epoch from stats API (reliable fallback for RPC path)
+    if(s.epoch&&s.epoch.epoch){document.getElementById("currentEpoch").textContent=fmt(s.epoch.epoch);document.getElementById("currentSlot").textContent="Slot: "+fmt(s.epoch.sidechain_slot||"");}
+    document.getElementById("currentEpoch").classList.add("loaded");
+    document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
+    // Epoch countdown from stats
+    if(s.epoch&&s.epoch.next_epoch_timestamp){updateCountdown(s.epoch.next_epoch_timestamp/1000);}
+    // Cardano epoch from stats
+    if(s.epoch&&s.epoch.mainchain_epoch){document.getElementById("mcEpoch").textContent=fmt(s.epoch.mainchain_epoch);}
     // Fetch network info
     fetch(API+"/network").then(function(r){return r.json()}).then(function(net){
       window.networkInfo=net;
@@ -2359,24 +2365,7 @@ function loadStats(){
       }
     }).catch(function(){});
   }).catch(function(){});
-  // Remove duplicate fetch - use same data
-  var c={};fetch(API+"/stats").then(function(r){return r.json()}).then(function(c){
-    // Also fetch network info for protocol version
-    fetch(API+"/network").then(function(r){return r.json()}).then(function(net){
-      window.networkInfo=net;
-      if(net.node){
-        var infoEl=document.getElementById("networkInfoDisplay");
-        if(infoEl)infoEl.innerHTML='<span class="text-orange-400">'+net.node.version+'</span> • <span class="text-slate-400">Spec v'+net.node.specVersion+'</span>';
-      }
-    }).catch(function(){});
-    
-      
-      document.getElementById("totalTxs").textContent=fmt(c.totalExtrinsics||c.extrinsics||0);
-      document.getElementById("totalBlocksSub").textContent=fmt(c.totalBlocks||c.blocks||0);
-    if(c&&c.sidechain){
-      if(c.sidechain.nextEpochTimestamp)updateCountdown(c.sidechain.nextEpochTimestamp/1000);
-    }
-  }).catch(function(){});
+  // Removed duplicate stats fetch — epoch data now handled in primary loadStats path above
 }
 var countdownInterval=null;
 function updateCountdown(ts){
@@ -2429,7 +2418,7 @@ function loadPrice(){
 var networkGenesisTimestamp=null;
 function loadNetworkAge(){
   if(networkGenesisTimestamp){updateNetworkAge();return;}
-  fetch(API+"/block/1").then(function(r){return r.json()}).then(function(b){
+  fetch(API+"/blocks/1").then(function(r){return r.json()}).then(function(b){
     if(b&&b.timestamp){
       networkGenesisTimestamp=b.timestamp*1000;
       updateNetworkAge();
@@ -2682,6 +2671,24 @@ window.addEventListener("popstate",function(){
 
 if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlockProducers();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
 setInterval(loadStats,6000);setInterval(loadPrice,60000);
+// Cleanup: hide label-only cards that still have no value after 8 seconds
+setTimeout(function(){
+  var ids=["totalEvents","nextEpoch","networkAge","currentEpoch","totalTxs","indexedBlocks"];
+  for(var i=0;i<ids.length;i++){
+    var el=document.getElementById(ids[i]);
+    if(el&&!el.textContent.trim()){
+      // Walk up to find the card container
+      var node=el.parentElement;
+      while(node&&node!==document.body){
+        if(node.classList.contains("rounded-xl")||node.classList.contains("rounded-2xl")){
+          node.style.display="none";
+          break;
+        }
+        node=node.parentElement;
+      }
+    }
+  }
+},8000);
 
 document.getElementById("networkBtn").addEventListener("click",function(e){e.stopPropagation();document.getElementById("networkMenu").classList.toggle("hidden")});
 document.addEventListener("click",function(){document.getElementById("networkMenu").classList.add("hidden")});
