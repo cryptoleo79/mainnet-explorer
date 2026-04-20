@@ -1114,6 +1114,110 @@ app.get('/api/address/:address/detail', async (req, res) => {
   }
 });
 
+// ─── Address Summary (compact, wallet-friendly) ───────────────
+const addressSummaryCache = new Map<string, { data: any; ts: number }>();
+
+app.get('/api/address-summary/:address', async (req, res) => {
+  try {
+    const address = req.params.address;
+
+    // Input validation
+    if (!address.startsWith('mn_addr_') && !address.startsWith('mn_shield-addr_')) {
+      return res.status(400).json({ error: 'Invalid address format — must start with mn_addr_ or mn_shield-addr_' });
+    }
+
+    // 30-second cache per address
+    const cached = addressSummaryCache.get(address);
+    if (cached && Date.now() - cached.ts < 30000) {
+      return res.json(cached.data);
+    }
+
+    // Shielded addresses: privacy preserved
+    if (address.startsWith('mn_shield-addr_')) {
+      const result = {
+        address,
+        isShielded: true,
+        balance: 'private',
+        txCount: 0,
+        firstSeen: null,
+        lastSeen: null,
+        dustRegistered: null,
+        note: 'Shielded addresses cannot be queried — privacy preserved',
+      };
+      addressSummaryCache.set(address, { data: result, ts: Date.now() });
+      return res.json(result);
+    }
+
+    // Unshielded: query indexer
+    const indexerUrl = (config.network as any)?.indexerHttp || (config.network as any)?.httpEndpoint || 'https://indexer.mainnet.midnight.network/api/v4/graphql';
+    const resp = await fetch(indexerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `{
+          transactions(
+            where: { unshieldedCreatedOutputs_some: { owner: "${address.replace(/[^a-zA-Z0-9_]/g, '')}" } }
+            orderBy: BLOCK_HEIGHT_DESC
+            limit: 200
+          ) {
+            hash
+            timestamp
+            unshieldedCreatedOutputs { owner value spentAtTransaction { hash } }
+          }
+        }`,
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const data = await resp.json();
+    const txs = data?.data?.transactions || [];
+
+    let balance = 0n;
+    let txCount = 0;
+    let firstSeen: number | null = null;
+    let lastSeen: number | null = null;
+
+    for (const tx of txs) {
+      txCount++;
+      const ts = tx.timestamp || 0;
+      if (ts > 0) {
+        if (firstSeen === null || ts < firstSeen) firstSeen = ts;
+        if (lastSeen === null || ts > lastSeen) lastSeen = ts;
+      }
+      for (const o of (tx.unshieldedCreatedOutputs || [])) {
+        if (o.owner === address) {
+          const val = BigInt(o.value || 0);
+          if (!o.spentAtTransaction) {
+            balance += val;
+          }
+        }
+      }
+    }
+
+    const result = {
+      address,
+      balance: (Number(balance) / 1_000_000).toFixed(6),
+      txCount,
+      firstSeen,
+      lastSeen,
+      isShielded: false,
+      dustRegistered: null,
+    };
+
+    addressSummaryCache.set(address, { data: result, ts: Date.now() });
+    // Evict stale entries every 100 lookups
+    if (addressSummaryCache.size > 500) {
+      const now = Date.now();
+      for (const [k, v] of addressSummaryCache) {
+        if (now - v.ts > 60000) addressSummaryCache.delete(k);
+      }
+    }
+
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Address lookup failed' });
+  }
+});
+
 // Price proxy with caching (avoids CoinGecko rate limits)
 let priceCache: { data: any; ts: number } | null = null;
 app.get('/api/price', async (req, res) => {
