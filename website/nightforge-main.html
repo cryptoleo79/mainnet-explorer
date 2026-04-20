@@ -278,15 +278,70 @@
   </div>
 </div>
 
-  <!-- Live Block Ticker -->
+  <!-- A. NETWORK PULSE + B. EPOCH INTELLIGENCE -->
+  <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+
+      <!-- Network Pulse -->
+      <div id="nfPulseCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(10,186,181,0.12);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span id="nfPulseDot" style="width:7px;height:7px;border-radius:50%;background:#0ABAB5;box-shadow:0 0 6px rgba(10,186,181,0.5);transition:box-shadow 0.3s;"></span>
+          <span style="color:#0ABAB5;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Network Pulse</span>
+        </div>
+        <div id="nfPulseBody" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Blocks/min</span>
+            <span id="nfPulseBpm" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;">—</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Tx/min</span>
+            <span id="nfPulseTpm" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;">—</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Avg block</span>
+            <span id="nfPulseAvg" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;">—</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Shielded</span>
+            <span id="nfPulseShield" style="color:#22c55e;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Epoch Intelligence -->
+      <div id="nfEpochCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(250,204,21,0.12);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="color:#facc15;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Epoch</span>
+            <span id="nfEpochNum" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;"></span>
+          </div>
+          <span id="nfEpochCountdown" style="color:#94a3b8;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;"></span>
+        </div>
+        <!-- Progress bar -->
+        <div style="height:6px;background:rgba(100,116,139,0.15);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+          <div id="nfEpochBar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#facc15,#f59e0b);width:0%;transition:width 1s linear;"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="nfEpochPct" style="color:#facc15;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;"></span>
+          <span id="nfEpochHealth" style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- C. LIVE FEED (Signal Mode) -->
   <div id="nfBlockTicker" style="max-width:1200px;margin:0 auto;padding:0 16px 12px;">
     <div style="background:rgba(30,41,59,0.4);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <span id="nfTickerDot" style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse 2s infinite;"></span>
-          <span style="color:#64748b;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Latest Blocks</span>
+          <span style="color:#64748b;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Live Feed</span>
+          <span id="nfTickerRate" style="color:#475569;font-size:9px;font-weight:500;"></span>
         </div>
-        <a href="/tools/live-feed.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">View feed &rarr;</a>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <a href="/tools/live-feed.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">Full feed &rarr;</a>
+        </div>
       </div>
       <div id="nfTickerItems" style="display:flex;gap:6px;overflow:hidden;"></div>
     </div>
@@ -305,21 +360,40 @@
       0%   { opacity:1; transform:translateY(0); }
       100% { opacity:0; transform:translateY(-10px); }
     }
+    @keyframes nfPulseBeat {
+      0%   { box-shadow:0 0 4px rgba(10,186,181,0.3); }
+      50%  { box-shadow:0 0 12px rgba(10,186,181,0.6); }
+      100% { box-shadow:0 0 4px rgba(10,186,181,0.3); }
+    }
     .nf-block { transition: opacity 0.4s ease, border-color 0.4s ease; }
     .nf-block-new { animation: nfSlideIn 0.35s ease-out, nfPulse 0.6s ease-out; }
+    .nf-block-hot { border-color: rgba(250,204,21,0.35) !important; }
     .nf-tx-burst {
       position:absolute; top:-8px; right:4px;
       font-size:9px; font-weight:700; color:#0ABAB5;
       animation: nfTxBurst 1.2s ease-out forwards;
       pointer-events:none;
     }
+    .nf-signal {
+      font-size:8px; font-weight:600; padding:1px 4px; border-radius:3px;
+      margin-left:4px; display:inline-block; vertical-align:middle;
+    }
+    .nf-pulse-beat { animation: nfPulseBeat 0.5s ease-out; }
+    @media (max-width:640px) {
+      #nfPulseCard, #nfEpochCard { padding:10px 12px; }
+      #nfPulseBody { grid-template-columns:1fr 1fr; gap:4px; }
+    }
   </style>
   <script>
   (function(){
+    // ─── SHARED STATE ──────────────────────────────────
     var tickerEl=document.getElementById("nfTickerItems");
     var dotEl=document.getElementById("nfTickerDot");
+    var pulseDot=document.getElementById("nfPulseDot");
     var lastHeight=0;
-    var knownBlocks=[];
+    var blockHistory=[];     // rolling window for rate computation
+    var avgTxPerBlock=1.5;   // running average for signal detection
+
     function timeAgo(ts){
       var s=Math.floor((Date.now()/1000)-ts);
       if(s<5)return"just now";
@@ -327,6 +401,99 @@
       if(s<3600)return Math.floor(s/60)+"m ago";
       return Math.floor(s/3600)+"h ago";
     }
+
+    // ─── A. NETWORK PULSE ──────────────────────────────
+    function updatePulse(blocks,overview){
+      var bpmEl=document.getElementById("nfPulseBpm");
+      var tpmEl=document.getElementById("nfPulseTpm");
+      var avgEl=document.getElementById("nfPulseAvg");
+      var shieldEl=document.getElementById("nfPulseShield");
+      if(!blocks||blocks.length<2){
+        if(bpmEl)bpmEl.textContent="...";
+        return;
+      }
+      // Compute from rolling block window (real timestamps)
+      var newest=blocks[0].timestamp;
+      var oldest=blocks[blocks.length-1].timestamp;
+      var span=newest-oldest;
+      if(span<=0)span=1;
+      var bpm=(blocks.length/span*60).toFixed(1);
+      var totalTx=0;
+      for(var i=0;i<blocks.length;i++)totalTx+=blocks[i].extrinsics_count||0;
+      var tpm=(totalTx/span*60).toFixed(1);
+      var avgBlock=(span/Math.max(1,blocks.length-1)).toFixed(1)+"s";
+      // Update running average for signal detection
+      avgTxPerBlock=totalTx/blocks.length;
+
+      if(bpmEl)bpmEl.textContent=bpm;
+      if(tpmEl)tpmEl.textContent=tpm;
+      if(avgEl)avgEl.textContent=avgBlock;
+      // Shielded ratio from overview (if available)
+      if(shieldEl&&overview&&typeof overview.shieldedRatio==='number'){
+        shieldEl.textContent=Math.round(overview.shieldedRatio*100)+"%";
+      }
+      // Pulse dot beat on update
+      if(pulseDot){
+        pulseDot.classList.add("nf-pulse-beat");
+        setTimeout(function(){pulseDot.classList.remove("nf-pulse-beat");},600);
+      }
+    }
+
+    // ─── B. EPOCH INTELLIGENCE ───────���─────────────────
+    var epochData=null;
+    var epochTimer=null;
+    function loadEpochIntelligence(){
+      fetch("/api/epoch/current").then(function(r){return r.json()}).then(function(d){
+        if(!d||!d.epochNo)return;
+        epochData=d;
+        renderEpoch();
+        // Start smooth countdown if not already running
+        if(!epochTimer){
+          epochTimer=setInterval(function(){
+            if(!epochData)return;
+            epochData.elapsedSeconds+=1;
+            if(epochData.elapsedSeconds>epochData.durationSeconds)epochData.elapsedSeconds=epochData.durationSeconds;
+            epochData.percentComplete=Math.min(100,(epochData.elapsedSeconds/epochData.durationSeconds*100));
+            renderEpoch();
+          },1000);
+        }
+      }).catch(function(){
+        var body=document.getElementById("nfEpochNum");
+        if(body)body.textContent="Awaiting epoch data";
+      });
+    }
+    function renderEpoch(){
+      if(!epochData)return;
+      var numEl=document.getElementById("nfEpochNum");
+      var barEl=document.getElementById("nfEpochBar");
+      var pctEl=document.getElementById("nfEpochPct");
+      var cdEl=document.getElementById("nfEpochCountdown");
+      var healthEl=document.getElementById("nfEpochHealth");
+
+      if(numEl)numEl.textContent=epochData.epochNo.toLocaleString();
+      var pct=Math.min(100,epochData.percentComplete).toFixed(1);
+      if(barEl)barEl.style.width=pct+"%";
+      if(pctEl)pctEl.textContent=pct+"%";
+
+      // Countdown
+      var remaining=Math.max(0,epochData.durationSeconds-epochData.elapsedSeconds);
+      var m=Math.floor(remaining/60);
+      var s=remaining%60;
+      if(cdEl)cdEl.textContent=m+"m "+String(s).padStart(2,"0")+"s";
+
+      // Health indicator (based on progress tracking expectation)
+      // At X% time elapsed, we expect ~X% blocks produced
+      if(healthEl){
+        // Simple health: if epoch is progressing, it's healthy
+        // Use block rate as proxy — ~10 blocks/min expected for 6s blocks
+        var health=remaining>0?"Active":"Transitioning";
+        var color=remaining>60?"#22c55e":"#facc15";
+        healthEl.textContent=health;
+        healthEl.style.cssText="font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;background:"+color+"20;color:"+color+";border:1px solid "+color+"30;";
+      }
+    }
+
+    // ─── C. SIGNAL-MODE LIVE FEED ──────────────────────
     function renderTicker(blocks){
       if(!blocks||!blocks.length){
         tickerEl.innerHTML='<span style="color:#475569;font-size:10px;">Waiting for blocks...</span>';
@@ -335,44 +502,56 @@
       var newBlocks=[];
       if(lastHeight>0){
         for(var n=0;n<blocks.length;n++){
-          if(blocks[n].height>lastHeight) newBlocks.push(blocks[n].height);
+          if(blocks[n].height>lastHeight)newBlocks.push(blocks[n].height);
         }
       }
       var count=Math.min(blocks.length,8);
-      // Build new block elements
       var frag=document.createDocumentFragment();
       for(var i=0;i<count;i++){
         var b=blocks[i];
         var isNew=newBlocks.indexOf(b.height)!==-1;
-        var age=Math.floor((Date.now()/1000)-b.timestamp);
-        // Time decay: newest bright, older dims
-        var opacity=i===0?1:Math.max(0.4, 1-(i*0.08));
-        var borderColor=isNew?'rgba(10,186,181,0.4)':'rgba(100,116,139,'+(0.15-i*0.01).toFixed(2)+')';
+        var txCount=b.extrinsics_count||0;
+        // Signal detection: is this block notable?
+        var isHot=txCount>Math.max(4,avgTxPerBlock*1.5);
+        // Time decay opacity
+        var opacity=i===0?1:Math.max(0.4,1-(i*0.08));
+        var borderColor=isNew?'rgba(10,186,181,0.4)':isHot?'rgba(250,204,21,0.25)':'rgba(100,116,139,'+(0.15-i*0.01).toFixed(2)+')';
         var div=document.createElement("div");
-        div.className="nf-block"+(isNew?" nf-block-new":"");
-        div.style.cssText="position:relative;flex-shrink:0;background:rgba(15,23,42,0.6);border:1px solid "+borderColor+";border-radius:6px;padding:5px 10px;min-width:0;opacity:"+opacity+";";
+        div.className="nf-block"+(isNew?" nf-block-new":"")+(isHot?" nf-block-hot":"");
+        div.style.cssText="position:relative;flex-shrink:0;background:rgba(15,23,42,0.6);border:1px solid "+borderColor+";border-radius:6px;padding:5px 10px;min-width:0;opacity:"+opacity+";cursor:pointer;";
+        div.title="Block #"+b.height+" — click to inspect";
+        div.setAttribute("data-height",b.height);
+        div.onclick=function(){var h=this.getAttribute("data-height");if(h)window.location.hash="";document.getElementById("searchInput").value=h;document.getElementById("searchBtn").click();};
         // Height
         var hSpan=document.createElement("span");
-        hSpan.style.cssText="color:"+(i===0?"#0ABAB5":"#0ABAB5")+";font-size:11px;font-weight:700;";
+        hSpan.style.cssText="color:#0ABAB5;font-size:11px;font-weight:700;";
         hSpan.textContent="#"+b.height.toLocaleString();
         div.appendChild(hSpan);
-        // Tx count
+        // Tx count with emphasis for high-activity blocks
         var txSpan=document.createElement("span");
-        txSpan.style.cssText="color:"+(i===0?"#64748b":"#475569")+";font-size:9px;margin-left:6px;";
-        txSpan.textContent=b.extrinsics_count+" tx";
+        txSpan.style.cssText="color:"+(isHot?"#facc15":i===0?"#64748b":"#475569")+";font-size:9px;margin-left:6px;"+(isHot?"font-weight:700;":"");
+        txSpan.textContent=txCount+" tx";
         div.appendChild(txSpan);
-        // Time ago (with data attr for live updates)
+        // Signal tags (derived from real data, not fake)
+        if(isHot){
+          var sig=document.createElement("span");
+          sig.className="nf-signal";
+          sig.style.cssText="font-size:8px;font-weight:600;padding:1px 4px;border-radius:3px;margin-left:4px;background:rgba(250,204,21,0.12);color:#facc15;border:1px solid rgba(250,204,21,0.2);";
+          sig.textContent="active";
+          div.appendChild(sig);
+        }
+        // Time ago
         var tSpan=document.createElement("span");
         tSpan.className="nf-time";
         tSpan.setAttribute("data-ts",b.timestamp);
         tSpan.style.cssText="color:#334155;font-size:9px;margin-left:4px;";
         tSpan.textContent=timeAgo(b.timestamp);
         div.appendChild(tSpan);
-        // Tx burst animation on new blocks
-        if(isNew&&b.extrinsics_count>0){
+        // Tx burst on new blocks
+        if(isNew&&txCount>0){
           var burst=document.createElement("span");
           burst.className="nf-tx-burst";
-          burst.textContent="+"+b.extrinsics_count+" tx";
+          burst.textContent="+"+txCount+" tx";
           div.appendChild(burst);
         }
         frag.appendChild(div);
@@ -380,29 +559,60 @@
       tickerEl.innerHTML="";
       tickerEl.appendChild(frag);
       if(blocks[0])lastHeight=blocks[0].height;
-      knownBlocks=blocks;
-      // Pulse the dot on new data
+      blockHistory=blocks;
+      // Show rolling rate in feed header
+      var rateEl=document.getElementById("nfTickerRate");
+      if(rateEl&&blocks.length>=2){
+        var span=blocks[0].timestamp-blocks[blocks.length-1].timestamp;
+        if(span>0){
+          var bps=(blocks.length/span*60).toFixed(1);
+          rateEl.textContent=bps+" blk/min";
+        }
+      }
+      // Pulse effects
       if(newBlocks.length>0){
-        dotEl.style.boxShadow="0 0 8px #22c55e";
+        dotEl.style.boxShadow="0 0 10px #22c55e";
         setTimeout(function(){dotEl.style.boxShadow="0 0 6px #22c55e";},400);
       }
     }
-    function fetchBlocks(){
-      fetch("/api/mainnet/blocks?limit=8").then(function(r){return r.json()}).then(function(d){
+
+    // ─── FETCH ORCHESTRATION ───────────────────────────
+    var cachedOverview=null;
+    function fetchAll(){
+      // Blocks (primary — drives ticker + pulse)
+      fetch("/api/mainnet/blocks?limit=10").then(function(r){return r.json()}).then(function(d){
         if(dotEl)dotEl.style.background="#22c55e";
         renderTicker(d);
+        updatePulse(d,cachedOverview);
       }).catch(function(){
         if(dotEl)dotEl.style.background="#f59e0b";
       });
     }
-    fetchBlocks();
-    setInterval(fetchBlocks,6000);
+    // Overview (slower cadence — for shielded ratio)
+    function fetchOverview(){
+      fetch("/api/mainnet/analytics/overview").then(function(r){return r.json()}).then(function(d){
+        cachedOverview=d;
+        // Update shielded ratio immediately
+        var shieldEl=document.getElementById("nfPulseShield");
+        if(shieldEl&&d&&typeof d.shieldedRatio==='number'){
+          shieldEl.textContent=Math.round(d.shieldedRatio*100)+"%";
+        }
+      }).catch(function(){});
+    }
+
+    // ─── INIT ──────────────────────────────────────────
+    fetchAll();
+    fetchOverview();
+    loadEpochIntelligence();
+    setInterval(fetchAll,6000);
+    setInterval(fetchOverview,30000);
+    setInterval(loadEpochIntelligence,30000);  // re-sync epoch every 30s
     // Live time-ago updates every 5s (no re-fetch)
     setInterval(function(){
       var spans=tickerEl.querySelectorAll(".nf-time");
-      for(var i=0;i<spans.length;i++){
-        var ts=parseInt(spans[i].getAttribute("data-ts"),10);
-        if(ts)spans[i].textContent=timeAgo(ts);
+      for(var j=0;j<spans.length;j++){
+        var ts=parseInt(spans[j].getAttribute("data-ts"),10);
+        if(ts)spans[j].textContent=timeAgo(ts);
       }
     },5000);
   })();
