@@ -466,7 +466,7 @@
 
     async function poll() {
       try {
-        const res = await fetch('/api/live/recent');
+        const res = await fetch('/api/live/recent?_t=' + Date.now());
         if (!res.ok) throw new Error('HTTP ' + res.status);
 
         const data = await res.json();

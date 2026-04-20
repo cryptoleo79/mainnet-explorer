@@ -41,7 +41,7 @@ app.use(express.json());
 // Serve static tools pages
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use('/tools', express.static(path.resolve(__dirname, '../../tools')));
+app.use('/tools', express.static(path.resolve(__dirname, '../../tools'), { maxAge: 0, etag: false, lastModified: false, setHeaders: (res) => { res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } }));
 
 // Rewrite non-API paths to /api/ prefix for nginx proxy compatibility
 // (nginx strips /api/mainnet/ prefix, so backend receives /governance instead of /api/governance)
