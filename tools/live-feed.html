@@ -466,10 +466,15 @@
 
     async function poll() {
       try {
-        const res = await fetch('/api/live/recent?_t=' + Date.now());
+        const apiBase = window.location.origin;
+        const res = await fetch(apiBase + '/api/live/recent?_t=' + Date.now());
         if (!res.ok) throw new Error('HTTP ' + res.status);
 
-        const data = await res.json();
+        const text = await res.text();
+        if (text.startsWith('<!') || text.startsWith('<html')) {
+          throw new Error('Got HTML instead of JSON — API route not proxied');
+        }
+        const data = JSON.parse(text);
         consecutiveErrors = 0;
         setConnection('live');
 
