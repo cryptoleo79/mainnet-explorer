@@ -347,6 +347,39 @@
     </div>
   </div>
 
+  <!-- B3. ACTIVITY PULSE STRIP — live DUST + shielded event rates -->
+  <div id="nfActivityStrip" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Activity Pulse</span>
+        <span style="color:#475569;font-size:9px;font-weight:500;">last 60s</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,0.6);"></span>
+          <span style="color:#94a3b8;font-size:10px;">DUST Events</span>
+          <span id="nfDustRate" style="font-weight:700;color:#f59e0b;">&mdash;</span>
+          <span id="nfDustTrend" style="color:#64748b;font-size:11px;"></span>
+        </span>
+        <span style="color:rgba(100,116,139,0.3);">|</span>
+        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 6px rgba(167,139,250,0.6);"></span>
+          <span style="color:#94a3b8;font-size:10px;">Shielded Events</span>
+          <span id="nfShieldRate" style="font-weight:700;color:#a78bfa;">&mdash;</span>
+          <span id="nfShieldTrend" style="color:#64748b;font-size:11px;"></span>
+        </span>
+        <span style="color:rgba(100,116,139,0.3);display:none;" id="nfGovSep">|</span>
+        <span id="nfGovChange" style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;display:none;align-items:center;gap:6px;">
+          <span style="color:#94a3b8;font-size:10px;">d-param</span>
+          <span id="nfGovDparam" style="font-weight:700;color:#38bdf8;">&mdash;</span>
+          <span style="color:#475569;font-size:10px;">T&amp;C</span>
+          <span id="nfGovTc" style="font-weight:600;color:#cbd5e1;font-family:ui-monospace,monospace;font-size:10px;">&mdash;</span>
+        </span>
+      </div>
+      <a href="/tools/live-feed.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">View detail &rarr;</a>
+    </div>
+  </div>
+
   <!-- ACTION STRIP — Data → Action -->
   <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -644,6 +677,75 @@
       }).catch(function(){
         if(dotEl)dotEl.style.background="#f59e0b";
       });
+      // Activity Pulse — DUST + shielded per-minute rates
+      fetchActivityPulse();
+    }
+
+    function arrowFor(t){
+      if(t==="up")return "↑";
+      if(t==="down")return "↓";
+      return "→";
+    }
+    function colorFor(t,base){
+      if(t==="up")return "#22c55e";
+      if(t==="down")return "#f87171";
+      return base;
+    }
+    function fetchActivityPulse(){
+      var dustEl=document.getElementById("nfDustRate");
+      var dustTrEl=document.getElementById("nfDustTrend");
+      var shEl=document.getElementById("nfShieldRate");
+      var shTrEl=document.getElementById("nfShieldTrend");
+      fetch("/api/mainnet/live/dust-rate").then(function(r){return r.json()}).then(function(d){
+        if(!d||typeof d.ratePerMinute!=="number"){return;}
+        if(dustEl)dustEl.textContent=d.ratePerMinute+"/min";
+        if(dustTrEl){dustTrEl.textContent=arrowFor(d.trend);dustTrEl.style.color=colorFor(d.trend,"#64748b");}
+      }).catch(function(){
+        if(dustEl)dustEl.textContent="—";
+        if(dustTrEl)dustTrEl.textContent="";
+      });
+      fetch("/api/mainnet/live/shielded-rate").then(function(r){return r.json()}).then(function(d){
+        if(!d||typeof d.ratePerMinute!=="number"){return;}
+        if(shEl)shEl.textContent=d.ratePerMinute+"/min";
+        if(shTrEl){shTrEl.textContent=arrowFor(d.trend);shTrEl.style.color=colorFor(d.trend,"#64748b");}
+      }).catch(function(){
+        if(shEl)shEl.textContent="—";
+        if(shTrEl)shTrEl.textContent="";
+      });
+    }
+
+    // Governance Change Log — one-shot on load
+    function fetchGovernanceChangeLog(){
+      var wrap=document.getElementById("nfGovChange");
+      var sep=document.getElementById("nfGovSep");
+      var dpEl=document.getElementById("nfGovDparam");
+      var tcEl=document.getElementById("nfGovTc");
+      Promise.all([
+        fetch("/api/mainnet/governance/d-parameter").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch("/api/mainnet/governance/tc-history").then(function(r){return r.json()}).catch(function(){return null;})
+      ]).then(function(results){
+        var dp=results[0];var tc=results[1];
+        var dpVal=null;var tcHash=null;
+        function pickLatest(arr){
+          if(!Array.isArray(arr)||arr.length===0)return null;
+          return arr.slice().sort(function(a,b){return (b.blockHeight||0)-(a.blockHeight||0);})[0];
+        }
+        var latestDp=dp?pickLatest(dp.history):null;
+        if(latestDp&&typeof latestDp.numPermissionedCandidates!=="undefined"){
+          dpVal=latestDp.numPermissionedCandidates+"P / "+latestDp.numRegisteredCandidates+"R";
+        }
+        var latestTc=tc?pickLatest(tc.history):null;
+        if(latestTc&&latestTc.hash){tcHash=latestTc.hash.slice(0,8);}
+        if(dpVal&&tcHash){
+          dpEl.textContent=dpVal;
+          tcEl.textContent=tcHash;
+          wrap.style.display="inline-flex";
+          if(sep)sep.style.display="inline";
+        } else {
+          wrap.style.display="none";
+          if(sep)sep.style.display="none";
+        }
+      });
     }
     // Overview (slower cadence — for shielded ratio)
     function fetchOverview(){
@@ -677,6 +779,7 @@
     fetchAll();
     fetchOverview();
     loadEpochIntelligence();
+    fetchGovernanceChangeLog();
     setInterval(fetchAll,6000);
     setInterval(fetchOverview,30000);
     setInterval(loadEpochIntelligence,30000);  // re-sync epoch every 30s

@@ -2502,6 +2502,122 @@ app.get('/api/live/recent', (req, res) => {
   }
 });
 
+// ─── Live Activity Pulse (Per-minute event rates from local events table) ───
+// DUST-related events: dust/dustSystem/midnightSystem sections + dust/fee methods
+app.get('/api/live/dust-rate', (req, res) => {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const window60 = now - 60;
+    const window120 = now - 120;
+
+    const dustFilter = `(
+      section IN ('dust', 'dustSystem', 'midnightSystem')
+      OR method LIKE '%dust%' OR method LIKE '%Dust%'
+      OR method LIKE '%fee%' OR method LIKE '%Fee%'
+    )`;
+
+    const lastMin = db.prepare(
+      `SELECT COUNT(*) as c FROM events WHERE timestamp >= ? AND ${dustFilter}`
+    ).get(window60) as { c: number };
+
+    const prevMin = db.prepare(
+      `SELECT COUNT(*) as c FROM events WHERE timestamp >= ? AND timestamp < ? AND ${dustFilter}`
+    ).get(window120, window60) as { c: number };
+
+    const latest = db.prepare(
+      `SELECT timestamp FROM events WHERE ${dustFilter} ORDER BY timestamp DESC LIMIT 1`
+    ).get() as { timestamp: number } | undefined;
+
+    let trend: 'up' | 'stable' | 'down' = 'stable';
+    if (lastMin.c > prevMin.c * 1.15) trend = 'up';
+    else if (lastMin.c < prevMin.c * 0.85) trend = 'down';
+
+    res.json({
+      eventsLastMinute: lastMin.c,
+      ratePerMinute: lastMin.c,
+      latestEventTimestamp: latest?.timestamp ?? null,
+      trend,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Shielded activity = midnight.TxApplied events (zswap ledger is shielded by default;
+// UnshieldedTokens events mark transparent portions — shielded = TxApplied not in unshielded set)
+app.get('/api/live/shielded-rate', (req, res) => {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const window60 = now - 60;
+    const window120 = now - 120;
+
+    // Count TxApplied events that are NOT accompanied by UnshieldedTokens in the same extrinsic
+    const shieldedLastMin = db.prepare(`
+      SELECT COUNT(*) as c FROM events tx
+      WHERE tx.section = 'midnight' AND tx.method = 'TxApplied'
+        AND tx.timestamp >= ?
+        AND NOT EXISTS (
+          SELECT 1 FROM events ut
+          WHERE ut.section = 'midnight' AND ut.method = 'UnshieldedTokens'
+            AND ut.block_height = tx.block_height
+            AND ut.extrinsic_index = tx.extrinsic_index
+        )
+    `).get(window60) as { c: number };
+
+    const shieldedPrevMin = db.prepare(`
+      SELECT COUNT(*) as c FROM events tx
+      WHERE tx.section = 'midnight' AND tx.method = 'TxApplied'
+        AND tx.timestamp >= ? AND tx.timestamp < ?
+        AND NOT EXISTS (
+          SELECT 1 FROM events ut
+          WHERE ut.section = 'midnight' AND ut.method = 'UnshieldedTokens'
+            AND ut.block_height = tx.block_height
+            AND ut.extrinsic_index = tx.extrinsic_index
+        )
+    `).get(window120, window60) as { c: number };
+
+    const latest = db.prepare(
+      `SELECT timestamp FROM events WHERE section = 'midnight' AND method = 'TxApplied' ORDER BY timestamp DESC LIMIT 1`
+    ).get() as { timestamp: number } | undefined;
+
+    let trend: 'up' | 'stable' | 'down' = 'stable';
+    if (shieldedLastMin.c > shieldedPrevMin.c * 1.15) trend = 'up';
+    else if (shieldedLastMin.c < shieldedPrevMin.c * 0.85) trend = 'down';
+
+    res.json({
+      eventsLastMinute: shieldedLastMin.c,
+      ratePerMinute: shieldedLastMin.c,
+      latestEventTimestamp: latest?.timestamp ?? null,
+      trend,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── Governance Change Log: T&C history (versions/hashes) ──────
+let tcHistoryCache: { data: any; ts: number } | null = null;
+app.get('/api/governance/tc-history', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (tcHistoryCache && now - tcHistoryCache.ts < 300000) {
+      return res.json(tcHistoryCache.data);
+    }
+    const data = await queryIndexer(`{
+      termsAndConditionsHistory { blockHeight timestamp hash url }
+    }`);
+    const result = {
+      history: data.termsAndConditionsHistory || [],
+      timestamp: new Date().toISOString(),
+    };
+    tcHistoryCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    if (tcHistoryCache) return res.json(tcHistoryCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/docs', (req, res) => {
   res.type('html').send(getDocsHTML('https://mainnet.nightforge.jp'));
 });
@@ -2548,6 +2664,9 @@ export function startAPI() {
     console.log(`  GET /api/epoch/utilization - Epoch utilization history`);
     console.log(`  GET /api/governance/d-parameter - Decentralization parameter history`);
     console.log(`  GET /api/live/recent - Live feed recent activity snapshot`);
+    console.log(`  GET /api/live/dust-rate - DUST event rate (events/min, trend)`);
+    console.log(`  GET /api/live/shielded-rate - Shielded (zswap) event rate`);
+    console.log(`  GET /api/governance/tc-history - Terms & Conditions change log`);
   });
 }
 
