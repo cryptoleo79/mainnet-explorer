@@ -328,30 +328,34 @@
     </div>
   </div>
 
-  <!-- DECENTRALIZATION DIAL — composite score 0-100, federated -> sovereign -->
-  <div id="nfDecentDial" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
-    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Decentralization Dial</span>
-          <span style="color:#475569;font-size:9px;font-weight:500;">federated &rarr; sovereign</span>
+  <!-- ═══ TIER 1: LIVE FEED (signal of life — always above fold) ═══ -->
+  <div id="nfBlockTicker" style="max-width:1200px;margin:0 auto;padding:0 16px 18px;">
+    <div style="background:rgba(30,41,59,0.4);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span id="nfTickerDot" style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse 2s infinite;"></span>
+          <span style="color:#94a3b8;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Live Feed</span>
+          <span id="nfTickerRate" style="color:#64748b;font-size:9px;font-weight:500;"></span>
         </div>
-        <span id="nfDecentPhase" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;"></span>
+        <a href="/tools/live-feed.html" style="color:#64748b;font-size:10px;text-decoration:none;font-weight:500;">Full feed &rarr;</a>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
-        <!-- Gauge SVG -->
-        <svg id="nfDecentGauge" viewBox="0 0 200 120" style="width:200px;height:120px;"></svg>
-        <!-- Components breakdown -->
-        <div id="nfDecentBreakdown" style="display:flex;flex-direction:column;gap:6px;font-size:10px;font-variant-numeric:tabular-nums;"></div>
-      </div>
+      <div id="nfTickerItems" style="display:flex;gap:6px;overflow:hidden;"></div>
     </div>
   </div>
 
-  <!-- B2. CONTRACT INTELLIGENCE STRIP -->
+  <!-- ═══ TIER 2 DIVIDER — Network signals ═══ -->
+  <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="color:#64748b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">Network Signals</span>
+      <span style="flex:1;height:1px;background:linear-gradient(90deg,rgba(100,116,139,0.25),transparent);"></span>
+    </div>
+  </div>
+
+  <!-- TIER 2: CONTRACT INTELLIGENCE (compact strip) -->
   <div id="nfContractStrip" style="display:none;max-width:1200px;margin:0 auto;padding:0 16px 10px;">
     <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Contract Intelligence</span>
+        <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Contracts</span>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Deployed</span> <span id="nfContractDeploys" style="font-weight:700;color:#0ABAB5;">—</span></span>
@@ -360,86 +364,69 @@
         <span style="color:rgba(100,116,139,0.3);">|</span>
         <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Shielded</span> <span id="nfContractShielded" style="font-weight:700;color:#a78bfa;">—</span></span>
         <span style="color:rgba(100,116,139,0.3);">|</span>
-        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Privacy Score</span> <span id="nfContractGrade" style="font-weight:700;color:#22c55e;">—</span></span>
+        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Privacy</span> <span id="nfContractGrade" style="font-weight:700;color:#22c55e;">—</span></span>
       </div>
-      <a href="/tools/contracts.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">View contracts &rarr;</a>
+      <a href="/tools/contracts.html" style="color:#94a3b8;font-size:10px;text-decoration:none;font-weight:500;">Contracts &rarr;</a>
     </div>
   </div>
 
-  <!-- B3. ACTIVITY PULSE STRIP — live DUST + shielded event rates -->
+  <!-- TIER 2: ACTIVITY PULSE (compact strip — live DUST + shielded rates) -->
   <div id="nfActivityStrip" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
     <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Activity Pulse</span>
-        <span style="color:#475569;font-size:9px;font-weight:500;">last 60s</span>
+        <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Activity</span>
+        <span style="color:#64748b;font-size:9px;font-weight:500;">last 60s</span>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px;">
           <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,0.6);"></span>
-          <span style="color:#94a3b8;font-size:10px;">DUST Events</span>
+          <span style="color:#94a3b8;font-size:10px;">DUST</span>
           <span id="nfDustRate" style="font-weight:700;color:#f59e0b;">&mdash;</span>
-          <span id="nfDustTrend" style="color:#64748b;font-size:11px;"></span>
+          <span id="nfDustTrend" style="color:#94a3b8;font-size:11px;"></span>
         </span>
         <span style="color:rgba(100,116,139,0.3);">|</span>
         <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px;">
           <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 6px rgba(167,139,250,0.6);"></span>
-          <span style="color:#94a3b8;font-size:10px;">Shielded Events</span>
+          <span style="color:#94a3b8;font-size:10px;">Shielded</span>
           <span id="nfShieldRate" style="font-weight:700;color:#a78bfa;">&mdash;</span>
-          <span id="nfShieldTrend" style="color:#64748b;font-size:11px;"></span>
+          <span id="nfShieldTrend" style="color:#94a3b8;font-size:11px;"></span>
         </span>
         <span style="color:rgba(100,116,139,0.3);display:none;" id="nfGovSep">|</span>
         <span id="nfGovChange" style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;display:none;align-items:center;gap:6px;">
           <span style="color:#94a3b8;font-size:10px;">d-param</span>
           <span id="nfGovDparam" style="font-weight:700;color:#38bdf8;">&mdash;</span>
-          <span style="color:#475569;font-size:10px;">T&amp;C</span>
+          <span style="color:#94a3b8;font-size:10px;">T&amp;C</span>
           <span id="nfGovTc" style="font-weight:600;color:#cbd5e1;font-family:ui-monospace,monospace;font-size:10px;">&mdash;</span>
         </span>
       </div>
-      <a href="/tools/live-feed.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">View detail &rarr;</a>
+      <a href="/tools/live-feed.html" style="color:#94a3b8;font-size:10px;text-decoration:none;font-weight:500;">Live feed &rarr;</a>
     </div>
   </div>
 
-  <!-- PRIVACY FLOW SANKEY — Real tx distribution -->
-  <div id="nfPrivacyFlow" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
-    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Privacy Flow</span>
-          <span id="nfPrivacyTotal" style="color:#94a3b8;font-size:10px;font-weight:500;"></span>
-        </div>
-        <a href="/tools/privacy-score.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">Privacy detail &rarr;</a>
+  <!-- TIER 2: PRIVACY FLOW (compact strip — full Sankey at /tools/privacy-flow.html) -->
+  <div id="nfPrivacyFlow" style="max-width:1200px;margin:0 auto;padding:0 16px 18px;display:none;">
+    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Privacy Flow</span>
+        <span id="nfPrivacyTotal" style="color:#64748b;font-size:9px;font-weight:500;"></span>
       </div>
-      <svg id="nfSankeySvg" viewBox="0 0 1000 140" style="width:100%;height:140px;" preserveAspectRatio="xMidYMid meet">
-        <!-- Filled dynamically by JS -->
-      </svg>
-      <div id="nfSankeyLegend" style="display:flex;align-items:center;justify-content:space-around;margin-top:8px;flex-wrap:wrap;gap:4px 10px;font-size:10px;font-variant-numeric:tabular-nums;">
-        <!-- Filled dynamically -->
+      <div id="nfPrivacySummary" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums;">
+        <!-- Populated dynamically -->
       </div>
+      <a href="/tools/privacy-flow.html" style="color:#0ABAB5;font-size:10px;text-decoration:none;font-weight:600;">Full Sankey &rarr;</a>
     </div>
   </div>
 
-  <!-- EPOCH PULSE — Dual-ring cross-chain anchor clock -->
-  <div id="nfEpochPulse" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
-    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Epoch Pulse</span>
-        <span style="color:#64748b;font-size:9px;">Cross-chain anchor</span>
-      </div>
-      <svg id="nfEpochPulseSvg" viewBox="0 0 1000 200" style="width:100%;height:200px;" preserveAspectRatio="xMidYMid meet"></svg>
-      <p id="nfLatestAnchor" style="color:#64748b;font-size:10px;text-align:center;margin-top:8px;font-variant-numeric:tabular-nums;"></p>
-    </div>
-  </div>
-
-  <!-- ACTION STRIP — Data → Action -->
-  <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+  <!-- ═══ ACTION STRIP — Data → Action ═══ -->
+  <div style="max-width:1200px;margin:0 auto;padding:0 16px 18px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <a href="/verify-credentials.html" style="text-decoration:none;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.18);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor='rgba(34,197,94,0.18)'">
         <div style="width:32px;height:32px;border-radius:8px;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
         </div>
         <div>
-          <p style="color:#22c55e;font-size:11px;font-weight:700;">Run credential proof</p>
-          <p style="color:#64748b;font-size:9px;">Verify age, KYC, or residency without sharing personal data</p>
+          <p style="color:#22c55e;font-size:12px;font-weight:700;">Run credential proof</p>
+          <p style="color:#94a3b8;font-size:10px;">Verify age, KYC, or residency without sharing personal data</p>
         </div>
       </a>
       <a href="/api/docs" style="text-decoration:none;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(139,92,246,0.35)'" onmouseout="this.style.borderColor='rgba(139,92,246,0.15)'">
@@ -447,28 +434,63 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg>
         </div>
         <div>
-          <p style="color:#8b5cf6;font-size:11px;font-weight:700;">Use the NightForge API</p>
-          <p style="color:#64748b;font-size:9px;">40+ REST endpoints. Blocks, addresses, DUST, contracts, analytics</p>
+          <p style="color:#8b5cf6;font-size:12px;font-weight:700;">Use the NightForge API</p>
+          <p style="color:#94a3b8;font-size:10px;">40+ REST endpoints. Blocks, addresses, DUST, contracts, analytics</p>
         </div>
       </a>
     </div>
   </div>
 
-  <!-- C. LIVE FEED (Signal Mode) -->
-  <div id="nfBlockTicker" style="max-width:1200px;margin:0 auto;padding:0 16px 12px;">
-    <div style="background:rgba(30,41,59,0.4);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;overflow:hidden;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span id="nfTickerDot" style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse 2s infinite;"></span>
-          <span style="color:#64748b;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Live Feed</span>
-          <span id="nfTickerRate" style="color:#475569;font-size:9px;font-weight:500;"></span>
+  <!-- ═══ TIER 3 DIVIDER — Deep analytics (collapsible) ═══ -->
+  <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+    <button id="nfDeepToggle" onclick="(function(){var p=document.getElementById('nfDeepPanel');var c=document.getElementById('nfDeepChevron');var open=p.style.display!=='none';p.style.display=open?'none':'block';if(c)c.style.transform=open?'rotate(0deg)':'rotate(180deg)';})()" style="width:100%;background:transparent;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
+      <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">Deep Analytics</span>
+      <span style="flex:1;height:1px;background:linear-gradient(90deg,rgba(100,116,139,0.25),transparent);"></span>
+      <span id="nfDeepChevron" style="color:#64748b;font-size:11px;transition:transform 0.2s;">▾</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:10px;">
+      <a href="/tools/validators.html" style="color:#94a3b8;text-decoration:none;">Validator liveness &rarr;</a>
+      <span style="color:rgba(100,116,139,0.3);">|</span>
+      <a href="/tools/contracts.html" style="color:#94a3b8;text-decoration:none;">Contract heatmap &rarr;</a>
+      <span style="color:rgba(100,116,139,0.3);">|</span>
+      <a href="/tools/privacy-flow.html" style="color:#94a3b8;text-decoration:none;">Privacy Sankey &rarr;</a>
+      <span style="color:rgba(100,116,139,0.3);">|</span>
+      <a href="/tools/epochs.html" style="color:#94a3b8;text-decoration:none;">Epoch history &rarr;</a>
+    </div>
+  </div>
+
+  <!-- TIER 3: Deep analytics panel (hidden by default, toggles on click) -->
+  <div id="nfDeepPanel" style="display:none;">
+
+    <!-- Decentralization Dial -->
+    <div id="nfDecentDial" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
+      <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Decentralization Dial</span>
+            <span style="color:#64748b;font-size:9px;font-weight:500;">federated &rarr; sovereign</span>
+          </div>
+          <span id="nfDecentPhase" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;"></span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <a href="/tools/live-feed.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">Full feed &rarr;</a>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
+          <svg id="nfDecentGauge" viewBox="0 0 200 120" style="width:200px;height:120px;"></svg>
+          <div id="nfDecentBreakdown" style="display:flex;flex-direction:column;gap:6px;font-size:11px;font-variant-numeric:tabular-nums;"></div>
         </div>
       </div>
-      <div id="nfTickerItems" style="display:flex;gap:6px;overflow:hidden;"></div>
     </div>
+
+    <!-- Epoch Pulse Dual-Ring (cross-chain anchor) -->
+    <div id="nfEpochPulse" style="max-width:1200px;margin:0 auto;padding:0 16px 18px;display:none;">
+      <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Epoch Pulse</span>
+          <span style="color:#64748b;font-size:9px;">Midnight ↔ Cardano anchor</span>
+        </div>
+        <svg id="nfEpochPulseSvg" viewBox="0 0 1000 200" style="width:100%;height:200px;" preserveAspectRatio="xMidYMid meet"></svg>
+        <p id="nfLatestAnchor" style="color:#94a3b8;font-size:10px;text-align:center;margin-top:8px;font-variant-numeric:tabular-nums;"></p>
+      </div>
+    </div>
+
   </div>
   <style>
     @keyframes nfSlideIn {
@@ -985,7 +1007,7 @@
     function renderPrivacySankey(overview){
       var flowEl=document.getElementById("nfPrivacyFlow");
       if(!flowEl)return;
-      // Fetch privacy + bridge data
+      // Fetch privacy + bridge data (same data drives full Sankey at /tools/privacy-flow.html)
       Promise.all([
         fetch("/api/mainnet/analytics/privacy?hours=168").then(function(r){return r.json()}).catch(function(){return null;}),
         fetch("/api/mainnet/analytics/bridge?hours=168").then(function(r){return r.json()}).catch(function(){return null;})
@@ -1002,74 +1024,26 @@
         flowEl.style.display="";
 
         var totalEl=document.getElementById("nfPrivacyTotal");
-        if(totalEl)totalEl.textContent="— "+total.toLocaleString()+" operations (7d)";
+        if(totalEl)totalEl.textContent="— "+total.toLocaleString()+" ops (7d)";
 
-        // SVG Sankey — 3 source pools on left, 4 destination pools on right
-        var svg=document.getElementById("nfSankeySvg");
-        var W=1000,H=140;
-        var leftX=130,rightX=870,barW=10;
-        var topY=15,botY=125;
-        // Destinations — each proportional to its count
+        // Compact inline summary: colored dots + percentages
         var destinations=[
           {name:"Shielded",  count:shielded,   color:"#22c55e"},
           {name:"Unshielded",count:unshielded, color:"#facc15"},
           {name:"Contracts", count:contracts,  color:"#8b5cf6"},
           {name:"Bridge",    count:bridgeOps,  color:"#0ABAB5"}
         ].filter(function(d){return d.count>0;});
-        var available=botY-topY;
-        var gap=4;
-        var totalGaps=gap*(destinations.length-1);
-        var totalHeight=available-totalGaps;
-        // Compute y-positions for each destination
-        var yCursor=topY;
-        destinations.forEach(function(dst){
-          dst.h=Math.max(2,totalHeight*(dst.count/total));
-          dst.y=yCursor;
-          dst.cy=dst.y+dst.h/2;
-          yCursor+=dst.h+gap;
-        });
-        // Source pool: all operations, single bar
-        var srcY=topY;
-        var srcH=available;
-        var srcCY=srcY+srcH/2;
-
-        var svgContent='';
-        // Source bar
-        svgContent+='<rect x="'+(leftX-barW)+'" y="'+srcY+'" width="'+barW+'" height="'+srcH+'" fill="#475569" opacity="0.6" rx="2"/>';
-        svgContent+='<text x="'+(leftX-barW-6)+'" y="'+(srcCY+3)+'" fill="#94a3b8" font-size="10" text-anchor="end" font-weight="600">Operations</text>';
-        svgContent+='<text x="'+(leftX-barW-6)+'" y="'+(srcCY+15)+'" fill="#64748b" font-size="9" text-anchor="end" font-variant-numeric="tabular-nums">'+total.toLocaleString()+'</text>';
-
-        // Flows from source to each destination
-        var srcYCursor=srcY;
-        destinations.forEach(function(dst){
-          var flowH=srcH*(dst.count/total);
-          var srcFlowCY=srcYCursor+flowH/2;
-          srcYCursor+=flowH;
-          // Bezier curve flow
-          var midX=(leftX+rightX)/2;
-          var path='M '+leftX+' '+(srcFlowCY-flowH/2)+
-                   ' C '+midX+' '+(srcFlowCY-flowH/2)+', '+midX+' '+(dst.y)+', '+rightX+' '+dst.y+
-                   ' L '+rightX+' '+(dst.y+dst.h)+
-                   ' C '+midX+' '+(dst.y+dst.h)+', '+midX+' '+(srcFlowCY+flowH/2)+', '+leftX+' '+(srcFlowCY+flowH/2)+
-                   ' Z';
-          svgContent+='<path d="'+path+'" fill="'+dst.color+'" opacity="0.18"/>';
-          // Destination bar
-          svgContent+='<rect x="'+rightX+'" y="'+dst.y+'" width="'+barW+'" height="'+dst.h+'" fill="'+dst.color+'" opacity="0.85" rx="2"/>';
-          // Destination label
-          var pct=Math.round(dst.count/total*100);
-          svgContent+='<text x="'+(rightX+barW+6)+'" y="'+(dst.cy+3)+'" fill="'+dst.color+'" font-size="10" font-weight="700">'+dst.name+'</text>';
-          svgContent+='<text x="'+(rightX+barW+6)+'" y="'+(dst.cy+15)+'" fill="#64748b" font-size="9" font-variant-numeric="tabular-nums">'+dst.count.toLocaleString()+' ('+pct+'%)</text>';
-        });
-        svg.innerHTML=svgContent;
-
-        // Legend
-        var legend=document.getElementById("nfSankeyLegend");
-        if(legend){
+        var summaryEl=document.getElementById("nfPrivacySummary");
+        if(summaryEl){
           var items=destinations.map(function(dst){
             var pct=Math.round(dst.count/total*100);
-            return '<span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:'+dst.color+';display:inline-block;"></span><span style="color:'+dst.color+';font-weight:600;">'+dst.name+'</span><span style="color:#64748b;">'+pct+'%</span></span>';
+            return '<span style="display:inline-flex;align-items:center;gap:5px;">'+
+              '<span style="width:7px;height:7px;border-radius:2px;background:'+dst.color+';display:inline-block;"></span>'+
+              '<span style="color:#cbd5e1;font-size:11px;">'+dst.name+'</span>'+
+              '<span style="color:'+dst.color+';font-weight:700;">'+pct+'%</span>'+
+            '</span>';
           });
-          legend.innerHTML=items.join('');
+          summaryEl.innerHTML=items.join('<span style="color:rgba(100,116,139,0.3);">|</span>');
         }
       }).catch(function(){});
     }
@@ -3642,7 +3616,8 @@ var chartView="line";
 
 
 
-setInterval(createSakura,6000);
+// Sakura cadence reduced to every 12s + one on load — less visual noise
+setInterval(createSakura,12000);
 
 // Init tracking & start real-time updates
 setTimeout(function() {
@@ -3650,8 +3625,7 @@ setTimeout(function() {
   fetch(API + "/extrinsics?limit=1").then(function(r) { return r.json(); }).then(function(d) { if (d && d[0]) lastTxHash = d[0].hash; });
 }, 2000);
 setInterval(function() { if (document.getElementById("recentBlocks")) { updateBlocksIncremental(); } }, 6000);
-setTimeout(createSakura,2000);
-setTimeout(createSakura,5000);
+setTimeout(createSakura,3000);
 
 // Keyboard shortcuts
 var shortcutsModal=null;
