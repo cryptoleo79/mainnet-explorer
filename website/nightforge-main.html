@@ -419,7 +419,7 @@
       <div id="nfPrivacySummary" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums;">
         <!-- Populated dynamically -->
       </div>
-      <a href="/tools/privacy-flow.html" style="color:#0ABAB5;font-size:10px;text-decoration:none;font-weight:600;">Full Sankey &rarr;</a>
+      <a href="/tools/privacy-flow.html" style="color:#0ABAB5;font-size:10px;text-decoration:none;font-weight:600;">View detail &rarr;</a>
     </div>
   </div>
 
@@ -433,7 +433,7 @@
         <div>
           <p style="color:#22c55e;font-size:12px;font-weight:700;">Run credential proof</p>
           <p style="color:#94a3b8;font-size:10px;">Verify age, KYC, or residency without sharing personal data</p>
-          <p style="color:#64748b;font-size:9px;margin-top:2px;">Aligned with Midnight's credential direction &middot; <a href="/tools/passport-ready.html" style="color:#0ABAB5;text-decoration:none;" onclick="event.stopPropagation();">See flow</a></p>
+          <p style="color:#94a3b8;font-size:10px;margin-top:3px;">Aligned with Midnight's credential direction &middot; <a href="/tools/passport-ready.html" style="color:#0ABAB5;text-decoration:none;" onclick="event.stopPropagation();">See flow</a></p>
         </div>
       </a>
       <a href="/api/docs" style="text-decoration:none;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(139,92,246,0.35)'" onmouseout="this.style.borderColor='rgba(139,92,246,0.15)'">
@@ -460,7 +460,7 @@
       <span style="color:rgba(100,116,139,0.3);">|</span>
       <a href="/tools/contracts.html" style="color:#94a3b8;text-decoration:none;">Contract heatmap &rarr;</a>
       <span style="color:rgba(100,116,139,0.3);">|</span>
-      <a href="/tools/privacy-flow.html" style="color:#94a3b8;text-decoration:none;">Privacy Sankey &rarr;</a>
+      <a href="/tools/privacy-flow.html" style="color:#94a3b8;text-decoration:none;">Privacy flow &rarr;</a>
       <span style="color:rgba(100,116,139,0.3);">|</span>
       <a href="/tools/epochs.html" style="color:#94a3b8;text-decoration:none;">Epoch history &rarr;</a>
     </div>
@@ -3475,6 +3475,48 @@ window.addEventListener("popstate",function(){
 
 if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlockProducers();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
 setInterval(loadStats,6000);setInterval(loadPrice,60000);
+
+// Visibility-aware polling guard: pause the heaviest pollers when tab is hidden,
+// resume + catch up when it's visible again. Saves CPU/network on backgrounded tabs.
+// Implementation: wrap fetch with a hidden-check; lightweight (no interval rewiring).
+(function(){
+  var origFetch = window.fetch;
+  // Short-lived request coalescing: if the same GET /api/* URL is fetched
+  // within a 2s window, reuse the in-flight promise. Dedupes boot-time
+  // bursts (e.g. triple /api/epoch/current, double /api/stats).
+  var inflight = new Map();
+  var COALESCE_MS = 2000;
+  window.fetch = function(url, opts){
+    // Allow user-initiated clicks (have explicit options) always; pause only GET polls.
+    if (document.hidden && typeof url === 'string' && url.indexOf('/api/') !== -1 && (!opts || !opts.method || opts.method === 'GET')) {
+      // Return a promise that never resolves — the caller's .catch handles missing data gracefully.
+      return new Promise(function(){});
+    }
+    // Coalesce GET /api/* requests by URL
+    if (typeof url === 'string' && url.indexOf('/api/') !== -1 && (!opts || !opts.method || opts.method === 'GET')) {
+      var cached = inflight.get(url);
+      if (cached && (Date.now() - cached.ts) < COALESCE_MS) {
+        return cached.promise.then(function(r){ return r.clone(); });
+      }
+      var p = origFetch.apply(this, arguments);
+      inflight.set(url, { promise: p, ts: Date.now() });
+      p.finally(function(){ setTimeout(function(){
+        var cur = inflight.get(url);
+        if (cur && cur.promise === p) inflight.delete(url);
+      }, COALESCE_MS); });
+      return p.then(function(r){ return r.clone(); });
+    }
+    return origFetch.apply(this, arguments);
+  };
+  // On visibility return, trigger one catch-up fetch for the most important views.
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) {
+      try { loadStats(); } catch(e){}
+      if (typeof fetchAll === 'function') try { fetchAll(); } catch(e){}
+      if (typeof loadEpochIntelligence === 'function') try { loadEpochIntelligence(); } catch(e){}
+    }
+  });
+})();
 // Cleanup: hide label-only cards that still have no value after 8 seconds
 setTimeout(function(){
   var ids=["totalEvents","nextEpoch","networkAge","currentEpoch","totalTxs","indexedBlocks"];

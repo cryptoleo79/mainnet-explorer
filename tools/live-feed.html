@@ -336,15 +336,15 @@
     <div class="pulse-row">
       <div class="pulse-card">
         <div class="pulse-label">Blocks / min</div>
-        <div class="pulse-value green mono" id="blocksPerMin">--</div>
+        <div class="pulse-value green mono" id="blocksPerMin">—</div>
       </div>
       <div class="pulse-card">
         <div class="pulse-label">Txs / min</div>
-        <div class="pulse-value cyan mono" id="txsPerMin">--</div>
+        <div class="pulse-value cyan mono" id="txsPerMin">—</div>
       </div>
       <div class="pulse-card">
         <div class="pulse-label">Active Contracts</div>
-        <div class="pulse-value orange mono" id="activeContracts">--</div>
+        <div class="pulse-value orange mono" id="activeContracts">—</div>
       </div>
     </div>
 
@@ -389,8 +389,18 @@
     const MAX_BLOCKS = 20;
     const MAX_CONTRACTS = 15;
 
+    // Bounded Sets — prevent unbounded memory growth on long-lived tabs.
+    // At one new block every 6s that's ~14k entries/day otherwise.
+    const MAX_DEDUP_CACHE = 500;
     let knownBlockHeights = new Set();
     let knownContractIds = new Set();
+    function addToCache(set, key) {
+      set.add(key);
+      if (set.size > MAX_DEDUP_CACHE) {
+        const iter = set.values();
+        for (let i = 0; i < 100; i++) set.delete(iter.next().value);
+      }
+    }
     let lastFetchOk = false;
     let consecutiveErrors = 0;
 
@@ -519,7 +529,7 @@
           blocks.forEach(b => {
             const key = b.height || b.number || '';
             if (key && knownBlockHeights.has(String(key))) return;
-            knownBlockHeights.add(String(key));
+            addToCache(knownBlockHeights, String(key));
             const li = renderBlockItem(b);
             blockFeed.insertBefore(li, blockFeed.firstChild);
           });
@@ -539,7 +549,7 @@
           contracts.forEach(c => {
             const key = (c.address || c.contractAddress || '') + (c.block || c.blockHeight || c.block_height || '') + (c.timestamp || c.time || '');
             if (knownContractIds.has(key)) return;
-            knownContractIds.add(key);
+            addToCache(knownContractIds, key);
             const li = renderContractItem(c);
             contractFeed.insertBefore(li, contractFeed.firstChild);
           });

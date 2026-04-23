@@ -372,7 +372,7 @@
 
     <!-- Current epoch card -->
     <div class="epoch-hero" id="epochHero">
-      <div class="epoch-number" id="epochNumber">--</div>
+      <div class="epoch-number" id="epochNumber">—</div>
       <div class="epoch-label">Current Epoch</div>
       <div class="epoch-meta">
         <div class="epoch-meta-item">
@@ -380,11 +380,11 @@
           <div class="epoch-meta-label">Duration</div>
         </div>
         <div class="epoch-meta-item">
-          <div class="epoch-meta-value" id="epochElapsed">--</div>
+          <div class="epoch-meta-value" id="epochElapsed">—</div>
           <div class="epoch-meta-label">Elapsed</div>
         </div>
         <div class="epoch-meta-item">
-          <div class="epoch-meta-value cyan" id="epochRemaining">--</div>
+          <div class="epoch-meta-value cyan" id="epochRemaining">—</div>
           <div class="epoch-meta-label">Remaining</div>
         </div>
       </div>
@@ -412,11 +412,11 @@
         </div>
         <div class="health-detail">
           <div class="health-detail-item">
-            <div class="health-detail-num" id="blocksProduced">--</div>
+            <div class="health-detail-num" id="blocksProduced">—</div>
             <div class="health-detail-lbl">Produced</div>
           </div>
           <div class="health-detail-item">
-            <div class="health-detail-num" id="blocksExpected">--</div>
+            <div class="health-detail-num" id="blocksExpected">—</div>
             <div class="health-detail-lbl">Expected</div>
           </div>
         </div>
@@ -585,15 +585,23 @@
         // Epoch history
         const history = data.history || data.recentEpochs || [];
         renderEpochHistory(history);
+        hasLoaded = true;
 
         // Update countdown immediately
         updateCountdown();
 
       } catch (err) {
         console.error('Epoch fetch error:', err);
-        // Don't overwrite existing data on transient errors
+        // First-load failure: show an honest status instead of "—" forever.
+        // Keep existing data on transient errors after first success.
+        if (!hasLoaded) {
+          var sb = document.getElementById('statusBar');
+          var st = document.getElementById('statusText');
+          if (sb && st) { sb.className = 'status-bar error'; st.textContent = 'Epoch API unreachable. Retrying...'; }
+        }
       }
     }
+    var hasLoaded = false;
 
     // Initial fetch
     fetchEpoch();
