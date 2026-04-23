@@ -631,6 +631,158 @@
       }
     }
 
+    // ─── B.2 EPOCH PULSE — Dual-ring cross-chain anchor clock ──
+    var pulseState=null;
+    var pulseTimer=null;
+    // Cardano Shelley anchor: epoch 208 began at absolute slot 4492800 (2020-07-29 21:44:51 UTC)
+    var CARDANO_SHELLEY_SLOT=4492800;
+    var CARDANO_EPOCH_SLOTS=432000; // 5 days, 1 slot/sec
+
+    function nfArcPath(cx,cy,r,startAngle,endAngle){
+      if(endAngle-startAngle<0.0001)return "";
+      var s={x:cx+r*Math.cos(startAngle),y:cy+r*Math.sin(startAngle)};
+      var e={x:cx+r*Math.cos(endAngle),y:cy+r*Math.sin(endAngle)};
+      var large=(endAngle-startAngle)>Math.PI?1:0;
+      return "M "+s.x.toFixed(2)+" "+s.y.toFixed(2)+" A "+r+" "+r+" 0 "+large+" 1 "+e.x.toFixed(2)+" "+e.y.toFixed(2);
+    }
+
+    function nfFmtDuration(totalSec){
+      if(totalSec<=0)return "0s";
+      var h=Math.floor(totalSec/3600);
+      var m=Math.floor((totalSec%3600)/60);
+      var s=totalSec%60;
+      if(h>0)return h+"h "+m+"m";
+      if(m>0)return m+"m "+String(s).padStart(2,"0")+"s";
+      return s+"s";
+    }
+
+    function renderEpochPulseSvg(){
+      if(!pulseState)return;
+      var svg=document.getElementById("nfEpochPulseSvg");
+      if(!svg)return;
+      var mid=pulseState.midnight;
+      var card=pulseState.cardano;
+      if(!mid||!card)return;
+
+      var midPct=Math.min(100,mid.elapsed/mid.duration*100);
+      var cardPct=Math.min(100,card.elapsedSlots/card.duration*100);
+
+      var cyRing=100;
+      var r=70, sw=10;
+      var cxMid=280, cxCard=720;
+      var start=-Math.PI/2;
+      var midEnd=start+(midPct/100)*Math.PI*2;
+      var cardEnd=start+(cardPct/100)*Math.PI*2;
+
+      var trackColor="rgba(100,116,139,0.15)";
+      var midColor="#0ABAB5";
+      var cardColor="#f97316";
+
+      var midRemaining=Math.max(0,mid.duration-mid.elapsed);
+
+      var parts=[];
+      parts.push('<defs>');
+      parts.push('<filter id="nfPulseGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>');
+      parts.push('</defs>');
+
+      parts.push('<circle cx="'+cxMid+'" cy="'+cyRing+'" r="'+r+'" fill="none" stroke="'+trackColor+'" stroke-width="'+sw+'"/>');
+      if(midPct>0.1){
+        parts.push('<path d="'+nfArcPath(cxMid,cyRing,r,start,midEnd)+'" fill="none" stroke="'+midColor+'" stroke-width="'+sw+'" stroke-linecap="round" filter="url(#nfPulseGlow)"/>');
+      }
+      parts.push('<text x="'+cxMid+'" y="'+(cyRing-18)+'" text-anchor="middle" fill="#64748b" font-size="9" font-weight="700" letter-spacing="1">MIDNIGHT</text>');
+      parts.push('<text x="'+cxMid+'" y="'+(cyRing-2)+'" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="ui-monospace,monospace">'+mid.epochNo.toLocaleString()+'</text>');
+      parts.push('<text x="'+cxMid+'" y="'+(cyRing+16)+'" text-anchor="middle" fill="'+midColor+'" font-size="18" font-weight="700" font-family="ui-monospace,monospace">'+midPct.toFixed(1)+'%</text>');
+      parts.push('<text x="'+cxMid+'" y="'+(cyRing+32)+'" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="ui-monospace,monospace">'+nfFmtDuration(midRemaining)+' left</text>');
+
+      parts.push('<circle cx="'+cxCard+'" cy="'+cyRing+'" r="'+r+'" fill="none" stroke="'+trackColor+'" stroke-width="'+sw+'"/>');
+      if(cardPct>0.1){
+        parts.push('<path d="'+nfArcPath(cxCard,cyRing,r,start,cardEnd)+'" fill="none" stroke="'+cardColor+'" stroke-width="'+sw+'" stroke-linecap="round" filter="url(#nfPulseGlow)"/>');
+      }
+      parts.push('<text x="'+cxCard+'" y="'+(cyRing-18)+'" text-anchor="middle" fill="#64748b" font-size="9" font-weight="700" letter-spacing="1">CARDANO</text>');
+      parts.push('<text x="'+cxCard+'" y="'+(cyRing-2)+'" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="ui-monospace,monospace">'+card.epochNo.toLocaleString()+'</text>');
+      parts.push('<text x="'+cxCard+'" y="'+(cyRing+16)+'" text-anchor="middle" fill="'+cardColor+'" font-size="18" font-weight="700" font-family="ui-monospace,monospace">'+cardPct.toFixed(1)+'%</text>');
+      parts.push('<text x="'+cxCard+'" y="'+(cyRing+32)+'" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="ui-monospace,monospace">anchored</text>');
+
+      var linkY=cyRing;
+      var linkX1=cxMid+r+sw/2+8;
+      var linkX2=cxCard-r-sw/2-8;
+      parts.push('<line x1="'+linkX1+'" y1="'+linkY+'" x2="'+linkX2+'" y2="'+linkY+'" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.7"/>');
+      var midX=(linkX1+linkX2)/2;
+      parts.push('<circle cx="'+midX+'" cy="'+linkY+'" r="14" fill="rgba(30,41,59,0.9)" stroke="#334155" stroke-width="1"/>');
+      parts.push('<path d="M '+(midX-5)+' '+(linkY-3)+' a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 M '+(midX-1)+' '+(linkY+3)+' a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0" fill="none" stroke="#94a3b8" stroke-width="1.3"/>');
+      parts.push('<text x="'+midX+'" y="'+(linkY+28)+'" text-anchor="middle" fill="#64748b" font-size="8" font-weight="700" letter-spacing="1">ANCHOR</text>');
+      parts.push('<text x="'+midX+'" y="'+(linkY-22)+'" text-anchor="middle" fill="#64748b" font-size="8" font-weight="600">sidechain</text>');
+      parts.push('<text x="'+midX+'" y="'+(linkY-12)+'" text-anchor="middle" fill="#64748b" font-size="8" font-weight="600">&#8594; mainchain</text>');
+
+      svg.innerHTML=parts.join("");
+    }
+
+    function renderEpochPulse(){
+      Promise.all([
+        fetch("/api/epoch/current").then(function(r){return r.json()}).catch(function(){return null}),
+        fetch("/api/stats").then(function(r){return r.json()}).catch(function(){return null}),
+        fetch("/api/cardano-anchors?limit=1").then(function(r){return r.json()}).catch(function(){return null})
+      ]).then(function(results){
+        var epoch=results[0];
+        var stats=results[1];
+        var anchors=results[2];
+        if(!epoch||!epoch.epochNo||!stats||!stats.epoch)return;
+        var se=stats.epoch;
+        if(!se.mainchain_slot||!se.mainchain_epoch)return;
+
+        var midnight={
+          epochNo:epoch.epochNo,
+          elapsed:epoch.elapsedSeconds||0,
+          duration:epoch.durationSeconds||1800
+        };
+
+        var slotsSinceShelley=se.mainchain_slot-CARDANO_SHELLEY_SLOT;
+        var elapsedInEpoch=slotsSinceShelley%CARDANO_EPOCH_SLOTS;
+        if(elapsedInEpoch<0)elapsedInEpoch+=CARDANO_EPOCH_SLOTS;
+        var cardano={
+          epochNo:se.mainchain_epoch,
+          elapsedSlots:elapsedInEpoch,
+          duration:CARDANO_EPOCH_SLOTS
+        };
+
+        pulseState={midnight:midnight,cardano:cardano,fetchedAt:Date.now()/1000};
+
+        var pulseEl=document.getElementById("nfEpochPulse");
+        if(pulseEl)pulseEl.style.display="";
+
+        renderEpochPulseSvg();
+
+        var latestEl=document.getElementById("nfLatestAnchor");
+        if(latestEl&&anchors&&anchors.currentAnchor){
+          var a=anchors.currentAnchor;
+          var tsDate="";
+          if(a.timestamp){
+            try{tsDate=new Date(a.timestamp).toISOString().replace("T"," ").substring(0,19)+" UTC";}catch(e){}
+          }
+          latestEl.innerHTML='Latest anchor &middot; Midnight epoch '+
+            '<span style="color:#0ABAB5;font-weight:600;">'+a.midnightEpoch.toLocaleString()+'</span>'+
+            ' &harr; Cardano epoch '+
+            '<span style="color:#f97316;font-weight:600;">'+a.cardanoEpoch.toLocaleString()+'</span>'+
+            (tsDate?' &middot; '+tsDate:'');
+        }
+
+        if(!pulseTimer){
+          pulseTimer=setInterval(function(){
+            if(!pulseState)return;
+            pulseState.midnight.elapsed+=1;
+            if(pulseState.midnight.elapsed>pulseState.midnight.duration){
+              pulseState.midnight.elapsed=pulseState.midnight.duration;
+            }
+            pulseState.cardano.elapsedSlots+=1;
+            if(pulseState.cardano.elapsedSlots>pulseState.cardano.duration){
+              pulseState.cardano.elapsedSlots=pulseState.cardano.duration;
+            }
+            renderEpochPulseSvg();
+          },1000);
+        }
+      }).catch(function(){});
+    }
+
     // ─── C. SIGNAL-MODE LIVE FEED ──────────────────────
     function renderTicker(blocks){
       if(!blocks||!blocks.length){
@@ -1060,11 +1212,13 @@
     fetchAll();
     fetchOverview();
     loadEpochIntelligence();
+    renderEpochPulse();
     fetchGovernanceChangeLog();
     renderDecentralizationDial();
     setInterval(fetchAll,6000);
     setInterval(fetchOverview,30000);
     setInterval(loadEpochIntelligence,30000);  // re-sync epoch every 30s
+    setInterval(renderEpochPulse,30000);        // re-sync dual-ring pulse every 30s
     setInterval(renderDecentralizationDial,60000);  // re-sync dial every 60s
     // Live time-ago updates every 5s (no re-fetch)
     setInterval(function(){
