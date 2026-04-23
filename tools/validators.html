@@ -282,6 +282,228 @@
     .sat-mid { background: #f59e0b; }
     .sat-high { background: #ef4444; }
 
+    /* Liveness Pulse */
+    .liveness-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .liveness-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .liveness-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .liveness-title .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
+      animation: pulseGlow 1.8s ease-out infinite;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+    .liveness-sub {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+      font-weight: 400;
+    }
+    .liveness-meta {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .liveness-meta span.fresh { color: #22c55e; }
+
+    .pulse-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .pulse-cell {
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      transition: transform 0.15s;
+    }
+    .pulse-cell:hover { transform: translateY(-2px); }
+    .pulse-cell .v-id {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pulse-cell .v-blocks {
+      font-size: 0.7rem;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pulse-cell.active {
+      background: rgba(34,197,94,0.15);
+      border-color: rgba(34,197,94,0.5);
+    }
+    .pulse-cell.active .v-id { color: #4ade80; }
+    .pulse-cell.slow {
+      background: rgba(250,204,21,0.12);
+      border-color: rgba(250,204,21,0.45);
+    }
+    .pulse-cell.slow .v-id { color: #fde047; }
+    .pulse-cell.silent {
+      background: rgba(239,68,68,0.1);
+      border-color: rgba(239,68,68,0.4);
+    }
+    .pulse-cell.silent .v-id { color: #fca5a5; }
+    .pulse-cell.silent-zero {
+      background: rgba(71,85,105,0.18);
+      border-color: rgba(100,116,139,0.3);
+    }
+    .pulse-cell.silent-zero .v-id { color: #94a3b8; }
+
+    .pulse-legend {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .legend-swatch.active { background: rgba(34,197,94,0.55); border-color: rgba(34,197,94,0.8); }
+    .legend-swatch.slow { background: rgba(250,204,21,0.55); border-color: rgba(250,204,21,0.8); }
+    .legend-swatch.silent { background: rgba(239,68,68,0.55); border-color: rgba(239,68,68,0.8); }
+    .legend-swatch.silent-zero { background: rgba(100,116,139,0.55); border-color: rgba(100,116,139,0.8); }
+
+    .liveness-warning {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      color: #fca5a5;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .liveness-warning .warn-icon {
+      flex-shrink: 0;
+      color: #f87171;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Liveness table */
+    .ltable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 1.25rem;
+    }
+    .ltable th {
+      text-align: left;
+      padding: 0.65rem 0.5rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+    .ltable td {
+      padding: 0.65rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .ltable tr:last-child td { border-bottom: none; }
+    .ltable tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .status-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .status-badge.active {
+      background: rgba(34,197,94,0.1);
+      color: #4ade80;
+      border-color: rgba(34,197,94,0.35);
+    }
+    .status-badge.active .dot { background: #22c55e; }
+    .status-badge.slow {
+      background: rgba(250,204,21,0.1);
+      color: #fde047;
+      border-color: rgba(250,204,21,0.35);
+    }
+    .status-badge.slow .dot { background: #facc15; }
+    .status-badge.silent {
+      background: rgba(239,68,68,0.1);
+      color: #fca5a5;
+      border-color: rgba(239,68,68,0.35);
+    }
+    .status-badge.silent .dot { background: #ef4444; }
+    .status-badge.silent-zero {
+      background: rgba(100,116,139,0.15);
+      color: #94a3b8;
+      border-color: rgba(100,116,139,0.35);
+    }
+    .status-badge.silent-zero .dot { background: #94a3b8; }
+
+    @media (max-width: 700px) {
+      .pulse-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+
     /* Empty state */
     .empty-card {
       background: rgba(30, 41, 59, 0.6);
@@ -355,6 +577,37 @@
       <p>SPO registry with performance, stake distribution, and delegation metrics for the Midnight network.</p>
     </div>
 
+    <!-- Liveness Pulse -->
+    <div class="liveness-card">
+      <div class="liveness-header">
+        <div>
+          <div class="liveness-title">
+            <span class="pulse-dot"></span>
+            Committee Liveness Pulse
+          </div>
+          <div class="liveness-sub">Silent-validator detector &mdash; which of the 10 committee members are producing blocks right now?</div>
+        </div>
+        <div class="liveness-meta" id="livenessMeta">Loading...</div>
+      </div>
+
+      <div id="livenessWarning"></div>
+
+      <div class="pulse-grid" id="pulseGrid">
+        <div style="grid-column: 1 / -1; text-align:center; color:#64748b; padding:2rem 0; font-size:0.85rem;">
+          <span class="spinner"></span> Sampling recent blocks...
+        </div>
+      </div>
+
+      <div class="pulse-legend">
+        <span class="legend-item"><span class="legend-swatch active"></span>Active (<span id="legendActive">--</span>) &mdash; block in last 60s</span>
+        <span class="legend-item"><span class="legend-swatch slow"></span>Slow (<span id="legendSlow">--</span>) &mdash; block in last 10m</span>
+        <span class="legend-item"><span class="legend-swatch silent"></span>Silent (<span id="legendSilent">--</span>) &mdash; no recent blocks</span>
+        <span class="legend-item"><span class="legend-swatch silent-zero"></span>Zero in window (<span id="legendZero">--</span>)</span>
+      </div>
+
+      <div id="livenessTableWrap"></div>
+    </div>
+
     <!-- Summary row -->
     <div class="summary-row">
       <div class="phase-badge federated" id="phaseBadge">
@@ -406,6 +659,135 @@
       const num = Number(n);
       if (isNaN(num)) return '--';
       return num.toLocaleString();
+    }
+
+    function formatAge(seconds) {
+      if (seconds == null) return 'never';
+      if (seconds < 60) return seconds + 's ago';
+      if (seconds < 3600) return Math.floor(seconds / 60) + 'm ' + (seconds % 60) + 's ago';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ' + Math.floor((seconds % 3600) / 60) + 'm ago';
+      return Math.floor(seconds / 86400) + 'd ago';
+    }
+
+    function truncateKey(key) {
+      if (!key) return '--';
+      const k = key.replace(/^0x/, '');
+      return '0x' + k.slice(0, 6) + '...' + k.slice(-4);
+    }
+
+    function cellStatusClass(v) {
+      if (v.status === 'active') return 'active';
+      if (v.status === 'slow') return 'slow';
+      if (v.blocksProduced === 0) return 'silent-zero';
+      return 'silent';
+    }
+
+    function badgeStatusClass(v) {
+      if (v.status === 'active') return 'active';
+      if (v.status === 'slow') return 'slow';
+      if (v.blocksProduced === 0) return 'silent-zero';
+      return 'silent';
+    }
+
+    function statusLabel(v) {
+      if (v.status === 'active') return 'Active';
+      if (v.status === 'slow') return 'Slow';
+      if (v.blocksProduced === 0) return 'No Blocks';
+      return 'Silent';
+    }
+
+    function renderPulseGrid(data) {
+      const validators = data.validators || [];
+      const grid = document.getElementById('pulseGrid');
+
+      if (validators.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; color:#64748b; padding:2rem 0;">No committee data available.</div>';
+        return;
+      }
+
+      grid.innerHTML = validators.map(v => {
+        const cls = cellStatusClass(v);
+        const tooltip = `Validator #${v.id}\nAura: ${truncateKey(v.auraKey)}\nBlocks (window): ${v.blocksProduced}\nLast block: ${v.lastBlockHeight || 'never'}\nLast seen: ${formatAge(v.lastBlockAgeSeconds)}`;
+        return `
+          <div class="pulse-cell ${cls}" title="${tooltip}">
+            <div class="v-id">V${v.id}</div>
+            <div class="v-blocks">${v.blocksProduced}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderLivenessTable(data) {
+      const validators = data.validators || [];
+      if (validators.length === 0) {
+        document.getElementById('livenessTableWrap').innerHTML = '';
+        return;
+      }
+
+      let html = '<table class="ltable"><thead><tr>';
+      html += '<th>#</th><th>Aura Key</th><th>Blocks (window)</th><th>Last Block</th><th>Last Seen</th><th>Status</th>';
+      html += '</tr></thead><tbody>';
+
+      validators.forEach(v => {
+        const badgeCls = badgeStatusClass(v);
+        html += `<tr>
+          <td class="mono" style="color:#cbd5e1;font-weight:600;">V${v.id}</td>
+          <td class="mono" style="color:#94a3b8;">${truncateKey(v.auraKey)}</td>
+          <td class="mono">${v.blocksProduced}</td>
+          <td class="mono">${v.lastBlockHeight != null ? v.lastBlockHeight.toLocaleString() : '<span style="color:#64748b;">never</span>'}</td>
+          <td class="mono" style="color:${v.lastBlockAgeSeconds != null && v.lastBlockAgeSeconds <= 60 ? '#4ade80' : '#94a3b8'};">${formatAge(v.lastBlockAgeSeconds)}</td>
+          <td><span class="status-badge ${badgeCls}"><span class="dot"></span>${statusLabel(v)}</span></td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      document.getElementById('livenessTableWrap').innerHTML = html;
+    }
+
+    function renderWarning(data) {
+      const silentTotal = (data.silentCount || 0);
+      const zeroBlock = (data.validators || []).filter(v => v.blocksProduced === 0).length;
+      const banner = document.getElementById('livenessWarning');
+
+      if (silentTotal >= 4) {
+        banner.innerHTML = `
+          <div class="liveness-warning">
+            <span class="warn-icon">!</span>
+            <div>
+              <strong>${silentTotal} of ${data.committeeSize || 10} committee validators</strong> have not produced a block in the sample window of ${data.windowBlocks} blocks
+              ${zeroBlock > 0 ? ` &mdash; ${zeroBlock} produced zero blocks in the entire window.` : '.'}
+              This is real on-chain data from the Midnight indexer.
+            </div>
+          </div>`;
+      } else {
+        banner.innerHTML = '';
+      }
+    }
+
+    function renderMeta(data) {
+      const zeroBlock = (data.validators || []).filter(v => v.blocksProduced === 0).length;
+      document.getElementById('livenessMeta').innerHTML =
+        `Window: <span>${data.windowBlocks}</span> blocks &middot; Latest <span class="fresh">#${(data.latestBlock || 0).toLocaleString()}</span> &middot; Active <span class="fresh">${data.activeCount}</span>/${data.committeeSize || 10}`;
+
+      document.getElementById('legendActive').textContent = data.activeCount || 0;
+      document.getElementById('legendSlow').textContent = data.slowCount || 0;
+      const silent = (data.silentCount || 0) - zeroBlock;
+      document.getElementById('legendSilent').textContent = Math.max(0, silent);
+      document.getElementById('legendZero').textContent = zeroBlock;
+    }
+
+    async function fetchLiveness() {
+      try {
+        const res = await fetch('/api/validators/liveness?window=100');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        renderMeta(data);
+        renderWarning(data);
+        renderPulseGrid(data);
+        renderLivenessTable(data);
+      } catch (err) {
+        console.error('Liveness fetch error:', err);
+        document.getElementById('livenessMeta').textContent = 'Unavailable';
+      }
     }
 
     function formatStake(n) {
@@ -526,6 +908,10 @@
     }
 
     fetchAll();
+
+    // Liveness Pulse: fetch immediately then poll every 10s
+    fetchLiveness();
+    setInterval(fetchLiveness, 10000);
   </script>
 
 </body>

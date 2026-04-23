@@ -19,6 +19,8 @@ import {
   getAllMidnightTxCount,
   getBridgeAnalytics,
   getContractAnalytics,
+  getContractHeatmap,
+  getContractCallsRecent,
   getNetworkOverviewData,
   getPrivacyFromEvents,
   getCommitteeMembers,
@@ -889,6 +891,149 @@ app.get('/api/analytics/contracts', (req, res) => {
   try {
     const data = getContractAnalytics();
     res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Contract Activity Heatmap API (30-day daily calls + deploys) ---
+app.get('/api/contracts/heatmap', (req, res) => {
+  try {
+    const days = Math.min(Math.max(parseInt(req.query.days as string) || 30, 1), 90);
+    const daysArr = getContractHeatmap(days);
+    const totalCalls = daysArr.reduce((s, d) => s + d.calls, 0);
+    const totalDeploys = daysArr.reduce((s, d) => s + d.deploys, 0);
+    res.json({
+      days: daysArr,
+      window: `${days}d`,
+      totalCalls,
+      totalDeploys,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Contract Entry Point Inspector (24h, resolves circuit names via indexer) ---
+// Cache resolved entryPoints per txHash (they are immutable once mined).
+const entryPointTxCache: Map<string, string> = new Map();
+const ENTRYPOINT_TX_CACHE_MAX = 5000;
+let entryPointAggCache: { data: any; ts: number } | null = null;
+const ENTRYPOINT_AGG_TTL_MS = 60_000; // 60s aggregate cache
+
+async function resolveEntryPointByTx(txHash: string): Promise<string | null> {
+  // Normalize: strip 0x prefix for indexer
+  const clean = txHash.startsWith('0x') ? txHash.slice(2) : txHash;
+  if (entryPointTxCache.has(clean)) return entryPointTxCache.get(clean) || null;
+  try {
+    const resp = await fetch('https://indexer.mainnet.midnight.network/api/v4/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `{ transactions(offset: { hash: "${clean}" }) { hash contractActions { __typename ... on ContractCall { entryPoint address } } } }`,
+      }),
+      signal: AbortSignal.timeout(7000),
+    });
+    const data = await resp.json() as any;
+    const txs = data?.data?.transactions || [];
+    if (!txs.length) return null;
+    const actions = txs[0].contractActions || [];
+    // A tx may have multiple contract calls; pick the first ContractCall's entryPoint
+    for (const action of actions) {
+      if (action.__typename === 'ContractCall' && action.entryPoint) {
+        // Evict oldest if cache is at capacity
+        if (entryPointTxCache.size >= ENTRYPOINT_TX_CACHE_MAX) {
+          const firstKey = entryPointTxCache.keys().next().value;
+          if (firstKey) entryPointTxCache.delete(firstKey);
+        }
+        entryPointTxCache.set(clean, action.entryPoint);
+        return action.entryPoint;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+app.get('/api/contracts/entrypoints', async (req, res) => {
+  try {
+    const hours = Math.min(Math.max(parseInt(req.query.hours as string) || 24, 1), 168);
+    const now = Date.now();
+
+    // Serve cached aggregate if fresh
+    if (entryPointAggCache && now - entryPointAggCache.ts < ENTRYPOINT_AGG_TTL_MS && (req.query.hours as string || '24') === '24') {
+      return res.json(entryPointAggCache.data);
+    }
+
+    const calls = getContractCallsRecent(hours);
+    const totalLocalCalls = calls.length;
+
+    // Cap indexer lookups per request to keep latency bounded.
+    // Prefer the most recent calls first (already ordered DESC by getContractCallsRecent).
+    const MAX_LOOKUPS = 200;
+    const toResolve = calls.slice(0, MAX_LOOKUPS);
+
+    // Deduplicate by txHash - a tx may appear multiple times if it emitted multiple ContractCall events.
+    const uniqueTx = new Map<string, { txHash: string; contractAddress: string }>();
+    for (const c of toResolve) {
+      if (!uniqueTx.has(c.txHash)) uniqueTx.set(c.txHash, { txHash: c.txHash, contractAddress: c.contractAddress });
+    }
+
+    // Resolve entryPoints in small concurrent batches.
+    const aggregator = new Map<string, { entryPoint: string; callCount: number; contracts: Set<string> }>();
+    let resolvedCount = 0;
+    let unresolvedCount = 0;
+
+    const txList = Array.from(uniqueTx.values());
+    const BATCH = 8;
+    for (let i = 0; i < txList.length; i += BATCH) {
+      const batch = txList.slice(i, i + BATCH);
+      const results = await Promise.all(batch.map(async (t) => {
+        const ep = await resolveEntryPointByTx(t.txHash);
+        return { ...t, entryPoint: ep };
+      }));
+      for (const r of results) {
+        if (!r.entryPoint) { unresolvedCount++; continue; }
+        resolvedCount++;
+        const key = r.entryPoint;
+        if (!aggregator.has(key)) {
+          aggregator.set(key, { entryPoint: key, callCount: 0, contracts: new Set() });
+        }
+        const entry = aggregator.get(key)!;
+        entry.callCount++;
+        entry.contracts.add(r.contractAddress);
+      }
+    }
+
+    const entrypoints = Array.from(aggregator.values())
+      .map(e => ({
+        entryPoint: e.entryPoint,
+        callCount: e.callCount,
+        contractCount: e.contracts.size,
+        contracts: Array.from(e.contracts).slice(0, 5),
+      }))
+      .sort((a, b) => b.callCount - a.callCount)
+      .slice(0, 10);
+
+    const result = {
+      entrypoints,
+      totalLocalCalls,
+      resolvedCalls: resolvedCount,
+      unresolvedCalls: unresolvedCount,
+      sampleSize: toResolve.length,
+      uniqueTxSampled: uniqueTx.size,
+      maxLookups: MAX_LOOKUPS,
+      window: `${hours}h`,
+      source: 'midnight indexer v4 (contractActions.entryPoint)',
+      generatedAt: Math.floor(now / 1000),
+    };
+
+    if ((req.query.hours as string || '24') === '24') {
+      entryPointAggCache = { data: result, ts: now };
+    }
+
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -2371,6 +2516,128 @@ app.get('/api/validators/performance', async (req, res) => {
   }
 });
 
+// ─── Validator Liveness Pulse ──────────────────────────────────
+// Detects silent committee validators by sampling recent blocks and
+// computing "last seen" block height + age per committee member.
+let validatorLivenessCache: { data: any; ts: number; window: number } | null = null;
+
+app.get('/api/validators/liveness', async (req, res) => {
+  try {
+    const rawWindow = parseInt(req.query.window as string);
+    const windowBlocks = Math.min(Math.max(Number.isFinite(rawWindow) ? rawWindow : 100, 10), 500);
+
+    const now = Date.now();
+    if (
+      validatorLivenessCache &&
+      validatorLivenessCache.window === windowBlocks &&
+      now - validatorLivenessCache.ts < 10000
+    ) {
+      return res.json(validatorLivenessCache.data);
+    }
+
+    // 1. Load the 10 committee members
+    const committeeData = getCommitteeMembers();
+    const committeeMembers: any[] = (committeeData && committeeData.members) || [];
+
+    // 2. Fetch latest block height from indexer
+    const latestResp = await queryIndexer(`{ block { height } }`);
+    const latestHeight: number = latestResp?.block?.height || 0;
+    if (!latestHeight) {
+      return res.status(503).json({ error: 'Indexer returned no latest block' });
+    }
+
+    const oldestSampled = Math.max(1, latestHeight - windowBlocks + 1);
+
+    // 3. Batch-query authors + timestamps for the window
+    const heights: number[] = [];
+    for (let h = latestHeight; h >= oldestSampled; h--) heights.push(h);
+
+    // Per-author aggregation
+    const authorCounts: Record<string, number> = {};
+    const authorLastHeight: Record<string, number> = {};
+    const authorLastTimestamp: Record<string, number> = {};
+
+    const batchSize = 20;
+    for (let i = 0; i < heights.length; i += batchSize) {
+      const batch = heights.slice(i, i + batchSize);
+      const queries = batch
+        .map((h, idx) => `b${idx}: block(offset: { height: ${h} }) { height author timestamp }`)
+        .join('\n');
+      const batchData = await queryIndexer(`{ ${queries} }`);
+      if (!batchData) continue;
+      for (const key of Object.keys(batchData)) {
+        const blk = batchData[key];
+        if (!blk || !blk.author) continue;
+        const author = blk.author.replace(/^0x/, '');
+        authorCounts[author] = (authorCounts[author] || 0) + 1;
+        if (!authorLastHeight[author] || blk.height > authorLastHeight[author]) {
+          authorLastHeight[author] = blk.height;
+          authorLastTimestamp[author] = blk.timestamp; // ms
+        }
+      }
+    }
+
+    // 4. Map per-committee stats + status
+    const nowSec = Math.floor(Date.now() / 1000);
+    let activeCount = 0;
+    let slowCount = 0;
+    let silentCount = 0;
+
+    const validators = committeeMembers.map((m: any, i: number) => {
+      const aura = (m.auraKey || '').replace(/^0x/, '');
+      const blocksProduced = authorCounts[aura] || 0;
+      const lastBlockHeight = authorLastHeight[aura] || null;
+      const lastTsMs = authorLastTimestamp[aura] || null;
+      const lastBlockAgeSeconds = lastTsMs ? Math.max(0, nowSec - Math.floor(lastTsMs / 1000)) : null;
+
+      let status: 'active' | 'slow' | 'silent';
+      if (blocksProduced === 0 || lastBlockAgeSeconds === null) {
+        status = 'silent';
+      } else if (lastBlockAgeSeconds <= 60) {
+        status = 'active';
+      } else if (lastBlockAgeSeconds <= 600) {
+        status = 'slow';
+      } else {
+        status = 'silent';
+      }
+
+      if (status === 'active') activeCount++;
+      else if (status === 'slow') slowCount++;
+      else silentCount++;
+
+      return {
+        id: i + 1,
+        validatorLabel: `Validator #${i + 1}`,
+        auraKey: m.auraKey || null,
+        grandpaKey: m.grandpaKey || null,
+        type: m.type || null,
+        blocksProduced,
+        lastBlockHeight,
+        lastBlockAgeSeconds,
+        status,
+      };
+    });
+
+    const result = {
+      windowBlocks,
+      latestBlock: latestHeight,
+      oldestSampled,
+      validators,
+      activeCount,
+      slowCount,
+      silentCount,
+      committeeSize: committeeMembers.length,
+      timestamp: new Date().toISOString(),
+    };
+
+    validatorLivenessCache = { data: result, ts: now, window: windowBlocks };
+    res.json(result);
+  } catch (error: any) {
+    if (validatorLivenessCache) return res.json(validatorLivenessCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ─── Epoch Utilization ──────────────────────────────────────────
 app.get('/api/epoch/current', async (req, res) => {
   try {
@@ -2652,6 +2919,8 @@ export function startAPI() {
     console.log(`  GET /api/block-producers - Block producer leaderboard`);
     console.log(`  GET /api/tx-enriched/:hash - Enriched transaction data from official indexer`);
     console.log(`  GET /api/contracts/deployed - Deployed contracts (event-based)`);
+    console.log(`  GET /api/contracts/heatmap - Daily call/deploy activity (last 30d)`);
+    console.log(`  GET /api/contracts/entrypoints - Top ZK circuits called in last 24h (via indexer v4)`);
     console.log(`  GET /api/governance - Governance dashboard`);
     console.log(`  GET /api/epochs - Epoch timeline`);
     console.log(`  GET /api/cardano-anchors - Cardano anchor points`);
@@ -2660,6 +2929,7 @@ export function startAPI() {
     console.log(`  GET /api/dust-economics - DUST Economics Observatory`);
     console.log(`  GET /api/validators/directory - Validator / SPO directory`);
     console.log(`  GET /api/validators/performance - Validator performance metrics`);
+    console.log(`  GET /api/validators/liveness - Validator liveness pulse (silent validators)`);
     console.log(`  GET /api/epoch/current - Current epoch info from indexer`);
     console.log(`  GET /api/epoch/utilization - Epoch utilization history`);
     console.log(`  GET /api/governance/d-parameter - Decentralization parameter history`);
