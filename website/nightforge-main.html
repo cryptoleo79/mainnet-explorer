@@ -380,6 +380,25 @@
     </div>
   </div>
 
+  <!-- PRIVACY FLOW SANKEY — Real tx distribution -->
+  <div id="nfPrivacyFlow" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
+    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Privacy Flow</span>
+          <span id="nfPrivacyTotal" style="color:#94a3b8;font-size:10px;font-weight:500;"></span>
+        </div>
+        <a href="/tools/privacy-score.html" style="color:#64748b;font-size:9px;text-decoration:none;font-weight:500;">Privacy detail &rarr;</a>
+      </div>
+      <svg id="nfSankeySvg" viewBox="0 0 1000 140" style="width:100%;height:140px;" preserveAspectRatio="xMidYMid meet">
+        <!-- Filled dynamically by JS -->
+      </svg>
+      <div id="nfSankeyLegend" style="display:flex;align-items:center;justify-content:space-around;margin-top:8px;flex-wrap:wrap;gap:4px 10px;font-size:10px;font-variant-numeric:tabular-nums;">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- ACTION STRIP — Data → Action -->
   <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -771,6 +790,103 @@
           var grade=ratio>0.8?"A+":ratio>0.65?"A":ratio>0.5?"B":ratio>0.3?"C":"D";
           var gradeColor=grade==="A+"||grade==="A"?"#22c55e":grade==="B"?"#facc15":"#f87171";
           if(gradeEl){gradeEl.textContent=grade;gradeEl.style.color=gradeColor;}
+        }
+        // Privacy Flow Sankey
+        renderPrivacySankey(d);
+      }).catch(function(){});
+    }
+
+    // ─── PRIVACY FLOW SANKEY ──────────────────────────
+    // Shows real distribution: shielded / unshielded / contract calls / bridge
+    // Uses only real mainnet data from /api/mainnet/analytics/privacy + /bridge
+    function renderPrivacySankey(overview){
+      var flowEl=document.getElementById("nfPrivacyFlow");
+      if(!flowEl)return;
+      // Fetch privacy + bridge data
+      Promise.all([
+        fetch("/api/mainnet/analytics/privacy?hours=168").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch("/api/mainnet/analytics/bridge?hours=168").then(function(r){return r.json()}).catch(function(){return null;})
+      ]).then(function(results){
+        var privacy=results[0];
+        var bridge=results[1];
+        if(!privacy||!overview)return;
+        var shielded=privacy.shielded||0;
+        var unshielded=privacy.unshielded||0;
+        var contracts=overview.contractCalls||0;
+        var bridgeOps=bridge&&bridge.last24h?bridge.last24h:0;
+        var total=shielded+unshielded+contracts+bridgeOps;
+        if(total<=0)return;
+        flowEl.style.display="";
+
+        var totalEl=document.getElementById("nfPrivacyTotal");
+        if(totalEl)totalEl.textContent="— "+total.toLocaleString()+" operations (7d)";
+
+        // SVG Sankey — 3 source pools on left, 4 destination pools on right
+        var svg=document.getElementById("nfSankeySvg");
+        var W=1000,H=140;
+        var leftX=130,rightX=870,barW=10;
+        var topY=15,botY=125;
+        // Destinations — each proportional to its count
+        var destinations=[
+          {name:"Shielded",  count:shielded,   color:"#22c55e"},
+          {name:"Unshielded",count:unshielded, color:"#facc15"},
+          {name:"Contracts", count:contracts,  color:"#8b5cf6"},
+          {name:"Bridge",    count:bridgeOps,  color:"#0ABAB5"}
+        ].filter(function(d){return d.count>0;});
+        var available=botY-topY;
+        var gap=4;
+        var totalGaps=gap*(destinations.length-1);
+        var totalHeight=available-totalGaps;
+        // Compute y-positions for each destination
+        var yCursor=topY;
+        destinations.forEach(function(dst){
+          dst.h=Math.max(2,totalHeight*(dst.count/total));
+          dst.y=yCursor;
+          dst.cy=dst.y+dst.h/2;
+          yCursor+=dst.h+gap;
+        });
+        // Source pool: all operations, single bar
+        var srcY=topY;
+        var srcH=available;
+        var srcCY=srcY+srcH/2;
+
+        var svgContent='';
+        // Source bar
+        svgContent+='<rect x="'+(leftX-barW)+'" y="'+srcY+'" width="'+barW+'" height="'+srcH+'" fill="#475569" opacity="0.6" rx="2"/>';
+        svgContent+='<text x="'+(leftX-barW-6)+'" y="'+(srcCY+3)+'" fill="#94a3b8" font-size="10" text-anchor="end" font-weight="600">Operations</text>';
+        svgContent+='<text x="'+(leftX-barW-6)+'" y="'+(srcCY+15)+'" fill="#64748b" font-size="9" text-anchor="end" font-variant-numeric="tabular-nums">'+total.toLocaleString()+'</text>';
+
+        // Flows from source to each destination
+        var srcYCursor=srcY;
+        destinations.forEach(function(dst){
+          var flowH=srcH*(dst.count/total);
+          var srcFlowCY=srcYCursor+flowH/2;
+          srcYCursor+=flowH;
+          // Bezier curve flow
+          var midX=(leftX+rightX)/2;
+          var path='M '+leftX+' '+(srcFlowCY-flowH/2)+
+                   ' C '+midX+' '+(srcFlowCY-flowH/2)+', '+midX+' '+(dst.y)+', '+rightX+' '+dst.y+
+                   ' L '+rightX+' '+(dst.y+dst.h)+
+                   ' C '+midX+' '+(dst.y+dst.h)+', '+midX+' '+(srcFlowCY+flowH/2)+', '+leftX+' '+(srcFlowCY+flowH/2)+
+                   ' Z';
+          svgContent+='<path d="'+path+'" fill="'+dst.color+'" opacity="0.18"/>';
+          // Destination bar
+          svgContent+='<rect x="'+rightX+'" y="'+dst.y+'" width="'+barW+'" height="'+dst.h+'" fill="'+dst.color+'" opacity="0.85" rx="2"/>';
+          // Destination label
+          var pct=Math.round(dst.count/total*100);
+          svgContent+='<text x="'+(rightX+barW+6)+'" y="'+(dst.cy+3)+'" fill="'+dst.color+'" font-size="10" font-weight="700">'+dst.name+'</text>';
+          svgContent+='<text x="'+(rightX+barW+6)+'" y="'+(dst.cy+15)+'" fill="#64748b" font-size="9" font-variant-numeric="tabular-nums">'+dst.count.toLocaleString()+' ('+pct+'%)</text>';
+        });
+        svg.innerHTML=svgContent;
+
+        // Legend
+        var legend=document.getElementById("nfSankeyLegend");
+        if(legend){
+          var items=destinations.map(function(dst){
+            var pct=Math.round(dst.count/total*100);
+            return '<span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:'+dst.color+';display:inline-block;"></span><span style="color:'+dst.color+';font-weight:600;">'+dst.name+'</span><span style="color:#64748b;">'+pct+'%</span></span>';
+          });
+          legend.innerHTML=items.join('');
         }
       }).catch(function(){});
     }
