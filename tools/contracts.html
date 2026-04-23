@@ -352,6 +352,183 @@
     .footer a { color: #64748b; text-decoration: none; }
     .footer a:hover { color: #f97316; }
 
+    /* Section sub-header - context/unique-to-midnight badge */
+    .unique-badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(139,92,246,0.12);
+      color: #c4b5fd;
+      border: 1px solid rgba(139,92,246,0.3);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: -0.75rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    /* Heatmap grid (30 cols x 1 row for daily, but we'll stack in a wrap for compact view) */
+    .heatmap-wrap {
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(30, minmax(18px, 1fr));
+      gap: 4px;
+      min-width: 560px;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1 / 1;
+      min-height: 22px;
+      border-radius: 4px;
+      background: rgba(30, 41, 59, 0.6);
+      position: relative;
+      cursor: default;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .heatmap-cell:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2px rgba(139,92,246,0.5);
+      z-index: 5;
+    }
+    .heatmap-cell .hm-tip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      border: 1px solid rgba(139,92,246,0.35);
+      border-radius: 6px;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.7rem;
+      color: #e2e8f0;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 20;
+      line-height: 1.4;
+    }
+    .heatmap-cell:hover .hm-tip { display: block; }
+    .heatmap-cell.level-0 { background: rgba(30, 41, 59, 0.4); }
+    .heatmap-cell.level-1 { background: rgba(139, 92, 246, 0.18); }
+    .heatmap-cell.level-2 { background: rgba(139, 92, 246, 0.35); }
+    .heatmap-cell.level-3 { background: rgba(139, 92, 246, 0.55); }
+    .heatmap-cell.level-4 { background: rgba(139, 92, 246, 0.78); }
+    .heatmap-cell.level-5 { background: rgba(6, 182, 212, 0.9); }
+    .heatmap-cell.deploy-mark::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #f59e0b;
+      box-shadow: 0 0 4px rgba(245,158,11,0.6);
+    }
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+    .heatmap-legend .hm-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+    .heatmap-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+      min-width: 560px;
+    }
+
+    /* Entry point panel */
+    .ep-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ep-row {
+      display: grid;
+      grid-template-columns: 1.5fr 3fr auto;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.4);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .ep-name {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.85rem;
+      color: #a78bfa;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ep-bar-wrap {
+      background: rgba(15,23,42,0.8);
+      border-radius: 6px;
+      height: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ep-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+      border-radius: 6px;
+      transition: width 0.3s;
+    }
+    .ep-bar-label {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem;
+      color: #e2e8f0;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+    .ep-contract-hint {
+      font-size: 0.7rem;
+      color: #64748b;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .ep-meta {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 0.75rem;
+      line-height: 1.5;
+    }
+    .honesty-note {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      background: rgba(15,23,42,0.5);
+      border: 1px dashed rgba(148,163,184,0.25);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.75rem;
+      line-height: 1.55;
+    }
+
     @media (max-width: 900px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
     }
@@ -361,6 +538,8 @@
       .header-nav { gap: 0.75rem; }
       .contract-table { font-size: 0.75rem; }
       .contract-table th, .contract-table td { padding: 0.5rem 0.25rem; }
+      .ep-row { grid-template-columns: 1fr; gap: 0.3rem; }
+      .ep-contract-hint { text-align: left; }
     }
   </style>
 </head>
@@ -415,6 +594,47 @@
       </div>
     </div>
 
+    <!-- 30-day activity heatmap -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+        30-Day Contract Activity Heatmap
+      </div>
+      <div class="card-subtitle">Daily contract-call volume. Amber dot marks days with new deployments. Hover any cell for the raw count.</div>
+      <div class="heatmap-wrap">
+        <div class="heatmap-grid" id="heatmapGrid">
+          <div class="empty-state" style="grid-column: 1 / -1;">Loading heatmap...</div>
+        </div>
+        <div class="heatmap-labels" id="heatmapLabels"></div>
+      </div>
+      <div class="heatmap-legend">
+        <span>Less</span>
+        <span class="hm-swatch" style="background:rgba(30,41,59,0.4);"></span>
+        <span class="hm-swatch" style="background:rgba(139,92,246,0.18);"></span>
+        <span class="hm-swatch" style="background:rgba(139,92,246,0.35);"></span>
+        <span class="hm-swatch" style="background:rgba(139,92,246,0.55);"></span>
+        <span class="hm-swatch" style="background:rgba(139,92,246,0.78);"></span>
+        <span class="hm-swatch" style="background:rgba(6,182,212,0.9);"></span>
+        <span>More</span>
+        <span style="flex:1;"></span>
+        <span><span class="hm-swatch" style="display:inline-block;background:#f59e0b;width:6px;height:6px;border-radius:50%;vertical-align:middle;margin-right:0.3rem;"></span>Deploy day</span>
+      </div>
+    </div>
+
+    <!-- Top entry points (ZK circuits) -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Top Entry Points (Last 24h)
+        <span class="unique-badge">Midnight only</span>
+      </div>
+      <div class="card-subtitle">Compact circuit names for each contract call, resolved from the Midnight indexer's <span class="mono" style="color:#c4b5fd;">contractActions.entryPoint</span> field. No other chain exposes ZK circuit names in its action log.</div>
+      <div class="ep-list" id="epList">
+        <div class="empty-state">Resolving entry points...</div>
+      </div>
+      <div class="ep-meta" id="epMeta"></div>
+    </div>
+
     <!-- Deploy timeline -->
     <div class="card">
       <div class="card-title">
@@ -451,7 +671,7 @@
   </footer>
 
   <script>
-    const REFRESH_MS = 15000;
+    const REFRESH_MS = 30000;
     const PAGE_SIZE = 20;
     let currentPage = 0;
     let allContracts = [];
@@ -674,6 +894,144 @@
       }
     }
 
+    // --- Heatmap rendering ---
+    function heatmapLevel(calls, maxCalls) {
+      if (!calls || calls <= 0) return 0;
+      if (maxCalls <= 0) return 0;
+      // Log scale so a handful of active days don't make everything else invisible
+      var logMax = Math.log(maxCalls + 1);
+      var logVal = Math.log(calls + 1);
+      var ratio = logVal / logMax;
+      if (ratio >= 0.95) return 5;
+      if (ratio >= 0.75) return 4;
+      if (ratio >= 0.50) return 3;
+      if (ratio >= 0.30) return 2;
+      return 1;
+    }
+
+    function renderHeatmap(days) {
+      var grid = document.getElementById('heatmapGrid');
+      var labels = document.getElementById('heatmapLabels');
+      grid.innerHTML = '';
+      labels.innerHTML = '';
+
+      if (!days || !days.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">No activity data yet</div>';
+        return;
+      }
+
+      var maxCalls = 0;
+      for (var i = 0; i < days.length; i++) {
+        if (days[i].calls > maxCalls) maxCalls = days[i].calls;
+      }
+
+      for (var j = 0; j < days.length; j++) {
+        var d = days[j];
+        var cell = document.createElement('div');
+        var level = heatmapLevel(d.calls, maxCalls);
+        cell.className = 'heatmap-cell level-' + level;
+        if (d.deploys > 0) cell.classList.add('deploy-mark');
+        var tip = document.createElement('span');
+        tip.className = 'hm-tip';
+        var tipText = d.date + '<br>' + Number(d.calls).toLocaleString() + ' call' + (d.calls !== 1 ? 's' : '');
+        if (d.deploys > 0) tipText += '<br>' + d.deploys + ' new deploy' + (d.deploys !== 1 ? 's' : '');
+        tip.innerHTML = tipText;
+        cell.appendChild(tip);
+        grid.appendChild(cell);
+      }
+
+      // Labels: first / middle / today
+      var first = days[0].date;
+      var mid = days[Math.floor(days.length / 2)].date;
+      var last = days[days.length - 1].date;
+      labels.innerHTML =
+        '<span>' + first + '</span>' +
+        '<span>' + mid + '</span>' +
+        '<span>' + last + ' (today)</span>';
+    }
+
+    async function fetchHeatmap() {
+      try {
+        var r = await fetch('/api/contracts/heatmap');
+        if (!r.ok) throw new Error('heatmap ' + r.status);
+        var j = await r.json();
+        renderHeatmap(j.days || []);
+      } catch (e) {
+        var grid = document.getElementById('heatmapGrid');
+        grid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">Heatmap unavailable</div>';
+      }
+    }
+
+    // --- Entry points rendering ---
+    function renderEntrypoints(payload) {
+      var list = document.getElementById('epList');
+      var meta = document.getElementById('epMeta');
+      list.innerHTML = '';
+      var eps = (payload && payload.entrypoints) || [];
+
+      if (!eps.length) {
+        var msg = 'No contract calls in the last 24h.';
+        if (payload && payload.totalLocalCalls > 0 && payload.resolvedCalls === 0) {
+          msg = 'Local DB saw ' + payload.totalLocalCalls + ' call(s) in the last 24h, but the indexer did not return entry-point data for any of them yet.';
+        }
+        list.innerHTML = '<div class="empty-state">' + msg + '</div>';
+        meta.innerHTML = '';
+        return;
+      }
+
+      var maxCount = eps[0].callCount || 1;
+
+      for (var i = 0; i < eps.length; i++) {
+        var e = eps[i];
+        var pct = Math.max(4, Math.round((e.callCount / maxCount) * 100));
+        var contractsHint = e.contractCount + ' contract' + (e.contractCount !== 1 ? 's' : '');
+        if (e.contracts && e.contracts.length) {
+          var short = e.contracts.slice(0, 1).map(function(c) {
+            if (!c) return '';
+            return c.length > 14 ? c.slice(0, 10) + '...' + c.slice(-4) : c;
+          }).join(', ');
+          if (short) contractsHint += ' &middot; ' + short;
+        }
+
+        var row = document.createElement('div');
+        row.className = 'ep-row';
+        row.innerHTML =
+          '<span class="ep-name" title="' + e.entryPoint + '">' + e.entryPoint + '</span>' +
+          '<div class="ep-bar-wrap"><div class="ep-bar" style="width:' + pct + '%;"></div>' +
+            '<span class="ep-bar-label">' + Number(e.callCount).toLocaleString() + '</span></div>' +
+          '<span class="ep-contract-hint">' + contractsHint + '</span>';
+        list.appendChild(row);
+      }
+
+      var metaBits = [];
+      if (payload.resolvedCalls != null && payload.totalLocalCalls != null) {
+        metaBits.push('Resolved <strong style="color:#cbd5e1;">' + payload.resolvedCalls + '</strong> of <strong style="color:#cbd5e1;">' + payload.totalLocalCalls + '</strong> call events from the last 24h.');
+      }
+      if (payload.unresolvedCalls && payload.unresolvedCalls > 0) {
+        metaBits.push('<span style="color:#fbbf24;">' + payload.unresolvedCalls + ' tx' + (payload.unresolvedCalls !== 1 ? 'es' : '') + ' could not be resolved via indexer.</span>');
+      }
+      if (payload.source) {
+        metaBits.push('Source: <span class="mono" style="color:#94a3b8;">' + payload.source + '</span>');
+      }
+      meta.innerHTML = metaBits.join(' &middot; ');
+    }
+
+    async function fetchEntrypoints() {
+      try {
+        var list = document.getElementById('epList');
+        if (!list.children.length || list.querySelector('.empty-state')) {
+          // Keep existing "Resolving..." state on first load
+        }
+        var r = await fetch('/api/contracts/entrypoints');
+        if (!r.ok) throw new Error('ep ' + r.status);
+        var j = await r.json();
+        renderEntrypoints(j);
+      } catch (e) {
+        var list = document.getElementById('epList');
+        list.innerHTML = '<div class="empty-state">Entry-point data unavailable (indexer fetch failed).</div>';
+      }
+    }
+
     // --- Fetch and update ---
     async function fetchData() {
       try {
@@ -694,7 +1052,7 @@
         var overview = overviewRes.ok ? await overviewRes.json() : {};
 
         consecutiveErrors = 0;
-        setStatus('live', 'Live - refreshing every 15s');
+        setStatus('live', 'Live - refreshing every 30s');
 
         // Stats
         var totalDeploys = analytics.totalContracts || overview.contractDeploys || deployed.total || 0;
@@ -792,9 +1150,15 @@
 
     // Initial fetch
     fetchData();
+    fetchHeatmap();
+    fetchEntrypoints();
 
-    // Refresh every 15 seconds
-    setInterval(fetchData, REFRESH_MS);
+    // Refresh every 30 seconds
+    setInterval(function() {
+      fetchData();
+      fetchHeatmap();
+      fetchEntrypoints();
+    }, REFRESH_MS);
   </script>
 
 </body>

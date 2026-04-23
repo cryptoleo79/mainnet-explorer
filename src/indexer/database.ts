@@ -413,6 +413,73 @@ export function getBridgeAnalytics(hours: number) {
   return { totalBridgeOps, last24h, trend, recentBridgeOps };
 }
 
+// --- Contract activity heatmap (daily calls + deploys for last N days) ---
+export function getContractHeatmap(days: number = 30) {
+  // Anchor on end-of-day UTC so the last bucket is "today"
+  const nowTs = Math.floor(Date.now() / 1000);
+  const todayStart = Math.floor(nowTs / 86400) * 86400;
+  const windowStart = todayStart - (days - 1) * 86400;
+
+  const callRows = db.prepare(`
+    SELECT date(timestamp, 'unixepoch') as day, COUNT(*) as count
+    FROM events
+    WHERE section = 'midnight' AND method = 'ContractCall' AND timestamp >= ?
+    GROUP BY day
+  `).all(windowStart) as { day: string; count: number }[];
+
+  const deployRows = db.prepare(`
+    SELECT date(timestamp, 'unixepoch') as day, COUNT(*) as count
+    FROM events
+    WHERE section = 'midnight' AND method = 'ContractDeploy' AND timestamp >= ?
+    GROUP BY day
+  `).all(windowStart) as { day: string; count: number }[];
+
+  const callsMap = new Map(callRows.map(r => [r.day, r.count]));
+  const deploysMap = new Map(deployRows.map(r => [r.day, r.count]));
+
+  const out: { date: string; calls: number; deploys: number }[] = [];
+  for (let i = 0; i < days; i++) {
+    const dayTs = windowStart + i * 86400;
+    const d = new Date(dayTs * 1000);
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const dayStr = `${yyyy}-${mm}-${dd}`;
+    out.push({
+      date: dayStr,
+      calls: callsMap.get(dayStr) || 0,
+      deploys: deploysMap.get(dayStr) || 0,
+    });
+  }
+  return out;
+}
+
+// --- Contract call events in last N hours (for entryPoint resolution) ---
+export function getContractCallsRecent(hours: number = 24) {
+  const cutoff = Math.floor(Date.now() / 1000) - hours * 3600;
+  const rows = db.prepare(`
+    SELECT data, timestamp, block_height
+    FROM events
+    WHERE section = 'midnight' AND method = 'ContractCall' AND timestamp >= ?
+    ORDER BY timestamp DESC
+  `).all(cutoff) as { data: string; timestamp: number; block_height: number }[];
+
+  // Each row has data: ["{\"txHash\":..., \"contractAddress\":...}"]
+  const calls: { txHash: string; contractAddress: string; timestamp: number; block_height: number }[] = [];
+  for (const row of rows) {
+    try {
+      const outer = JSON.parse(row.data);
+      const inner = typeof outer[0] === 'string' ? JSON.parse(outer[0]) : outer[0];
+      const txHash = inner.txHash || '';
+      const contractAddress = inner.contractAddress || '';
+      if (txHash && contractAddress) {
+        calls.push({ txHash, contractAddress, timestamp: row.timestamp, block_height: row.block_height });
+      }
+    } catch {}
+  }
+  return calls;
+}
+
 export function getContractAnalytics() {
   // Get deployed contracts from ContractDeploy events
   const deployedContracts = db.prepare(`
