@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passport-Ready Flow - NightForge</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="How YAMORI + midnight-credential-gate align with the Midnight credential/identity direction. Honest about what's live today and what awaits issuer integration." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    a { color: #0ABAB5; text-decoration: none; }
+    a:hover { color: #22d3c8; }
+    code { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 0.85em; background: rgba(30,41,59,0.6); padding: 1px 6px; border-radius: 4px; color: #cbd5e1; }
+
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .header-brand { display: flex; align-items: center; gap: 0.75rem; color: #e2e8f0; }
+    .header-brand img { height: 32px; width: 32px; border-radius: 6px; }
+    .header-brand span { font-weight: 700; font-size: 1rem; }
+    .header-nav { display: flex; align-items: center; gap: 1.5rem; font-size: 0.875rem; }
+    .header-nav a { color: #94a3b8; }
+    .header-nav a.active { color: #22c55e; }
+
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; color: #f1f5f9; }
+    .subtitle { color: #94a3b8; font-size: 1rem; margin-bottom: 2.5rem; line-height: 1.6; }
+
+    .context-banner {
+      background: rgba(34,197,94,0.06);
+      border: 1px solid rgba(34,197,94,0.18);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .context-banner svg { flex-shrink: 0; margin-top: 2px; }
+    .context-banner h2 { color: #22c55e; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .context-banner p { color: #cbd5e1; font-size: 0.9rem; line-height: 1.55; }
+
+    .section { margin-bottom: 2.5rem; }
+    .section-header { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+    .section-header h2 { color: #e2e8f0; font-size: 1.1rem; font-weight: 700; }
+    .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(100,116,139,0.25), transparent); }
+
+    /* Flow diagram */
+    .flow {
+      background: rgba(30,41,59,0.45);
+      border: 1px solid rgba(100,116,139,0.15);
+      border-radius: 12px;
+      padding: 1.75rem;
+    }
+    .flow-row {
+      display: grid;
+      grid-template-columns: 1fr 32px 1fr 32px 1fr 32px 1fr;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .flow-step {
+      background: rgba(15,23,42,0.7);
+      border: 1px solid rgba(100,116,139,0.2);
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+    }
+    .flow-step-live { border-color: rgba(34,197,94,0.3); }
+    .flow-step-future { border-color: rgba(100,116,139,0.15); opacity: 0.85; }
+    .flow-step h3 { font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
+    .flow-step p { color: #94a3b8; font-size: 0.78rem; line-height: 1.45; flex: 1; }
+    .flow-step .status { margin-top: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status-live { color: #22c55e; }
+    .status-ready { color: #0ABAB5; }
+    .status-awaiting { color: #94a3b8; }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Honest status table */
+    .status-grid {
+      background: rgba(30,41,59,0.45);
+      border: 1px solid rgba(100,116,139,0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .status-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      padding: 10px 0;
+      align-items: center;
+      border-bottom: 1px solid rgba(100,116,139,0.1);
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-row-label { color: #cbd5e1; font-size: 0.9rem; }
+    .status-row-label span { color: #94a3b8; font-size: 0.8rem; display: block; margin-top: 2px; }
+    .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+    .pill-live { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+    .pill-ready { background: rgba(10,186,181,0.12); color: #0ABAB5; border: 1px solid rgba(10,186,181,0.25); }
+    .pill-await { background: rgba(148,163,184,0.08); color: #94a3b8; border: 1px solid rgba(148,163,184,0.18); }
+
+    .disclaimer {
+      background: rgba(250,204,21,0.05);
+      border: 1px solid rgba(250,204,21,0.15);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-top: 1.5rem;
+    }
+    .disclaimer h3 { color: #facc15; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .disclaimer p { color: #cbd5e1; font-size: 0.85rem; line-height: 1.55; }
+    .disclaimer ul { margin-top: 8px; padding-left: 20px; color: #94a3b8; font-size: 0.85rem; line-height: 1.6; }
+
+    .cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1.5rem; }
+    .cta {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px; border-radius: 10px;
+      text-decoration: none; transition: border-color 0.2s;
+    }
+    .cta-green { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.18); }
+    .cta-green:hover { border-color: rgba(34,197,94,0.4); }
+    .cta-teal { background: rgba(10,186,181,0.06); border: 1px solid rgba(10,186,181,0.18); }
+    .cta-teal:hover { border-color: rgba(10,186,181,0.4); }
+    .cta-title { font-size: 0.95rem; font-weight: 700; }
+    .cta-sub { color: #94a3b8; font-size: 0.8rem; margin-top: 2px; }
+
+    footer { text-align: center; padding: 2rem 1rem; color: #64748b; font-size: 0.8rem; border-top: 1px solid rgba(100,116,139,0.1); margin-top: 3rem; }
+
+    @media (max-width: 720px) {
+      .flow-row { grid-template-columns: 1fr; gap: 12px; }
+      .flow-arrow { transform: rotate(90deg); padding: 4px 0; }
+      .cta-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand" style="text-decoration:none;">
+        <img src="/favicon.ico" alt="NightForge" />
+        <span>NightForge</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Explorer</a>
+        <a href="/tools/">Tools</a>
+        <a href="/tools/passport-ready.html" class="active">Passport-Ready</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Passport-Ready Flow</h1>
+    <p class="subtitle">
+      Midnight's direction points toward privacy-preserving identity and credential-gated access.
+      YAMORI + NightForge + <code>midnight-credential-gate</code> already implement the end-to-end flow.
+      This page is honest about what runs today and what awaits issuer integration.
+    </p>
+
+    <div class="context-banner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      <div>
+        <h2>Aligned with Midnight's Credential Direction</h2>
+        <p>
+          We are an independent builder. We have not claimed endorsement, official partnership, or
+          Passport integration. The Midnight ecosystem points toward credential-based identity; we
+          have built the components that align with that direction. When Passport or equivalent
+          issuer infrastructure lands, our stack accepts it without a rewrite.
+        </p>
+      </div>
+    </div>
+
+    <!-- The real flow -->
+    <div class="section">
+      <div class="section-header">
+        <h2>The Flow That Works Today</h2>
+        <span class="section-line"></span>
+      </div>
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-step flow-step-live">
+            <h3>1. Wallet</h3>
+            <p>YAMORI stores credentials locally, signs presentations with BIP44 ed25519, requires biometric/password confirmation per proof.</p>
+            <div class="status status-live">Live</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step flow-step-live">
+            <h3>2. Proof</h3>
+            <p>Wallet creates a selective-disclosure presentation bound to a verifier challenge. Only the predicate (yes/no) is disclosed by default.</p>
+            <div class="status status-live">Live</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step flow-step-live">
+            <h3>3. Verifier</h3>
+            <p>Any DApp or service checks dual signatures, challenge freshness, and predicate satisfaction. Works off-chain today.</p>
+            <div class="status status-live">Live</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step flow-step-ready">
+            <h3>4. Contract Gate</h3>
+            <p><code>midnight-credential-gate</code> Compact module lets any DApp enforce credential checks on chain. Library shipped.</p>
+            <div class="status status-ready">Library ready</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Honest status -->
+    <div class="section">
+      <div class="section-header">
+        <h2>What Is Real vs Future</h2>
+        <span class="section-line"></span>
+      </div>
+      <div class="status-grid">
+        <div class="status-row">
+          <div class="status-row-label">Selective-disclosure credentials in YAMORI wallet
+            <span>6 claim types: age_over_18, age_over_21, kyc_passed, residency_country, residency_class, accredited_investor</span>
+          </div>
+          <span class="status-pill pill-live">Live</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">Per-presentation biometric confirmation
+            <span>Every proof requires a fresh passkey or password approval — no cached consent</span>
+          </div>
+          <span class="status-pill pill-live">Live</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">External verifier demo at nightforge.jp/verify-credentials.html
+            <span>Shows dual-signature verification end-to-end with real wallet signing</span>
+          </div>
+          <span class="status-pill pill-live">Live</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">midnight-credential-gate Compact library
+            <span>Reusable module with <code>require_credential(subject, claim)</code>, on-chain expiry via <code>blockTimeLt</code> (Compact 0.17)</span>
+          </div>
+          <span class="status-pill pill-ready">Shipped</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">Gate deployed to Midnight testnet
+            <span>Requires Compact compiler install and testnet deploy — code-complete, awaiting operator action</span>
+          </div>
+          <span class="status-pill pill-ready">Ready</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">Zero-knowledge predicate proofs
+            <span>Current backend is signed selective disclosure (ed25519). ZK predicates need Compact circuit support we don't yet have.</span>
+          </div>
+          <span class="status-pill pill-await">Future</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">Real issuer integration (government, KYC provider, accreditation body)
+            <span>YAMORI has a dev issuer today. Production issuers require upstream infrastructure and trust framework agreements.</span>
+          </div>
+          <span class="status-pill pill-await">Awaiting</span>
+        </div>
+        <div class="status-row">
+          <div class="status-row-label">Credential revocation registry
+            <span>The gate contract supports on-chain expiry; a revocation registry is a separate upstream component.</span>
+          </div>
+          <span class="status-pill pill-await">Future</span>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <h3>Honest disclaimers</h3>
+        <p>We make no claim of official Midnight Passport integration or endorsement.</p>
+        <ul>
+          <li>"Passport" is a direction the Midnight ecosystem is moving toward; this is an independent implementation compatible with that direction.</li>
+          <li>Backend today is <strong>signed selective disclosure</strong>, not zero-knowledge predicates.</li>
+          <li>No production issuer integration yet — only a development issuer for testing.</li>
+          <li>The Compact contracts have not undergone external security audit.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Try It</h2>
+        <span class="section-line"></span>
+      </div>
+      <div class="cta-row">
+        <a class="cta cta-green" href="/verify-credentials.html">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" style="flex-shrink:0;">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <div>
+            <div class="cta-title" style="color:#22c55e;">Run the verifier demo</div>
+            <div class="cta-sub">See wallet → proof → verifier in action</div>
+          </div>
+        </a>
+        <a class="cta cta-teal" href="https://github.com/cryptoleo79/YAMORI/tree/main/contracts/credential-gate">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0ABAB5" stroke-width="2.5" style="flex-shrink:0;">
+            <path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/>
+          </svg>
+          <div>
+            <div class="cta-title" style="color:#0ABAB5;">Read credential-gate source</div>
+            <div class="cta-sub">Compact module + examples on GitHub</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 <a href="/">NightForge Explorer</a> &mdash; Built for the Midnight Network</p>
+  </footer>
+</body>
+</html>
