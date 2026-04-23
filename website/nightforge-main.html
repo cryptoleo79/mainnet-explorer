@@ -328,6 +328,25 @@
     </div>
   </div>
 
+  <!-- DECENTRALIZATION DIAL — composite score 0-100, federated -> sovereign -->
+  <div id="nfDecentDial" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
+    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Decentralization Dial</span>
+          <span style="color:#475569;font-size:9px;font-weight:500;">federated &rarr; sovereign</span>
+        </div>
+        <span id="nfDecentPhase" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;"></span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
+        <!-- Gauge SVG -->
+        <svg id="nfDecentGauge" viewBox="0 0 200 120" style="width:200px;height:120px;"></svg>
+        <!-- Components breakdown -->
+        <div id="nfDecentBreakdown" style="display:flex;flex-direction:column;gap:6px;font-size:10px;font-variant-numeric:tabular-nums;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- B2. CONTRACT INTELLIGENCE STRIP -->
   <div id="nfContractStrip" style="display:none;max-width:1200px;margin:0 auto;padding:0 16px 10px;">
     <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
@@ -396,6 +415,18 @@
       <div id="nfSankeyLegend" style="display:flex;align-items:center;justify-content:space-around;margin-top:8px;flex-wrap:wrap;gap:4px 10px;font-size:10px;font-variant-numeric:tabular-nums;">
         <!-- Filled dynamically -->
       </div>
+    </div>
+  </div>
+
+  <!-- EPOCH PULSE — Dual-ring cross-chain anchor clock -->
+  <div id="nfEpochPulse" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
+    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Epoch Pulse</span>
+        <span style="color:#64748b;font-size:9px;">Cross-chain anchor</span>
+      </div>
+      <svg id="nfEpochPulseSvg" viewBox="0 0 1000 200" style="width:100%;height:200px;" preserveAspectRatio="xMidYMid meet"></svg>
+      <p id="nfLatestAnchor" style="color:#64748b;font-size:10px;text-align:center;margin-top:8px;font-variant-numeric:tabular-nums;"></p>
     </div>
   </div>
 
@@ -891,14 +922,150 @@
       }).catch(function(){});
     }
 
+    // ─── DECENTRALIZATION DIAL ────────────────────────
+    // Composite 0-100 score: Midnight's path federated -> sovereign
+    // 0.4 * registrationScore + 0.3 * (1 - concentration) + 0.3 * epochUtilization
+    function computeHHI(blocksArr){
+      var total=blocksArr.reduce(function(a,b){return a+b;},0);
+      if(total===0)return 10000;
+      var shares=blocksArr.map(function(x){return x/total*100;});
+      return Math.round(shares.reduce(function(s,v){return s+v*v;},0));
+    }
+    function renderDecentralizationDial(){
+      var wrap=document.getElementById("nfDecentDial");
+      if(!wrap)return;
+      Promise.all([
+        fetch("/api/governance/d-parameter").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch("/api/committee").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch("/api/block-producers").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch("/api/epoch/current").then(function(r){return r.json()}).catch(function(){return null;})
+      ]).then(function(res){
+        var dparam=res[0],committee=res[1],producers=res[2],epoch=res[3];
+        // Require committee + d-parameter (epoch is a bonus)
+        if(!committee||!committee.members||!dparam||!dparam.history||!dparam.history.length)return;
+        var latest=dparam.history[dparam.history.length-1];
+        var registered=latest.numRegisteredCandidates||0;
+        var permissioned=latest.numPermissionedCandidates||0;
+        var totalCand=registered+permissioned;
+        if(totalCand<=0)return;
+
+        // 1. Registration score: fraction of registered candidates
+        var registrationScore=registered/totalCand;
+
+        // 2. Block-producer concentration via HHI on sampled blocks produced
+        var blocksArr=(producers&&producers.producers)?producers.producers.map(function(p){return p.blocks||0;}):[];
+        var hhi=computeHHI(blocksArr);
+        // Normalize: for 10-validator set, ideal = 1000, worst = 10000
+        // Floor based on committee size so small sets aren't penalized
+        var idealHHI=committee.size>0?Math.round(10000/committee.size):1000;
+        var concentration=Math.max(0,Math.min(1,(hhi-idealHHI)/(10000-idealHHI)));
+        var concentrationScore=1-concentration;
+
+        // 3. Active producer ratio: distinct producers observed / committee size
+        // Honest proxy for epoch utilization — shows how many committee members
+        // are actually producing blocks in the recent sampling window.
+        var activeProducers=blocksArr.filter(function(b){return b>0;}).length;
+        var epochUtil=committee.size>0?Math.min(1,activeProducers/committee.size):0;
+
+        var score=Math.round(100*(0.4*registrationScore + 0.3*concentrationScore + 0.3*epochUtil));
+        score=Math.max(0,Math.min(100,score));
+
+        // Phase
+        var regPct=registrationScore*100;
+        var phase,phaseColor,phaseBg;
+        if(registered===0){phase="FEDERATED";phaseColor="#f87171";phaseBg="rgba(248,113,113,0.15)";}
+        else if(regPct<20){phase="TRANSITIONING";phaseColor="#fb923c";phaseBg="rgba(251,146,60,0.15)";}
+        else if(regPct<=80){phase="DECENTRALIZING";phaseColor="#facc15";phaseBg="rgba(250,204,21,0.15)";}
+        else{phase="SOVEREIGN";phaseColor="#22c55e";phaseBg="rgba(34,197,94,0.15)";}
+
+        // Score color tracks phase
+        var scoreColor=phase==="FEDERATED"?"#f87171":phase==="TRANSITIONING"?"#fb923c":phase==="DECENTRALIZING"?"#facc15":"#22c55e";
+
+        // Gauge SVG: semi-circle, 180deg left red -> 360deg right green
+        var cx=100,cy=100,r=80;
+        function pt(angDeg){
+          var a=angDeg*Math.PI/180;
+          return {x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};
+        }
+        // Track: full semi from 180 to 360 (left -> right across the top)
+        var trackStart=pt(180),trackEnd=pt(360);
+        // Fill arc: 180 to 180 + 1.8*score
+        var fillAngle=180+1.8*score;
+        var fillEnd=pt(fillAngle);
+        var largeArc=score>50?1:0;
+        // Needle
+        var needle=pt(fillAngle);
+
+        var svg=document.getElementById("nfDecentGauge");
+        if(svg){
+          var gradId="nfDecentGrad";
+          var svgContent=''+
+            '<defs>'+
+              '<linearGradient id="'+gradId+'" x1="0%" y1="0%" x2="100%" y2="0%">'+
+                '<stop offset="0%" stop-color="#f87171"/>'+
+                '<stop offset="50%" stop-color="#facc15"/>'+
+                '<stop offset="100%" stop-color="#22c55e"/>'+
+              '</linearGradient>'+
+            '</defs>'+
+            // Track (background arc)
+            '<path d="M '+trackStart.x+' '+trackStart.y+' A '+r+' '+r+' 0 0 1 '+trackEnd.x+' '+trackEnd.y+'" '+
+              'stroke="rgba(100,116,139,0.2)" stroke-width="12" fill="none" stroke-linecap="round"/>'+
+            // Filled arc (gradient)
+            '<path d="M '+trackStart.x+' '+trackStart.y+' A '+r+' '+r+' 0 '+largeArc+' 1 '+fillEnd.x+' '+fillEnd.y+'" '+
+              'stroke="url(#'+gradId+')" stroke-width="12" fill="none" stroke-linecap="round"/>'+
+            // Needle dot
+            '<circle cx="'+needle.x+'" cy="'+needle.y+'" r="5" fill="'+scoreColor+'" stroke="#0f172a" stroke-width="2"/>'+
+            // Center label: score
+            '<text x="100" y="88" text-anchor="middle" fill="'+scoreColor+'" font-size="32" font-weight="800" font-variant-numeric="tabular-nums">'+score+'</text>'+
+            '<text x="100" y="104" text-anchor="middle" fill="#64748b" font-size="9" font-weight="600" letter-spacing="0.1em">SCORE / 100</text>'+
+            // Endpoint labels
+            '<text x="20" y="118" text-anchor="middle" fill="#64748b" font-size="8" font-weight="600">0</text>'+
+            '<text x="180" y="118" text-anchor="middle" fill="#64748b" font-size="8" font-weight="600">100</text>';
+          svg.innerHTML=svgContent;
+        }
+
+        // Phase badge
+        var phaseEl=document.getElementById("nfDecentPhase");
+        if(phaseEl){
+          phaseEl.textContent=phase;
+          phaseEl.style.color=phaseColor;
+          phaseEl.style.background=phaseBg;
+          phaseEl.style.border="1px solid "+phaseColor+"40";
+        }
+
+        // Breakdown
+        var bdEl=document.getElementById("nfDecentBreakdown");
+        if(bdEl){
+          var regPctStr=(regPct).toFixed(0)+"%";
+          var utilPctStr=Math.round(epochUtil*100)+"%";
+          var rows=[
+            {label:"Registered / Permissioned",value:registered+" / "+permissioned+" ("+regPctStr+")",color:registered===0?"#f87171":"#e2e8f0"},
+            {label:"Block-producer HHI",value:hhi.toLocaleString()+" (ideal "+idealHHI.toLocaleString()+")",color:concentration>0.5?"#fb923c":"#e2e8f0"},
+            {label:"Active producers (recent)",value:activeProducers+"/"+committee.size+" ("+utilPctStr+")",color:epochUtil<0.8?"#facc15":"#22c55e"},
+            {label:"Committee size",value:committee.size+" validators",color:"#94a3b8"}
+          ];
+          bdEl.innerHTML=rows.map(function(r){
+            return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;">'+
+              '<span style="color:#64748b;">'+r.label+'</span>'+
+              '<span style="color:'+r.color+';font-weight:700;">'+r.value+'</span>'+
+            '</div>';
+          }).join('');
+        }
+
+        wrap.style.display="";
+      }).catch(function(){});
+    }
+
     // ─── INIT ──────────────────────────────────────────
     fetchAll();
     fetchOverview();
     loadEpochIntelligence();
     fetchGovernanceChangeLog();
+    renderDecentralizationDial();
     setInterval(fetchAll,6000);
     setInterval(fetchOverview,30000);
     setInterval(loadEpochIntelligence,30000);  // re-sync epoch every 30s
+    setInterval(renderDecentralizationDial,60000);  // re-sync dial every 60s
     // Live time-ago updates every 5s (no re-fetch)
     setInterval(function(){
       var spans=tickerEl.querySelectorAll(".nf-time");
