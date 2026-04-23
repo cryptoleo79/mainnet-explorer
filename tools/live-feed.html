@@ -446,12 +446,22 @@
     }
 
     function renderContractItem(c) {
+      // The /api/live/recent endpoint nests txHash/contractAddress inside a JSON-stringified data array
+      let address = c.address || c.contractAddress || '';
+      if (!address && c.data) {
+        try {
+          const parsed = Array.isArray(c.data) ? JSON.parse(c.data[0]) : JSON.parse(c.data);
+          address = parsed.contractAddress || '';
+        } catch {}
+      }
+      const block = c.block || c.blockHeight || c.block_height || 0;
+      const action = c.method || c.action || c.type || 'interact';
       const li = document.createElement('li');
       li.className = 'feed-item flash';
       li.innerHTML = `
-        <span class="feed-addr">${truncAddr(c.address || c.contractAddress || '')}</span>
-        <span class="feed-action">${c.action || c.type || 'interact'}</span>
-        <span class="feed-block">#${Number(c.block || c.blockHeight || 0).toLocaleString()}</span>
+        <span class="feed-addr">${truncAddr(address)}</span>
+        <span class="feed-action">${action}</span>
+        <span class="feed-block">#${Number(block).toLocaleString()}</span>
         <span class="feed-time" data-ts="${c.timestamp || c.time || ''}">${timeAgo(c.timestamp || c.time)}</span>
       `;
       return li;
@@ -495,7 +505,7 @@
             document.getElementById('txsPerMin').textContent = tpm;
           }
         }
-        const contracts = data.contracts || data.contractActivity || [];
+        const contracts = data.contractActions || data.contracts || data.contractActivity || [];
         if (contracts.length > 0) {
           document.getElementById('activeContracts').textContent = contracts.length;
         } else {
@@ -527,7 +537,7 @@
           if (emptyEl) emptyEl.remove();
 
           contracts.forEach(c => {
-            const key = (c.address || c.contractAddress || '') + (c.block || c.blockHeight || '') + (c.timestamp || c.time || '');
+            const key = (c.address || c.contractAddress || '') + (c.block || c.blockHeight || c.block_height || '') + (c.timestamp || c.time || '');
             if (knownContractIds.has(key)) return;
             knownContractIds.add(key);
             const li = renderContractItem(c);
