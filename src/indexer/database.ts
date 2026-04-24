@@ -676,7 +676,7 @@ export function getCommitteeMembers() {
   `).get() as { args: string; block_height: number } | undefined;
 
   if (!row || !row.args) {
-    return { epoch: 0, size: 0, members: [] };
+    return { epoch: 0, size: 0, totalEntries: 0, federated: false, members: [] };
   }
 
   try {
@@ -685,7 +685,7 @@ export function getCommitteeMembers() {
     const membersRaw = Array.isArray(parsed) ? (typeof parsed[0] === 'string' ? JSON.parse(parsed[0]) : parsed[0]) : [];
     const epoch = Array.isArray(parsed) && parsed.length >= 2 ? parsed[1] : row.block_height;
 
-    const members = (Array.isArray(membersRaw) ? membersRaw : []).map((m: any) => {
+    const rawEntries = (Array.isArray(membersRaw) ? membersRaw : []).map((m: any) => {
       if (m.permissioned) {
         return {
           pubKey: m.permissioned.id || null,
@@ -694,7 +694,6 @@ export function getCommitteeMembers() {
           type: 'permissioned',
         };
       }
-      // Fallback for other formats
       return {
         pubKey: m.id || m.pubKey || null,
         auraKey: m.keys?.aura || null,
@@ -703,9 +702,29 @@ export function getCommitteeMembers() {
       };
     });
 
-    return { epoch, size: members.length, members };
+    // The on-chain sessionCommitteeManagement.set extrinsic lists one entry
+    // per slot-assignment; each validator's pubKey appears multiple times
+    // (e.g. 13× for a 10-validator federated committee with 130 slot assigns).
+    // Downstream code treats size as "unique validators", so de-duplicate.
+    const seen = new Set<string>();
+    const members = rawEntries.filter((m: any) => {
+      const key = m.pubKey;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const allPermissioned = rawEntries.length > 0 && rawEntries.every((m: any) => m.type === 'permissioned');
+
+    return {
+      epoch,
+      size: members.length,
+      totalEntries: rawEntries.length,
+      federated: allPermissioned,
+      members,
+    };
   } catch {
-    return { epoch: 0, size: 0, members: [] };
+    return { epoch: 0, size: 0, totalEntries: 0, federated: false, members: [] };
   }
 }
 
