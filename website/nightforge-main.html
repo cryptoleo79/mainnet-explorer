@@ -167,7 +167,7 @@
 
   </style>
 </head>
-<body class="min-h-screen text-white" style="background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #050a12 100%);">
+<body class="min-h-screen text-white" style="background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #050a12 100%); isolation: isolate;">
   <div id="deepLoader" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900" style="background:#0a1628" style="display:none;">
     <p id="loadingText" class="text-slate-400 text-lg" style="display:none"></p>
   </div>
@@ -1278,7 +1278,7 @@
   })();
   </script>
 
-  <div class="bg-slate-900/50 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
+  <div class="bg-slate-900/85 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
     <div class="max-w-7xl mx-auto px-4">
       <nav class="flex items-center gap-1 py-2" id="tabNav">
         <button data-tab="overview" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-white" data-i18n="overview">Overview</button>
@@ -1393,12 +1393,12 @@
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white">—</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400"></p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white"></p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400">—</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3">
+        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white">—</p></div>
+        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400"></p></div>
+        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white"></p></div>
+        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400">—</p></div>
+        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
+        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3">
           <p class="text-xs text-slate-500 mb-1" data-i18n="avgBlockTime">Avg Block Time</p>
           <div class="flex items-center gap-2">
             <p id="avgBlockTime" class="text-lg font-semibold text-white">—</p>
@@ -2759,20 +2759,30 @@ applyTranslations();
   if (btn) btn.textContent = currentLang === 'jp' ? '日本語 | EN' : 'EN | 日本語';
 })();
 
-(function(){
-  var c=document.getElementById("networkCanvas");
-  var x=c.getContext("2d");
-  var n=[];
-  var N=80,D=150;
-  function resize(){c.width=innerWidth;c.height=Math.max(innerHeight,document.body.scrollHeight)}
+// Background network canvas — atmosphere only, kept behind content via body{isolation:isolate}.
+// Lazy-started after first paint; respects prefers-reduced-motion + Save-Data.
+// 30fps cap, viewport-only height (not full doc), ~half the nodes of v1, halo opacity halved.
+var __nfStartCanvas=function(){
+  var c=document.getElementById("networkCanvas");if(!c)return;
+  var x=c.getContext("2d");if(!x)return;
+  var prefersReduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var saveData=navigator.connection&&navigator.connection.saveData;
+  var w=innerWidth,small=w<900;
+  var N=small?20:40,D=small?100:120;
+  var n=[],last=0,FRAME=1000/30;
+  function resize(){c.width=innerWidth;c.height=innerHeight;}
   function createNodes(){n=[];for(var i=0;i<N;i++){n.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*2.5+1,o:Math.random()*0.6+0.3})}}
-  function drawNode(e){x.beginPath();x.arc(e.x,e.y,e.r,0,Math.PI*2);x.fillStyle="rgba(6,182,212,"+e.o+")";x.fill();x.beginPath();x.arc(e.x,e.y,e.r*3,0,Math.PI*2);var g=x.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r*3);g.addColorStop(0,"rgba(6,182,212,"+(e.o*0.4)+")");g.addColorStop(1,"rgba(6,182,212,0)");x.fillStyle=g;x.fill()}
-  function drawLines(){for(var i=0;i<n.length;i++){for(var j=i+1;j<n.length;j++){var dx=n[i].x-n[j].x,dy=n[i].y-n[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<D){x.beginPath();x.moveTo(n[i].x,n[i].y);x.lineTo(n[j].x,n[j].y);x.strokeStyle="rgba(6,182,212,"+((1-d/D)*0.15)+")";x.lineWidth=1;x.stroke()}}}}
+  function drawNode(e){x.beginPath();x.arc(e.x,e.y,e.r,0,Math.PI*2);x.fillStyle="rgba(6,182,212,"+e.o+")";x.fill();x.beginPath();x.arc(e.x,e.y,e.r*3,0,Math.PI*2);var g=x.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r*3);g.addColorStop(0,"rgba(6,182,212,"+(e.o*0.2)+")");g.addColorStop(1,"rgba(6,182,212,0)");x.fillStyle=g;x.fill()}
+  function drawLines(){var D2=D*D;for(var i=0;i<n.length;i++){for(var j=i+1;j<n.length;j++){var dx=n[i].x-n[j].x,dy=n[i].y-n[j].y,d2=dx*dx+dy*dy;if(d2<D2){var d=Math.sqrt(d2);x.beginPath();x.moveTo(n[i].x,n[i].y);x.lineTo(n[j].x,n[j].y);x.strokeStyle="rgba(6,182,212,"+((1-d/D)*0.15)+")";x.lineWidth=1;x.stroke()}}}}
   function update(){n.forEach(function(e){e.x+=e.vx;e.y+=e.vy;if(e.x<0||e.x>c.width)e.vx*=-1;if(e.y<0||e.y>c.height)e.vy*=-1;e.x=Math.max(0,Math.min(c.width,e.x));e.y=Math.max(0,Math.min(c.height,e.y))})}
-  function animate(){x.clearRect(0,0,c.width,c.height);drawLines();n.forEach(drawNode);update();requestAnimationFrame(animate)}
-  resize();createNodes();animate();
+  function frame(){x.clearRect(0,0,c.width,c.height);drawLines();n.forEach(drawNode);update()}
+  function tick(ts){if(document.visibilityState!=="visible"){last=ts;requestAnimationFrame(tick);return}if(ts-last>=FRAME){last=ts;frame()}requestAnimationFrame(tick)}
+  resize();createNodes();
+  if(prefersReduce||saveData){frame();return;}
+  requestAnimationFrame(tick);
   window.addEventListener("resize",function(){resize();createNodes()});
-})();
+};
+(window.requestIdleCallback||function(f){return setTimeout(f,400)})(__nfStartCanvas,{timeout:1500});
 
 var API="/api/mainnet";
 
@@ -3253,45 +3263,49 @@ function viewContractDetail(addr,entry,type){
 }
 
 function loadHealthScore(){
+  // Truth rule: every component must be a live API value or em-dash empty state.
+  // No defaults that round up to a flattering A+. No catch-block that fakes 99%.
   fetch(API+"/analytics/overview").then(function(r){return r.json()}).then(function(data){
-    if(!data)return;
-    // Block production score: ideal is 5-7s
-    var avgBt=parseFloat(data.avgBlockTime)||6;
-    var blockScore=100;
-    if(avgBt<5)blockScore=Math.max(0,100-((5-avgBt)*20));
-    else if(avgBt>7)blockScore=Math.max(0,100-((avgBt-7)*20));
-    // Validators score: committee size out of 10
-    var committeeSize=parseInt(data.committeeSize||data.validators||10);
-    var validatorScore=Math.min(100,(committeeSize/10)*100);
-    // Privacy score: shielded ratio
-    var shieldedRatio=parseFloat(data.shieldedRatio||0.99);
-    var privacyScore=shieldedRatio*100;
-    // Weighted average
-    var overall=Math.round(blockScore*0.4+validatorScore*0.3+privacyScore*0.3);
-    // Update UI
-    var scoreEl=document.getElementById("healthScore");
-    if(scoreEl){
-      var grade=overall>=95?"A+":overall>=90?"A":overall>=80?"B+":overall>=70?"B":overall>=60?"C":"D";
-      scoreEl.textContent=grade+" ("+overall+"%)";
-      scoreEl.className="text-2xl font-bold "+(overall>=80?"text-green-400":overall>=60?"text-yellow-400":"text-red-400");
+    if(!data)throw new Error("empty overview");
+    var setBar=function(id,pct){var el=document.getElementById(id);if(el)el.style.width=pct.toFixed(0)+"%";};
+    var setEmpty=function(id){var el=document.getElementById(id);if(el){el.textContent="—";el.title="Awaiting indexer data";}};
+    // Block production score (ideal 5-7s) — only computed if avgBlockTime present.
+    var blockScore=null;
+    if(typeof data.avgBlockTime==='number'&&data.avgBlockTime>0){
+      var avgBt=data.avgBlockTime;
+      blockScore=100;
+      if(avgBt<5)blockScore=Math.max(0,100-((5-avgBt)*20));
+      else if(avgBt>7)blockScore=Math.max(0,100-((avgBt-7)*20));
     }
-    var hb=document.getElementById("healthBlocks");if(hb)hb.style.width=blockScore.toFixed(0)+"%";
-    var hbl=document.getElementById("healthBlocksLabel");if(hbl)hbl.textContent=blockScore.toFixed(0)+"%";
-    var hv=document.getElementById("healthValidators");if(hv)hv.style.width=validatorScore.toFixed(0)+"%";
-    var hvl=document.getElementById("healthValidatorsLabel");if(hvl)hvl.textContent=validatorScore.toFixed(0)+"%";
-    var hp=document.getElementById("healthPrivacy");if(hp)hp.style.width=privacyScore.toFixed(0)+"%";
-    var hpl=document.getElementById("healthPrivacyLabel");if(hpl)hpl.textContent=privacyScore.toFixed(0)+"%";
+    // Validators score — only computed if committeeSize present (no || 10 default).
+    var validatorScore=null;
+    if(typeof data.committeeSize==='number'&&data.committeeSize>0){
+      validatorScore=Math.min(100,(data.committeeSize/10)*100);
+    }
+    // Privacy score — only computed if shieldedRatio present (no || 0.99 default).
+    var privacyScore=null;
+    if(typeof data.shieldedRatio==='number'){
+      privacyScore=data.shieldedRatio*100;
+    }
+    var scoreEl=document.getElementById("healthScore");
+    if(blockScore!=null&&validatorScore!=null&&privacyScore!=null){
+      var overall=Math.round(blockScore*0.4+validatorScore*0.3+privacyScore*0.3);
+      var grade=overall>=95?"A+":overall>=90?"A":overall>=80?"B+":overall>=70?"B":overall>=60?"C":"D";
+      if(scoreEl){scoreEl.textContent=grade+" ("+overall+"%)";scoreEl.className="text-2xl font-bold "+(overall>=80?"text-green-400":overall>=60?"text-yellow-400":"text-red-400");scoreEl.removeAttribute("title");}
+    } else {
+      if(scoreEl){scoreEl.textContent="—";scoreEl.title="Awaiting indexer data";scoreEl.className="text-2xl font-bold text-slate-400";}
+    }
+    if(blockScore!=null){setBar("healthBlocks",blockScore);var hbl=document.getElementById("healthBlocksLabel");if(hbl){hbl.textContent=blockScore.toFixed(0)+"%";hbl.removeAttribute("title");}}else{setBar("healthBlocks",0);setEmpty("healthBlocksLabel");}
+    if(validatorScore!=null){setBar("healthValidators",validatorScore);var hvl=document.getElementById("healthValidatorsLabel");if(hvl){hvl.textContent=validatorScore.toFixed(0)+"%";hvl.removeAttribute("title");}}else{setBar("healthValidators",0);setEmpty("healthValidatorsLabel");}
+    if(privacyScore!=null){setBar("healthPrivacy",privacyScore);var hpl=document.getElementById("healthPrivacyLabel");if(hpl){hpl.textContent=privacyScore.toFixed(0)+"%";hpl.removeAttribute("title");}}else{setBar("healthPrivacy",0);setEmpty("healthPrivacyLabel");}
   }).catch(function(e){
     console.log("Health score error:",e);
-    // Fallback with defaults
-    var scoreEl=document.getElementById("healthScore");
-    if(scoreEl)scoreEl.textContent="A+ (99%)";
-    var hb=document.getElementById("healthBlocks");if(hb)hb.style.width="100%";
-    var hbl=document.getElementById("healthBlocksLabel");if(hbl)hbl.textContent="100%";
-    var hv=document.getElementById("healthValidators");if(hv)hv.style.width="100%";
-    var hvl=document.getElementById("healthValidatorsLabel");if(hvl)hvl.textContent="100%";
-    var hp=document.getElementById("healthPrivacy");if(hp)hp.style.width="99%";
-    var hpl=document.getElementById("healthPrivacyLabel");if(hpl)hpl.textContent="99%";
+    // Honest empty state — no fabricated A+ on fetch failure.
+    ["healthScore","healthBlocksLabel","healthValidatorsLabel","healthPrivacyLabel"].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){el.textContent="—";el.title="Awaiting indexer data";if(id==="healthScore")el.className="text-2xl font-bold text-slate-400";}
+    });
+    ["healthBlocks","healthValidators","healthPrivacy"].forEach(function(id){var el=document.getElementById(id);if(el)el.style.width="0%";});
   });
 }
 
@@ -3623,7 +3637,21 @@ window.addEventListener("popstate",function(){
   setTimeout(function(){isPopState=false;},100);
 });
 
-if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlockProducers();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
+// Boot pipeline — three-tier load to keep first paint snappy.
+// Tier 1 (now): hero stats + recent blocks/exts + epoch — visible above the fold.
+// Tier 2 (idle ~timeout 400ms): validators, block producers, price, sparkline, WS.
+// Tier 3 (idle ~timeout 2000ms): full block/ext lists, methods, network age, health, chart.
+if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);
+loadStats();loadEpochData();loadBlocks();loadExts();
+var __nfIdle=window.requestIdleCallback||function(f){return setTimeout(f,1)};
+__nfIdle(function(){
+  loadValidators();loadBlockProducers();loadPrice();updateSparkline();connectWS();
+},{timeout:400});
+__nfIdle(function(){
+  updateTopMethods();loadNetworkAge();loadHealthScore();
+  loadAllBlocks();loadAllExts();
+  setTimeout(function(){var b=document.getElementById("chartGridBtn");if(b)b.click()},800);
+},{timeout:2000});
 setInterval(loadStats,6000);setInterval(loadPrice,60000);
 
 // Visibility-aware polling guard: pause the heaviest pollers when tab is hidden,
@@ -3815,8 +3843,13 @@ var chartView="line";
 
 
 
-// Sakura cadence reduced to every 12s + one on load — less visual noise
-setInterval(createSakura,12000);
+// Sakura cadence — defer first spawn behind idle so it never competes with first paint.
+(window.requestIdleCallback||function(f){return setTimeout(f,1500)})(function(){
+  var prefersReduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(prefersReduce)return;
+  setTimeout(createSakura,3000);
+  setInterval(createSakura,12000);
+},{timeout:3000});
 
 // Init tracking & start real-time updates
 setTimeout(function() {
