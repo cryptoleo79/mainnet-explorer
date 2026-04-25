@@ -1,0 +1,33 @@
+name: commit-style
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages in this PR
+        run: |
+          set -e
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          chmod +x .githooks/commit-msg
+          fail=0
+          for sha in $(git rev-list "$BASE_SHA..$HEAD_SHA"); do
+            msg=$(git log -1 --pretty=%B "$sha")
+            tmp=$(mktemp)
+            printf "%s" "$msg" > "$tmp"
+            if ! .githooks/commit-msg "$tmp"; then
+              echo "::error::commit $sha failed style check"
+              fail=1
+            fi
+            rm -f "$tmp"
+          done
+          exit $fail

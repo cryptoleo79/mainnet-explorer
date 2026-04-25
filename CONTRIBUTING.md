@@ -26,6 +26,16 @@ No mock values. No fake live-looking placeholders. No stale numbers presented as
 
 See [`docs/COMMIT_AND_PR_STYLE.md`](docs/COMMIT_AND_PR_STYLE.md).
 
+### Install the commit-msg hook (one-time, per clone)
+
+```bash
+git config core.hooksPath .githooks
+```
+
+That points git at `.githooks/commit-msg`, which validates every commit title against the policy (scope present, lowercase imperative, ≤72 chars, no banned words, no AI attribution). If a commit is rejected, the hook prints the offending title and the rule that failed.
+
+Same check runs as CI on every PR via `.github/workflows/commit-style.yml`, so a missing local hook is caught before merge. Do not bypass the hook with `--no-verify` on `main`.
+
 Quick form:
 
 ```
