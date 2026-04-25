@@ -138,6 +138,54 @@
       50% { opacity: 0.4; }
     }
 
+    /* Confidential ContractCalls strip */
+    .confidential-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .cs-tile {
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .cs-tile.cs-confidential {
+      border-color: rgba(139, 92, 246, 0.35);
+      background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(15,23,42,0.55));
+    }
+    .cs-tile.cs-transparent {
+      border-color: rgba(34, 211, 238, 0.25);
+      background: linear-gradient(135deg, rgba(34,211,238,0.06), rgba(15,23,42,0.55));
+    }
+    .cs-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #64748b;
+    }
+    .cs-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #e2e8f0;
+    }
+    .cs-tile.cs-confidential .cs-value { color: #c4b5fd; }
+    .cs-tile.cs-transparent .cs-value { color: #67e8f9; }
+    .cs-sub {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+    @media (max-width: 700px) {
+      .confidential-strip { grid-template-columns: 1fr; }
+    }
+
     /* Summary stats */
     .stats-row {
       display: grid;
@@ -587,6 +635,24 @@
       <span id="statusText">Loading...</span>
     </div>
 
+    <!-- Confidential ContractCalls strip -->
+    <div class="confidential-strip" id="confidentialStrip" aria-label="Confidential vs transparent contract calls in last 24h">
+      <div class="cs-tile">
+        <div class="cs-label">Total contracts (24h)</div>
+        <div class="cs-value mono" id="csTotal" title="Awaiting indexer data">&mdash;</div>
+      </div>
+      <div class="cs-tile cs-confidential">
+        <div class="cs-label">Confidential contract calls (24h)</div>
+        <div class="cs-value mono" id="csConfidential" title="Awaiting indexer data">&mdash;</div>
+        <div class="cs-sub" id="csConfidentialPct">&mdash;</div>
+      </div>
+      <div class="cs-tile cs-transparent">
+        <div class="cs-label">Transparent contract calls (24h)</div>
+        <div class="cs-value mono" id="csTransparent" title="Awaiting indexer data">&mdash;</div>
+        <div class="cs-sub" id="csTransparentPct">&mdash;</div>
+      </div>
+    </div>
+
     <!-- Summary stats -->
     <div class="stats-row">
       <div class="stat-card">
@@ -1029,6 +1095,83 @@
       meta.innerHTML = metaBits.join(' &middot; ');
     }
 
+    // --- Confidential vs transparent classification ---
+    function setConfidentialEmpty() {
+      var els = ['csTotal', 'csConfidential', 'csTransparent', 'csConfidentialPct', 'csTransparentPct'];
+      for (var i = 0; i < els.length; i++) {
+        var el = document.getElementById(els[i]);
+        if (!el) continue;
+        el.innerHTML = '&mdash;';
+        el.setAttribute('title', 'Awaiting indexer data');
+      }
+    }
+
+    async function fetchConfidentialStrip() {
+      try {
+        var r = await fetch('/api/contracts/entrypoints');
+        if (!r.ok) throw new Error('cs ' + r.status);
+        var j = await r.json();
+        var actions = (j && j.contractActions) || j.actions || [];
+        // Fallback: derive from entrypoints payload if it carries per-action zswap flags
+        var total = 0, confidential = 0, transparent = 0;
+        var contractSet = {};
+
+        if (Array.isArray(actions) && actions.length > 0) {
+          for (var i = 0; i < actions.length; i++) {
+            var a = actions[i];
+            total++;
+            if (a.contractAddress) contractSet[a.contractAddress] = true;
+            var hasZswap = false;
+            if (Array.isArray(a.zswapEvents) && a.zswapEvents.length > 0) hasZswap = true;
+            else if (Array.isArray(a.transaction && a.transaction.zswapEvents) && a.transaction.zswapEvents.length > 0) hasZswap = true;
+            else if (typeof a.hasZswap === 'boolean') hasZswap = a.hasZswap;
+            if (hasZswap) confidential++; else transparent++;
+          }
+        } else if (j && typeof j.confidentialCalls === 'number' && typeof j.transparentCalls === 'number') {
+          confidential = j.confidentialCalls;
+          transparent = j.transparentCalls;
+          total = confidential + transparent;
+        } else {
+          setConfidentialEmpty();
+          return;
+        }
+
+        if (total === 0) {
+          setConfidentialEmpty();
+          return;
+        }
+
+        var contractCount = Object.keys(contractSet).length;
+        if (contractCount === 0 && typeof j.uniqueContracts === 'number') contractCount = j.uniqueContracts;
+
+        var totalEl = document.getElementById('csTotal');
+        var confEl = document.getElementById('csConfidential');
+        var transEl = document.getElementById('csTransparent');
+        var confPctEl = document.getElementById('csConfidentialPct');
+        var transPctEl = document.getElementById('csTransparentPct');
+
+        if (contractCount > 0) {
+          totalEl.textContent = Number(contractCount).toLocaleString();
+          totalEl.removeAttribute('title');
+        } else {
+          totalEl.innerHTML = '&mdash;';
+          totalEl.setAttribute('title', 'Awaiting indexer data');
+        }
+
+        confEl.textContent = Number(confidential).toLocaleString();
+        confEl.removeAttribute('title');
+        transEl.textContent = Number(transparent).toLocaleString();
+        transEl.removeAttribute('title');
+
+        var confPct = total > 0 ? Math.round((confidential / total) * 100) : 0;
+        var transPct = total > 0 ? Math.round((transparent / total) * 100) : 0;
+        confPctEl.textContent = confPct + '% of ' + total + ' calls';
+        transPctEl.textContent = transPct + '% of ' + total + ' calls';
+      } catch (e) {
+        setConfidentialEmpty();
+      }
+    }
+
     async function fetchEntrypoints() {
       try {
         var list = document.getElementById('epList');
@@ -1165,12 +1308,14 @@
     fetchData();
     fetchHeatmap();
     fetchEntrypoints();
+    fetchConfidentialStrip();
 
     // Refresh every 30 seconds
     setInterval(function() {
       fetchData();
       fetchHeatmap();
       fetchEntrypoints();
+      fetchConfidentialStrip();
     }, REFRESH_MS);
   </script>
 

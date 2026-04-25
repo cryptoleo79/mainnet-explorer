@@ -263,6 +263,39 @@
       font-size: 0.8rem;
     }
 
+    /* Aztecscan-style privacy badges */
+    .tx-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+    .tx-badge.shielded {
+      background: rgba(168, 85, 247, 0.14);
+      color: #c4b5fd;
+      border: 1px solid rgba(168, 85, 247, 0.28);
+    }
+    .tx-badge.unshielded {
+      background: rgba(100, 116, 139, 0.16);
+      color: #cbd5e1;
+      border: 1px solid rgba(100, 116, 139, 0.32);
+    }
+    .tx-badge.mixed {
+      background: rgba(34, 211, 238, 0.12);
+      color: #67e8f9;
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+    .tx-badge.contract {
+      background: rgba(245, 158, 11, 0.14);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
     /* Empty state */
     .empty-state {
       text-align: center;
@@ -443,6 +476,39 @@
       }
     }
 
+    // Classify a tx/row by its privacy footprint (Aztecscan-style chip).
+    // NOTE: /api/live/recent currently only exposes counts/addresses; for accurate
+    // shielded vs unshielded detection per tx we'd want GraphQL fields:
+    //   transactions { zswapLedgerEvents { __typename } unshieldedCreatedOutputs { value }
+    //                  unshieldedSpentOutputs { value } contractActions { address } }
+    // Until then we infer best-effort from whatever the row carries.
+    function classifyTx(row) {
+      if (!row) return null;
+      const zswap = row.zswapLedgerEvents || row.zswap_events || row.shieldedEvents || [];
+      const shieldedIn = Number(row.shieldedInputs || row.shielded_inputs || 0);
+      const shieldedOut = Number(row.shieldedOutputs || row.shielded_outputs || 0);
+      const unshieldedCreated = Number(row.unshieldedCreatedOutputs?.length ?? row.unshielded_created ?? 0);
+      const unshieldedSpent = Number(row.unshieldedSpentOutputs?.length ?? row.unshielded_spent ?? 0);
+      const contractActions = row.contractActions || row.contract_actions || (row.address || row.contractAddress ? [1] : []);
+
+      const hasShielded = (Array.isArray(zswap) ? zswap.length : Number(zswap || 0)) > 0
+                        || shieldedIn > 0 || shieldedOut > 0;
+      const hasUnshielded = unshieldedCreated > 0 || unshieldedSpent > 0;
+      const hasContract = Array.isArray(contractActions) ? contractActions.length > 0 : !!contractActions;
+
+      if (hasShielded && hasUnshielded) return { cls: 'mixed', label: 'Mixed' };
+      if (hasShielded) return { cls: 'shielded', label: 'Shielded' };
+      if (hasContract) return { cls: 'contract', label: 'Contract' };
+      if (hasUnshielded) return { cls: 'unshielded', label: 'Unshielded' };
+      return null;
+    }
+
+    function badgeHtml(row) {
+      const c = classifyTx(row);
+      if (!c) return '';
+      return `<span class="tx-badge ${c.cls}" title="${c.label} transaction">${c.label}</span>`;
+    }
+
     function renderBlockItem(block) {
       const li = document.createElement('li');
       li.className = 'feed-item flash';
@@ -450,6 +516,7 @@
         <span class="feed-height">#${Number(block.height || block.number || 0).toLocaleString()}</span>
         <span class="feed-hash">${truncHash(block.hash || '')}</span>
         <span class="feed-txcount">${block.extrinsics_count || block.txCount || block.extrinsics || 0} txs</span>
+        ${badgeHtml(block)}
         <span class="feed-time" data-ts="${block.timestamp || block.time || ''}">${timeAgo(block.timestamp || block.time)}</span>
       `;
       return li;
@@ -468,10 +535,14 @@
       const action = c.method || c.action || c.type || 'interact';
       const li = document.createElement('li');
       li.className = 'feed-item flash';
+      // Contract feed rows are by definition contract interactions; classifyTx
+      // will upgrade to Shielded/Mixed if the row carries zswap evidence.
+      const badge = badgeHtml(c) || `<span class="tx-badge contract" title="Contract transaction">Contract</span>`;
       li.innerHTML = `
         <span class="feed-addr">${truncAddr(address)}</span>
         <span class="feed-action">${action}</span>
         <span class="feed-block">#${Number(block).toLocaleString()}</span>
+        ${badge}
         <span class="feed-time" data-ts="${c.timestamp || c.time || ''}">${timeAgo(c.timestamp || c.time)}</span>
       `;
       return li;

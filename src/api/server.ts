@@ -2341,6 +2341,77 @@ app.get('/api/dust-economics', async (req, res) => {
   }
 });
 
+// ─── DUST Eligibility Gauge ─────────────────────────────────────
+// % of NIGHT UTXOs created within a recent block window that are
+// registered for DUST generation. Reads UnshieldedUtxo.registeredForDustGeneration
+// from indexer v4.1+. Cached for 30s. Returns honest empty state if no UTXOs
+// in the window (federated-phase mainnet has long quiet stretches).
+let dustEligibilityCache: { data: any; ts: number; window: number } | null = null;
+const DUST_ELIGIBILITY_TTL_MS = 30_000;
+
+async function fetchDustEligibility(windowBlocks: number) {
+  const latestResp = await queryIndexer(`{ block { height } }`);
+  const latestHeight: number = latestResp?.block?.height || 0;
+  if (!latestHeight) throw new Error('Indexer returned no latest block');
+
+  const oldestSampled = Math.max(1, latestHeight - windowBlocks + 1);
+  let total = 0;
+  let registered = 0;
+  let blocksScanned = 0;
+
+  const batchSize = 20;
+  for (let h = latestHeight; h >= oldestSampled; h -= batchSize) {
+    const aliases: string[] = [];
+    for (let i = 0; i < batchSize && (h - i) >= oldestSampled; i++) {
+      aliases.push(`b${i}: block(offset: { height: ${h - i} }) { height transactions { unshieldedCreatedOutputs { tokenType registeredForDustGeneration } } }`);
+    }
+    const data = await queryIndexer(`{ ${aliases.join('\n')} }`);
+    if (!data) continue;
+    for (const key of Object.keys(data)) {
+      const blk = data[key];
+      if (!blk) continue;
+      blocksScanned++;
+      for (const tx of blk.transactions || []) {
+        for (const u of tx.unshieldedCreatedOutputs || []) {
+          total++;
+          if (u.registeredForDustGeneration === true) registered++;
+        }
+      }
+    }
+  }
+
+  const percent = total > 0 ? parseFloat(((registered / total) * 100).toFixed(1)) : 0;
+  return {
+    windowBlocks,
+    registered,
+    total,
+    percent,
+    asOfBlock: latestHeight,
+    oldestSampled,
+    blocksScanned,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+const dustEligibilityHandler = async (req: any, res: any) => {
+  try {
+    const rawWindow = parseInt(req.query.windowBlocks as string);
+    const windowBlocks = Math.min(Math.max(Number.isFinite(rawWindow) ? rawWindow : 600, 10), 2000);
+    const now = Date.now();
+    if (dustEligibilityCache && dustEligibilityCache.window === windowBlocks && now - dustEligibilityCache.ts < DUST_ELIGIBILITY_TTL_MS) {
+      return res.json(dustEligibilityCache.data);
+    }
+    const result = await fetchDustEligibility(windowBlocks);
+    dustEligibilityCache = { data: result, ts: now, window: windowBlocks };
+    res.json(result);
+  } catch (error: any) {
+    if (dustEligibilityCache) return res.json(dustEligibilityCache.data);
+    res.status(500).json({ error: error.message });
+  }
+};
+app.get('/api/dust-eligibility', dustEligibilityHandler);
+app.get('/api/mainnet/dust-eligibility', dustEligibilityHandler);
+
 // ─── Privacy Health Score ────────────────────────────────────────
 // Composite privacy metric — unique to NightForge, unique to crypto
 app.get('/api/privacy-score', (req, res) => {

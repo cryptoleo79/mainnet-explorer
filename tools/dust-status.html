@@ -326,6 +326,79 @@
       box-shadow: 0 4px 16px rgba(249,115,22,0.4);
     }
 
+    /* Eligibility gauge widget */
+    .eligibility-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-top: 2rem;
+    }
+    .eligibility-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .eligibility-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .eligibility-header .window-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .eligibility-pct {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #22c55e, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .eligibility-pct.empty {
+      background: none;
+      -webkit-text-fill-color: #475569;
+      color: #475569;
+    }
+    .eligibility-sub {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+    .eligibility-sub.empty { color: #64748b; font-style: italic; }
+    .eligibility-bar-wrap {
+      width: 100%;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .eligibility-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #06b6d4);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.6s ease-out;
+    }
+    .eligibility-bar-fill.empty {
+      background: rgba(71, 85, 105, 0.4);
+    }
+    .eligibility-footer {
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: #475569;
+      letter-spacing: 0.03em;
+    }
+
     /* Footer */
     .footer {
       text-align: center;
@@ -434,6 +507,20 @@
         <p>This address is not registered for DUST generation. Register now to start earning DUST from your NIGHT holdings.</p>
         <a href="https://dust.nethermind.dev" target="_blank" rel="noopener noreferrer">Register at Nethermind DUST Generator &rarr;</a>
       </div>
+    </div>
+
+    <!-- DUST eligibility gauge (network-wide) -->
+    <div class="eligibility-card" id="eligibilityCard">
+      <div class="eligibility-header">
+        <h3 id="eligibilityTitle">DUST eligibility</h3>
+        <span class="window-label" id="eligibilityWindow">last 600 blocks</span>
+      </div>
+      <div class="eligibility-pct empty mono" id="eligibilityPct">&mdash;</div>
+      <div class="eligibility-sub empty" id="eligibilitySub">Awaiting indexer data</div>
+      <div class="eligibility-bar-wrap">
+        <div class="eligibility-bar-fill empty" id="eligibilityBar"></div>
+      </div>
+      <div class="eligibility-footer">Share of recently created NIGHT UTXOs registered for DUST generation.</div>
     </div>
 
     <!-- Info section -->
@@ -573,6 +660,74 @@
 
       resultsEl.classList.add('visible');
     }
+
+    // ---- DUST eligibility gauge (network-wide, independent of address lookup) ----
+    const ELIGIBILITY_WINDOW_BLOCKS = 600;
+    const ELIGIBILITY_REFRESH_MS = 60_000;
+
+    function renderEligibilityEmpty(reason) {
+      const pctEl = document.getElementById('eligibilityPct');
+      const subEl = document.getElementById('eligibilitySub');
+      const barEl = document.getElementById('eligibilityBar');
+      const titleEl = document.getElementById('eligibilityTitle');
+      pctEl.classList.add('empty');
+      pctEl.innerHTML = '&mdash;';
+      subEl.classList.add('empty');
+      subEl.textContent = reason || 'Awaiting indexer data';
+      barEl.classList.add('empty');
+      barEl.style.width = '0%';
+      titleEl.textContent = 'DUST eligibility';
+    }
+
+    function renderEligibility(data) {
+      const pctEl = document.getElementById('eligibilityPct');
+      const subEl = document.getElementById('eligibilitySub');
+      const barEl = document.getElementById('eligibilityBar');
+      const winEl = document.getElementById('eligibilityWindow');
+
+      const total = Number(data.totalUtxos ?? data.total ?? data.total_utxos ?? 0);
+      const registered = Number(data.registeredUtxos ?? data.registered ?? data.registered_utxos ?? 0);
+      const window = Number(data.windowBlocks ?? data.window_blocks ?? ELIGIBILITY_WINDOW_BLOCKS);
+
+      if (!Number.isFinite(total) || total <= 0) {
+        renderEligibilityEmpty('Awaiting indexer data');
+        return;
+      }
+
+      const ratio = Math.max(0, Math.min(1, registered / total));
+      const pct = (ratio * 100);
+      const pctText = pct.toFixed(pct >= 10 ? 1 : 2) + '%';
+
+      pctEl.classList.remove('empty');
+      pctEl.textContent = pctText;
+      subEl.classList.remove('empty');
+      subEl.textContent = `${registered.toLocaleString()} registered / ${total.toLocaleString()} NIGHT UTXOs in last ${window.toLocaleString()} blocks`;
+      barEl.classList.remove('empty');
+      barEl.style.width = pct.toFixed(2) + '%';
+      winEl.textContent = `last ${window.toLocaleString()} blocks`;
+    }
+
+    async function loadEligibility() {
+      try {
+        const resp = await fetch(`/api/mainnet/dust-eligibility?windowBlocks=${ELIGIBILITY_WINDOW_BLOCKS}`, { cache: 'no-store' });
+        if (resp.status === 404) {
+          renderEligibilityEmpty('Awaiting indexer data');
+          return;
+        }
+        if (!resp.ok) {
+          renderEligibilityEmpty('Awaiting indexer data');
+          return;
+        }
+        const data = await resp.json();
+        renderEligibility(data);
+      } catch (err) {
+        renderEligibilityEmpty('Awaiting indexer data');
+      }
+    }
+
+    // Initial paint + periodic refresh so it auto-populates when endpoint goes live
+    loadEligibility();
+    setInterval(loadEligibility, ELIGIBILITY_REFRESH_MS);
   </script>
 
 </body>
