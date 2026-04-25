@@ -613,6 +613,47 @@
         else if(bpmVal<8)hbEl.classList.add("nf-hb-slow");
         if(hbNum)hbNum.textContent=bpmVal>0?Math.round(bpmVal):"—";
       }
+      // Network Status card — derive every value from live data, never fake.
+      var bpmVal2=parseFloat(bpm);
+      var hLabel=document.getElementById("netHealthLabel");
+      var hBar=document.getElementById("netHealthBar");
+      if(hLabel&&hBar){
+        var label,color,pct;
+        if(!isFinite(bpmVal2)||bpmVal2<=0||hbStalled>=2){
+          label="Stalled";color="#f87171";pct=0;
+        }else if(bpmVal2>=8){
+          label="Healthy";color="#22c55e";pct=Math.min(100,(bpmVal2/12)*100);
+        }else if(bpmVal2>=5){
+          label="Slow";color="#facc15";pct=Math.min(100,(bpmVal2/12)*100);
+        }else{
+          label="Degraded";color="#f97316";pct=Math.min(100,(bpmVal2/12)*100);
+        }
+        hLabel.textContent=label+" ("+bpmVal2.toFixed(1)+" bpm)";
+        hLabel.style.color=color;
+        hLabel.title="Derived from rolling block production rate";
+        hBar.style.width=pct.toFixed(0)+"%";
+        hBar.style.background=color;
+      }
+      var fEl=document.getElementById("finalityValue");
+      if(fEl&&overview&&typeof overview.avgBlockTime==='number'&&overview.avgBlockTime>0){
+        fEl.textContent="~"+overview.avgBlockTime.toFixed(0)+"s";
+        fEl.title="Average block time from /api/mainnet/analytics/overview";
+      }
+      // Synced indicator — derive from age of newest block in the rolling window.
+      var ageSec=Math.max(0,Math.floor(Date.now()/1000)-newest);
+      var sDot=document.getElementById("syncedDot");
+      var sLabel=document.getElementById("syncedLabel");
+      var sPct=document.getElementById("syncedPct");
+      if(sDot&&sLabel&&sPct){
+        if(ageSec<=12){
+          sDot.style.background="#22c55e";sLabel.textContent="Synced";sLabel.style.color="#94a3b8";sPct.textContent="current";sPct.style.color="#22c55e";
+        }else if(ageSec<=60){
+          sDot.style.background="#facc15";sLabel.textContent="Lagging";sPct.textContent=ageSec+"s behind";sPct.style.color="#facc15";
+        }else{
+          sDot.style.background="#f87171";sLabel.textContent="Behind";sPct.textContent=Math.round(ageSec/60)+"m behind";sPct.style.color="#f87171";
+        }
+        sLabel.title="Derived from newest indexed block timestamp vs now";
+      }
     }
 
     // ─── B. EPOCH INTELLIGENCE ───────���─────────────────
@@ -1496,17 +1537,17 @@
             </div>
           <div class="p-4">
             <div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span class="font-medium text-white" data-i18n="networkStatus">Network Status</span></div>
-            <div class="flex items-center justify-between mb-2"><span class="text-slate-500 text-sm" data-i18n="health">Health</span><span class="text-green-400 font-medium" data-i18n="excellent">Excellent</span></div>
-            <div class="h-1.5 bg-slate-700 rounded-full mb-4"><div class="h-full bg-green-500 rounded-full" style="width:100%"></div></div>
+            <div class="flex items-center justify-between mb-2"><span class="text-slate-500 text-sm" data-i18n="health">Health</span><span id="netHealthLabel" class="text-slate-400 font-medium" title="Awaiting indexer data">—</span></div>
+            <div class="h-1.5 bg-slate-700 rounded-full mb-4"><div id="netHealthBar" class="h-full bg-slate-600 rounded-full" style="width:0%"></div></div>
             <div class="grid grid-cols-2 gap-3">
-              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="finality">Finality</p><p class="font-semibold text-white">~6s</p></div>
-              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="validators">Validators</p><p class="font-semibold text-green-400">Active</p></div>
-              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">MCAP</p><p id="mcapWidget" class="font-semibold text-white">$996M</p></div>
-              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">VOL 24H</p><p id="volWidget" class="font-semibold text-white">$14M</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="finality">Finality</p><p id="finalityValue" class="font-semibold text-white">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="validators">Validators</p><p id="validatorsCard" class="font-semibold text-slate-300" title="Awaiting indexer data">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">MCAP</p><p id="mcapWidget" class="font-semibold text-white">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">VOL 24H</p><p id="volWidget" class="font-semibold text-white">—</p></div>
             </div>
             <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-700/50">
-              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-sm text-slate-400" data-i18n="synced">Fully Synced</span></div>
-              <span class="text-green-400 font-medium">100.0%</span>
+              <div class="flex items-center gap-2"><span id="syncedDot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="syncedLabel" class="text-sm text-slate-400" title="Awaiting indexer data">—</span></div>
+              <span id="syncedPct" class="text-slate-400 font-medium">—</span>
             </div>
           </div>
         </div>
@@ -4004,13 +4045,26 @@ function renderCommitteeCards(members, epoch){
   // After the de-dup fix in getCommitteeMembers(), members.length = unique
   // validator count. All members are permissioned on mainnet today — label
   // accordingly so no one reads it as open validator set.
+  var allPermissioned=members.length>0&&members.every(function(m){return (m.type||"").toLowerCase()==="permissioned";});
   var countEl=document.getElementById("committeeCount");
   if(countEl){
     if(!members.length){
       countEl.textContent="";
     }else{
-      var allPermissioned=members.every(function(m){return (m.type||"").toLowerCase()==="permissioned";});
       countEl.textContent=members.length+(allPermissioned?" permissioned validators":" validators");
+    }
+  }
+  // Network Status card "Validators" tile — derived from /api/committee.
+  var vCard=document.getElementById("validatorsCard");
+  if(vCard){
+    if(!members.length){
+      vCard.textContent="—";
+    }else{
+      vCard.textContent=members.length+(allPermissioned?" permissioned":" active");
+      vCard.style.color=allPermissioned?"#facc15":"#22c55e";
+      vCard.title=allPermissioned
+        ? "Federated phase — "+members.length+" permissioned committee validators"
+        : members.length+" active committee validators";
     }
   }
   var html="";

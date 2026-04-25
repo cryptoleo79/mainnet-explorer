@@ -585,7 +585,7 @@
             <span class="pulse-dot"></span>
             Committee Liveness Pulse
           </div>
-          <div class="liveness-sub">Silent-validator detector &mdash; which of the 10 committee members are producing blocks right now?</div>
+          <div class="liveness-sub">Silent-validator detector &mdash; which of the <span id="livenessCommitteeSize">—</span> committee members are producing blocks right now?</div>
         </div>
         <div class="liveness-meta" id="livenessMeta">Loading...</div>
       </div>
@@ -614,9 +614,17 @@
         <span class="phase-dot"></span>
         <span id="phaseText">Federated Phase</span>
       </div>
-      <div>
+      <div title="Unique committee validators after de-duplicating slot assignments">
+        <span class="validator-count mono" id="committeeValidators">—</span>
+        <span class="validator-count-label">committee validators</span>
+      </div>
+      <div title="Raw entries in sessionCommitteeManagement.set — typically validators × slot assignments per epoch">
+        <span class="validator-count mono" id="committeeEntries" style="color:#94a3b8;">—</span>
+        <span class="validator-count-label" style="color:#94a3b8;">observed entries</span>
+      </div>
+      <div title="Registered SPOs from /api/validators/directory (Mohalu phase)">
         <span class="validator-count mono" id="validatorCount">—</span>
-        <span class="validator-count-label">validators</span>
+        <span class="validator-count-label">registered SPOs</span>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="fetchAll()">Refresh</button>
     </div>
@@ -753,7 +761,7 @@
           <div class="liveness-warning">
             <span class="warn-icon">!</span>
             <div>
-              <strong>${silentTotal} of ${data.committeeSize || 10} committee validators</strong> have not produced a block in the sample window of ${data.windowBlocks} blocks
+              <strong>${silentTotal} of ${data.committeeSize != null ? data.committeeSize : '—'} committee validators</strong> have not produced a block in the sample window of ${data.windowBlocks} blocks
               ${zeroBlock > 0 ? ` &mdash; ${zeroBlock} produced zero blocks in the entire window.` : '.'}
               This is real on-chain data from the Midnight indexer.
             </div>
@@ -766,7 +774,7 @@
     function renderMeta(data) {
       const zeroBlock = (data.validators || []).filter(v => v.blocksProduced === 0).length;
       document.getElementById('livenessMeta').innerHTML =
-        `Window: <span>${data.windowBlocks}</span> blocks &middot; Latest <span class="fresh">#${(data.latestBlock || 0).toLocaleString()}</span> &middot; Active <span class="fresh">${data.activeCount}</span>/${data.committeeSize || 10}`;
+        `Window: <span>${data.windowBlocks}</span> blocks &middot; Latest <span class="fresh">#${(data.latestBlock || 0).toLocaleString()}</span> &middot; Active <span class="fresh">${data.activeCount}</span>/${data.committeeSize != null ? data.committeeSize : '—'}`;
 
       document.getElementById('legendActive').textContent = data.activeCount || 0;
       document.getElementById('legendSlow').textContent = data.slowCount || 0;
@@ -859,18 +867,32 @@
       btn.disabled = true;
 
       try {
-        const [dirRes, dparamRes] = await Promise.allSettled([
+        const [dirRes, dparamRes, commRes] = await Promise.allSettled([
           fetch('/api/validators/directory'),
-          fetch('/api/governance/d-parameter')
+          fetch('/api/governance/d-parameter'),
+          fetch('/api/committee')
         ]);
 
-        // Validator directory
+        // Committee (truth source for size and totalEntries)
+        let committeeFederated = false;
+        if (commRes.status === 'fulfilled' && commRes.value.ok) {
+          const c = await commRes.value.json();
+          committeeFederated = !!c.federated;
+          const cv = document.getElementById('committeeValidators');
+          if (cv) cv.textContent = (typeof c.size === 'number') ? c.size : '—';
+          const ce = document.getElementById('committeeEntries');
+          if (ce) ce.textContent = (typeof c.totalEntries === 'number') ? c.totalEntries : '—';
+          const lcs = document.getElementById('livenessCommitteeSize');
+          if (lcs) lcs.textContent = (typeof c.size === 'number') ? c.size : '—';
+        }
+
+        // Validator directory (Mohalu / SPO registry)
         if (dirRes.status === 'fulfilled' && dirRes.value.ok) {
           const data = await dirRes.value.json();
           const validators = data.validators || data.data || (Array.isArray(data) ? data : []);
 
-          // Phase
-          const phase = data.phase || data.networkPhase || '';
+          // Phase — prefer the federated flag from /api/committee when directory is empty.
+          const phase = data.phase || data.networkPhase || (committeeFederated ? 'federated' : '');
           const badge = document.getElementById('phaseBadge');
           const phaseText = document.getElementById('phaseText');
           if (phase.toLowerCase().includes('mohalu') || phase.toLowerCase().includes('decentralized')) {
@@ -880,11 +902,16 @@
           } else {
             badge.classList.remove('mohalu');
             badge.classList.add('federated');
-            phaseText.textContent = 'Federated Phase';
+            phaseText.textContent = committeeFederated ? 'Federated Phase (permissioned)' : 'Federated Phase';
           }
 
-          // Count
-          document.getElementById('validatorCount').textContent = validators.length || data.count || '--';
+          // Registered SPO count (separate truth from committee size)
+          const regCount = (typeof data.count === 'number') ? data.count : validators.length;
+          document.getElementById('validatorCount').textContent = regCount;
+          document.getElementById('validatorCount').title =
+            regCount === 0
+              ? 'No registered SPOs in current federated phase. Will populate when Mohalu activation begins.'
+              : regCount + ' registered SPO' + (regCount === 1 ? '' : 's');
 
           renderValidators(validators);
         } else {

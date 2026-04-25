@@ -1,3 +1,12 @@
+// NightForge truth rule: every displayed metric must be live, derived from
+// a live source, a canonical on-chain/deployment fact, or an explicitly
+// unavailable empty state. No mock values, no hardcoded plausible numbers,
+// no stale placeholders presented as current. If a number cannot fit one of
+// those four categories, do not return it from this API.
+//
+// When you add a new endpoint here, classify each field in the response and
+// reject anything that isn't traceable to its source.
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
