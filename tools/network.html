@@ -475,27 +475,27 @@
     <div class="metrics-row" id="metricsRow">
       <div class="metric-card">
         <div class="metric-label">Block Height</div>
-        <div class="metric-value green mono" id="mBlockHeight">--</div>
+        <div class="metric-value green mono" id="mBlockHeight" title="Awaiting indexer data">—</div>
         <div class="metric-sub">latest finalized</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">TPS</div>
-        <div class="metric-value cyan mono" id="mTps">--</div>
+        <div class="metric-value cyan mono" id="mTps" title="Awaiting indexer data">—</div>
         <div class="metric-sub">transactions/sec</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Avg Block Time</div>
-        <div class="metric-value mono" id="mBlockTime">--</div>
+        <div class="metric-value mono" id="mBlockTime" title="Awaiting indexer data">—</div>
         <div class="metric-sub" id="mBlockTimeSub">target: 6s</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Total Txs</div>
-        <div class="metric-value orange mono" id="mTotalTx">--</div>
+        <div class="metric-value orange mono" id="mTotalTx" title="Awaiting indexer data">—</div>
         <div class="metric-sub">all extrinsics</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Network Age</div>
-        <div class="metric-value cyan mono" id="mNetAge">--</div>
+        <div class="metric-value cyan mono" id="mNetAge" title="Awaiting indexer data">—</div>
         <div class="metric-sub">since genesis</div>
       </div>
     </div>
@@ -517,11 +517,11 @@
           Transaction Throughput
         </div>
         <div class="gauge-wrap" id="tpsGauge">
-          <div class="gauge-value" id="gaugeTps">--</div>
+          <div class="gauge-value" id="gaugeTps" title="Awaiting indexer data">—</div>
           <div class="gauge-unit">transactions per second</div>
           <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="gaugeBar" style="width:0%"></div></div>
           <div class="gauge-stats">
-            <div>Daily est: <span id="dailyEst">--</span></div>
+            <div>Daily est: <span id="dailyEst" title="Awaiting indexer data">—</span></div>
             <div>Peak capacity: <span>~10 TPS</span></div>
           </div>
         </div>
@@ -547,20 +547,20 @@
             Bridge Operations
           </div>
           <div class="bridge-stat">
-            <div class="big-num" id="bridgeOps">--</div>
+            <div class="big-num" id="bridgeOps" title="Awaiting indexer data">—</div>
             <div class="bridge-label">Cardano &#8596; Midnight bridge transactions</div>
           </div>
           <div class="bridge-sub-stats">
             <div class="bridge-sub-stat">
-              <div class="num" id="contractDeploys">--</div>
+              <div class="num" id="contractDeploys" title="Awaiting indexer data">—</div>
               <div class="lbl">Contract Deploys</div>
             </div>
             <div class="bridge-sub-stat">
-              <div class="num" id="contractCalls">--</div>
+              <div class="num" id="contractCalls" title="Awaiting indexer data">—</div>
               <div class="lbl">Contract Calls</div>
             </div>
             <div class="bridge-sub-stat">
-              <div class="num" id="committeeSize">--</div>
+              <div class="num" id="committeeSize" title="Awaiting indexer data">—</div>
               <div class="lbl">Committee Size</div>
             </div>
           </div>
@@ -573,7 +573,7 @@
             Network Age
           </div>
           <div class="age-display">
-            <div class="days" id="ageDays">--</div>
+            <div class="days" id="ageDays" title="Awaiting indexer data">—</div>
             <div class="age-label">days since genesis</div>
             <div class="genesis-date">Genesis: 2026-03-31T00:00:00Z</div>
           </div>
