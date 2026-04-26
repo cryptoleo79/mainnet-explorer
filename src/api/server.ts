@@ -1048,6 +1048,109 @@ app.get('/api/contracts/entrypoints', async (req, res) => {
   }
 });
 
+// --- Credential-Gate Liveness API (preview-network on-chain proof of life) ---
+// Returns the most recent prove_kyc and swap calls against the credential-gate
+// contract on Midnight PREVIEW. Used by the homepage liveness card.
+//
+// Indexer constraint: the v4 GraphQL exposes only `contractAction` (singular,
+// exact-match offset) and `block.transactions.contractActions`. There is no
+// listable contractActions query, so we anchor on the head action and walk
+// backward block-by-block until both circuits are found.
+const CREDGATE_CONTRACT = '7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703';
+const CREDGATE_DEPLOY_BLOCK = 454958;
+const CREDGATE_INDEXER_URL = 'https://indexer.preview.midnight.network/api/v4/graphql';
+const CREDGATE_TTL_MS = 60_000;
+const CREDGATE_MAX_SCAN_BLOCKS = 2000;
+const CREDGATE_BATCH = 8;
+let credGateCache: { data: any; ts: number } | null = null;
+
+async function credGateGql(query: string): Promise<any> {
+  const resp = await fetch(CREDGATE_INDEXER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!resp.ok) throw new Error(`indexer ${resp.status}`);
+  const j = await resp.json() as any;
+  if (j.errors) throw new Error(j.errors.map((e: any) => e.message).join('; '));
+  return j.data;
+}
+
+app.get('/api/credential-gate/liveness', async (_req, res) => {
+  try {
+    const now = Date.now();
+    if (credGateCache && now - credGateCache.ts < CREDGATE_TTL_MS) {
+      return res.json(credGateCache.data);
+    }
+
+    type Hit = { txHash: string; block: number; timestamp: number };
+    let lastProveKyc: Hit | null = null;
+    let lastSwap: Hit | null = null;
+
+    const headData = await credGateGql(
+      `{ contractAction(address: "${CREDGATE_CONTRACT}") { __typename ... on ContractCall { entryPoint transaction { hash block { height timestamp } } } } }`
+    );
+    const head = headData?.contractAction;
+    let anchorHeight: number | null = null;
+    if (head && head.__typename === 'ContractCall' && head.transaction?.block) {
+      const hit: Hit = {
+        txHash: head.transaction.hash,
+        block: head.transaction.block.height,
+        timestamp: Math.floor((head.transaction.block.timestamp || 0) / 1000),
+      };
+      if (head.entryPoint === 'prove_kyc') lastProveKyc = hit;
+      else if (head.entryPoint === 'swap') lastSwap = hit;
+      anchorHeight = head.transaction.block.height;
+    }
+
+    if (anchorHeight !== null && (!lastProveKyc || !lastSwap)) {
+      const lowerBound = Math.max(CREDGATE_DEPLOY_BLOCK, anchorHeight - CREDGATE_MAX_SCAN_BLOCKS);
+      let cursor = anchorHeight - 1;
+      while (cursor >= lowerBound && (!lastProveKyc || !lastSwap)) {
+        const heights: number[] = [];
+        for (let i = 0; i < CREDGATE_BATCH && cursor - i >= lowerBound; i++) heights.push(cursor - i);
+        cursor -= heights.length;
+        const blocks = await Promise.all(heights.map(h => credGateGql(
+          `{ block(offset: { height: ${h} }) { height timestamp transactions { hash contractActions { __typename ... on ContractCall { address entryPoint } } } } }`
+        ).catch(() => null)));
+        for (const bd of blocks) {
+          const blk = bd?.block;
+          if (!blk?.transactions) continue;
+          for (const tx of blk.transactions) {
+            for (const a of (tx.contractActions || [])) {
+              if (a.__typename !== 'ContractCall') continue;
+              if (a.address !== CREDGATE_CONTRACT) continue;
+              const hit: Hit = {
+                txHash: tx.hash,
+                block: blk.height,
+                timestamp: Math.floor((blk.timestamp || 0) / 1000),
+              };
+              if (a.entryPoint === 'prove_kyc' && !lastProveKyc) lastProveKyc = hit;
+              else if (a.entryPoint === 'swap' && !lastSwap) lastSwap = hit;
+            }
+          }
+          if (lastProveKyc && lastSwap) break;
+        }
+      }
+    }
+
+    const result = {
+      contract: CREDGATE_CONTRACT,
+      network: 'preview',
+      lastProveKyc,
+      lastSwap,
+      deployBlock: CREDGATE_DEPLOY_BLOCK,
+      fetchedAt: Math.floor(now / 1000),
+      verified: !!(lastProveKyc && lastSwap),
+    };
+    credGateCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // --- Network Overview API ---
 app.get('/api/analytics/overview', (req, res) => {
   try {
