@@ -3119,12 +3119,14 @@ function loadStats(){
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
     document.getElementById("indexedBlocks").textContent=s.totalBlocks?fmt(s.totalBlocks):"";document.getElementById("indexedBlocks").classList.add("loaded");
     var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;var is=document.getElementById("indexedStrip");if(is&&newVal)is.style.display="";showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
-    document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
+    var txN=(typeof s.totalExtrinsics==="number")?s.totalExtrinsics:(typeof s.totalTransactions==="number"?s.totalTransactions:null);
+    var ttEl=document.getElementById("totalTxs");if(ttEl){ttEl.textContent=txN!==null?fmt(txN):"—";if(txN===null)ttEl.title="Awaiting indexer data";ttEl.classList.add("loaded");}
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
     // Epoch from stats API (reliable fallback for RPC path)
     if(s.epoch&&s.epoch.epoch){document.getElementById("currentEpoch").textContent=fmt(s.epoch.epoch);document.getElementById("currentSlot").textContent="Slot: "+fmt(s.epoch.sidechain_slot||"");}
     document.getElementById("currentEpoch").classList.add("loaded");
-    document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
+    var evN=(typeof s.events==="number")?s.events:(typeof s.totalEvents==="number"?s.totalEvents:null);
+    var evEl=document.getElementById("totalEvents");if(evEl){evEl.textContent=evN!==null?fmt(evN):"—";if(evN===null)evEl.title="Awaiting indexer data";}
     // Epoch countdown from stats
     if(s.epoch&&s.epoch.next_epoch_timestamp){updateCountdown(s.epoch.next_epoch_timestamp/1000);}
     // Cardano epoch from stats
