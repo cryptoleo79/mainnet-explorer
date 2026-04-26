@@ -21,13 +21,13 @@
     @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     .animate-marquee { animation: marquee 30s linear infinite; will-change: transform; transition: opacity 0.3s ease; }
     @keyframes sakura-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 10% { opacity: 0.6; } 70% { opacity: 0.4; } 100% { transform: translateY(90vh) rotate(360deg); opacity: 0; } }
-    .sakura { position: fixed; top: 0; pointer-events: none; z-index: 1; animation: sakura-fall linear forwards; }
-    /* Promote the top-of-page strips above decorative sakura (z-index:1).
-       Without this, sakura petals can render on top of tickers/cards. */
-    #nfBlockTicker, #nfContractStrip, #nfActivityStrip, #nfPrivacyFlow,
-    #nfDeepPanel, #nfDecentDial, #nfEpochPulse {
+    .sakura { position: fixed; top: 0; pointer-events: none; z-index: 0; animation: sakura-fall linear forwards; }
+    /* Decorative layers (canvas, sakura) live at z:0 as fixed siblings of body.
+       Lift every normal-flow body child above them so cards, tickers, and tabs
+       never get covered. Fixed-position children opt out via :not selectors. */
+    body > *:not(canvas):not(.sakura):not(#deepLoader):not(script):not(style) {
       position: relative;
-      z-index: 2;
+      z-index: 1;
     }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px rgba(6,182,212,0.3); } 50% { box-shadow: 0 0 20px rgba(6,182,212,0.6); } }
     .live-glow { animation: pulse-glow 2s ease-in-out infinite; }
@@ -1485,6 +1485,33 @@
           </div>
         </div>
       </section>
+      <!-- Credential Gate liveness — live verification snapshot from preview indexer. Truth rule: em-dash on null. -->
+      <section id="credGateLiveness" class="mb-8 bg-slate-800/85 rounded-xl border border-slate-700/60 p-5">
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span></span>
+            <h3 class="text-sm font-semibold text-white tracking-wide uppercase">Credential Gate &middot; live verification</h3>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/60 text-slate-200 border border-slate-600/60 uppercase tracking-wider">preview</span>
+          </div>
+          <span id="cgStatus" class="text-sm font-semibold text-slate-400" title="Awaiting indexer data">&mdash;</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-slate-900/60 rounded-lg border border-slate-700/60 p-3">
+            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Last prove_kyc</p>
+            <p id="cgProveLine" class="text-xs text-cyan-300 mono" title="Awaiting indexer data">&mdash;</p>
+            <p id="cgProveAgo" class="text-[10px] text-slate-500 mt-0.5">&mdash;</p>
+          </div>
+          <div class="bg-slate-900/60 rounded-lg border border-slate-700/60 p-3">
+            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Last swap (gated)</p>
+            <p id="cgSwapLine" class="text-xs text-orange-300 mono" title="Awaiting indexer data">&mdash;</p>
+            <p id="cgSwapAgo" class="text-[10px] text-slate-500 mt-0.5">&mdash;</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-2 mt-3">
+          <p id="cgVerifiedAt" class="text-[10px] text-slate-500">Verified at &mdash;</p>
+          <a href="/credential-gate" class="text-[11px] text-cyan-300 hover:text-cyan-200 underline decoration-dotted">See the proof flow and contract address &rarr;</a>
+        </div>
+      </section>
       <!-- Ecosystem links — factual references to community Midnight projects. Static, no JS, no animation. -->
       <section class="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/85 backdrop-blur p-5">
         <div class="flex items-center gap-2 mb-3">
@@ -2859,6 +2886,32 @@ function copyHash(hash){
     setTimeout(function(){toast.remove()},2000);
   });
 }
+// Credential Gate liveness — calls /api/credential-gate/liveness (preview-network proof of life).
+// Truth rule: render em-dash on null/error; never fabricate hashes.
+function loadCredentialGateLiveness(){
+  var $=function(id){return document.getElementById(id)};
+  function shortHash(h){return h?(h.slice(0,8)+'…'+h.slice(-8)):''}
+  function txLink(h){return h?('https://preview.nightforge.jp/tools/contracts.html?address=7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703'):'#'}
+  function fillTile(line,ago,d){
+    if(!d||!d.txHash){line.textContent='—';line.title='Awaiting indexer data';ago.textContent='—';return}
+    line.innerHTML='block #'+(d.block||0).toLocaleString()+' &middot; <a href="'+txLink(d.txHash)+'" target="_blank" rel="noopener" class="underline decoration-dotted hover:text-white">'+shortHash(d.txHash)+'</a>';
+    line.title=d.txHash;
+    ago.textContent=d.timestamp?timeAgo(d.timestamp):'—';
+  }
+  fetch('/api/credential-gate/liveness').then(function(r){return r.json()}).then(function(d){
+    if(!d||d.error)throw new Error('bad');
+    var st=$('cgStatus');
+    if(d.verified){st.textContent='✓ FAIL → PROVE → PASS';st.className='text-sm font-semibold text-emerald-400';st.title='Full prove→swap path verified by preview indexer';}
+    else{st.textContent='—';st.className='text-sm font-semibold text-slate-400';st.title='Awaiting indexer data';}
+    fillTile($('cgProveLine'),$('cgProveAgo'),d.lastProveKyc);
+    fillTile($('cgSwapLine'),$('cgSwapAgo'),d.lastSwap);
+    var ts=d.fetchedAt?new Date(d.fetchedAt*1000):new Date();
+    $('cgVerifiedAt').textContent='Verified at '+ts.toISOString().slice(11,19)+' UTC';
+  }).catch(function(){
+    ['cgStatus','cgProveLine','cgProveAgo','cgSwapLine','cgSwapAgo'].forEach(function(id){var el=$(id);if(el){el.textContent='—';el.title='Awaiting indexer data';}});
+    var v=$('cgVerifiedAt');if(v)v.textContent='Verified at —';
+  });
+}
 
 function getColor(s){if(s==="timestamp")return{bg:"bg-slate-500/20",t:"text-slate-300",b:"border-slate-500/30"};if(s==="cNightObservation")return{bg:"bg-yellow-500/20",t:"text-yellow-300",b:"border-yellow-500/30"};if(s==="federatedAuthorityObservation")return{bg:"bg-pink-500/20",t:"text-pink-300",b:"border-pink-500/30"};return{bg:"bg-purple-500/20",t:"text-purple-300",b:"border-purple-500/30"}}
 
@@ -3646,6 +3699,7 @@ loadStats();loadEpochData();loadBlocks();loadExts();
 var __nfIdle=window.requestIdleCallback||function(f){return setTimeout(f,1)};
 __nfIdle(function(){
   loadValidators();loadBlockProducers();loadPrice();updateSparkline();connectWS();
+  loadCredentialGateLiveness();setInterval(loadCredentialGateLiveness,60000);
 },{timeout:400});
 __nfIdle(function(){
   updateTopMethods();loadNetworkAge();loadHealthScore();
