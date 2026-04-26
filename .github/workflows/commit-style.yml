@@ -3,6 +3,9 @@ name: commit-style
 on:
   pull_request:
     branches: [main]
+    # `edited` re-triggers when the PR title or body changes — needed so a
+    # fixed title actually re-validates without pushing a new commit.
+    types: [opened, edited, synchronize, reopened]
 
 jobs:
   validate:
@@ -12,6 +15,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Validate PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -e
+          chmod +x .githooks/commit-msg
+          tmp=$(mktemp)
+          printf "%s" "$PR_TITLE" > "$tmp"
+          if ! .githooks/commit-msg "$tmp"; then
+            echo "::error title=PR title rejected::PR title must follow <scope>: <imperative action> (see docs/COMMIT_AND_PR_STYLE.md)"
+            rm -f "$tmp"
+            exit 1
+          fi
+          rm -f "$tmp"
 
       - name: Validate commit messages in this PR
         run: |
