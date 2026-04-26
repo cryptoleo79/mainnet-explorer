@@ -312,36 +312,50 @@
       </div>
     </div>
   </section>
-  <!-- A. NETWORK PULSE — single card above the fold. Epoch detail is one click away in the Epochs tab. -->
+  <!-- A. NETWORK PULSE + B. EPOCH INTELLIGENCE (side-by-side, restored after over-cut) -->
   <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
-    <div id="nfPulseCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(10,186,181,0.12);border-radius:10px;padding:12px 14px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-        <span id="nfHeartbeat" class="nf-heartbeat"><span id="nfHeartbeatRing" class="nf-hb-ring"></span><span id="nfHeartbeatBpm" class="nf-hb-num" title="Awaiting indexer data">—</span></span>
-        <span style="color:#0ABAB5;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Network Pulse</span>
+    <div class="nf-pulse-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;">
+      <div id="nfPulseCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(10,186,181,0.12);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span id="nfHeartbeat" class="nf-heartbeat"><span id="nfHeartbeatRing" class="nf-hb-ring"></span><span id="nfHeartbeatBpm" class="nf-hb-num" title="Awaiting indexer data">—</span></span>
+          <span style="color:#0ABAB5;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Network Pulse</span>
+        </div>
+        <div id="nfPulseBody" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Blocks/min</span>
+            <span id="nfPulseBpm" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Tx/min</span>
+            <span id="nfPulseTpm" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Avg block</span>
+            <span id="nfPulseAvg" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="color:#94a3b8;font-size:9px;">Shielded</span>
+            <span id="nfPulseShield" style="color:#22c55e;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+          </div>
+        </div>
       </div>
-      <div id="nfPulseBody" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <span style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;">Blocks/min</span>
-          <span id="nfPulseBpm" style="color:#e2e8f0;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+      <div id="nfEpochCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(250,204,21,0.12);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="color:#facc15;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Epoch</span>
+            <span id="nfEpochNum" style="color:#e2e8f0;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+          </div>
+          <span id="nfEpochCountdown" style="color:#94a3b8;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;"></span>
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <span style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;">Tx/min</span>
-          <span id="nfPulseTpm" style="color:#e2e8f0;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+        <div style="height:6px;background:rgba(100,116,139,0.15);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+          <div id="nfEpochBar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#facc15,#f59e0b);width:0%;transition:width 1s linear;"></div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <span style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;">Avg block</span>
-          <span id="nfPulseAvg" style="color:#e2e8f0;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <span style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;">Shielded</span>
-          <span id="nfPulseShield" style="color:#22c55e;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;" title="Awaiting indexer data">—</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="nfEpochPct" style="color:#facc15;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;"></span>
+          <span id="nfEpochHealth" style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;"></span>
         </div>
       </div>
     </div>
-  </div>
-  <!-- Hidden Epoch card preserved for JS that updates nfEpoch* IDs; not visible. Data still available at /tools/epochs.html. -->
-  <div id="nfEpochCard" style="display:none;">
-    <span id="nfEpochNum"></span><span id="nfEpochCountdown"></span><div id="nfEpochBar"></div><span id="nfEpochPct"></span><span id="nfEpochHealth"></span>
   </div>
 
   <!-- ═══ TIER 1: LIVE FEED (signal of life — always above fold) ═══ -->
