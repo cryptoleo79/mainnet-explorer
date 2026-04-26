@@ -740,9 +740,17 @@ export function getContractAddresses() {
   const contracts = rows.map(row => {
     try {
       const parsed = JSON.parse(row.data);
+      // Some ContractDeploy events double-encode the payload: parsed.txHash is
+      // itself a JSON string of {txHash, contractAddress}. Unwrap that layer.
+      let inner: any = parsed;
+      if (typeof parsed?.txHash === 'string' && parsed.txHash.startsWith('{')) {
+        try { inner = JSON.parse(parsed.txHash); } catch { /* keep parsed */ }
+      }
+      const address = inner?.contractAddress ?? (Array.isArray(inner) ? inner[1] : null);
+      const txHash = inner?.txHash ?? (Array.isArray(inner) ? inner[0] : null);
       return {
-        address: parsed.contractAddress || parsed[1] || null,
-        txHash: parsed.txHash || parsed[0] || null,
+        address: typeof address === 'string' ? address : null,
+        txHash: typeof txHash === 'string' ? txHash : null,
         block: row.block_height,
         blockHash: row.block_hash,
         timestamp: row.timestamp,
