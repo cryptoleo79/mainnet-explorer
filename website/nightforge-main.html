@@ -168,7 +168,7 @@
   </style>
 </head>
 <body class="min-h-screen text-white" style="background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #050a12 100%); isolation: isolate;">
-  <div id="deepLoader" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900" style="background:#0a1628" style="display:none;">
+  <div id="deepLoader" class="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900" style="background:#0a1628;display:none;">
     <p id="loadingText" class="text-slate-400 text-lg" style="display:none"></p>
   </div>
   <script>
@@ -206,7 +206,7 @@
               <span id="networkLabel" class="text-sm font-medium text-green-400">MAINNET</span>
               <svg class="w-4 h-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-50 min-w-[220px] overflow-hidden">
+            <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[100] min-w-[220px] overflow-hidden">
               <button class="network-opt w-full px-4 py-3 text-left hover:bg-green-500/10 transition flex items-center gap-3" data-network="mainnet">
                 <div class="w-2 h-2 rounded-full bg-green-400"></div>
                 <div class="flex-1"><p class="text-sm font-medium text-green-400">Mainnet</p><p class="text-xs text-green-400">mainnet.nightforge.jp</p></div>
