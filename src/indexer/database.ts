@@ -576,33 +576,40 @@ export function getNetworkOverviewData() {
 // --- Event-based analytics functions ---
 
 export function getPrivacyFromEvents(hours?: number) {
+  // When hours is provided, scope ALL totals (not just trend) to that window so the
+  // top-level shieldedRatio matches what the user asked for. When omitted, keep
+  // legacy all-time behavior for callers that pass no args.
+  const cutoff = hours ? Math.floor(Date.now() / 1000) - hours * 3600 : null;
+  const windowClause = cutoff !== null ? ' AND timestamp >= ?' : '';
+  const windowParams: number[] = cutoff !== null ? [cutoff] : [];
+
   // Total applied midnight txs from events
-  const totalTxApplied = (db.prepare("SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'TxApplied'").get() as { count: number }).count;
+  const totalTxApplied = (db.prepare(`SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'TxApplied'${windowClause}`).get(...windowParams) as { count: number }).count;
 
   // Count extrinsic indices that have UnshieldedTokens events (these are unshielded txs)
   const unshieldedTxCount = (db.prepare(`
     SELECT COUNT(DISTINCT block_height || '-' || extrinsic_index) as count
     FROM events
-    WHERE section = 'midnight' AND method = 'UnshieldedTokens'
-  `).get() as { count: number }).count;
+    WHERE section = 'midnight' AND method = 'UnshieldedTokens'${windowClause}
+  `).get(...windowParams) as { count: number }).count;
 
   // Shielded = TxApplied that don't have a corresponding UnshieldedTokens event
   const shieldedTxCount = totalTxApplied - unshieldedTxCount;
 
   // Contract deploys and calls from events
-  const contractDeploys = (db.prepare("SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractDeploy'").get() as { count: number }).count;
-  const contractCalls = (db.prepare("SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractCall'").get() as { count: number }).count;
+  const contractDeploys = (db.prepare(`SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractDeploy'${windowClause}`).get(...windowParams) as { count: number }).count;
+  const contractCalls = (db.prepare(`SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractCall'${windowClause}`).get(...windowParams) as { count: number }).count;
 
   const shieldedRatio = totalTxApplied > 0 ? Math.round((shieldedTxCount / totalTxApplied) * 10000) / 10000 : 0;
 
-  // Get unshielded details
+  // Get unshielded details (most recent 50 within window if hours set)
   const unshieldedDetails = db.prepare(`
     SELECT e.block_height as block, e.data, e.timestamp
     FROM events e
-    WHERE e.section = 'midnight' AND e.method = 'UnshieldedTokens'
+    WHERE e.section = 'midnight' AND e.method = 'UnshieldedTokens'${windowClause.replace(/timestamp/g, 'e.timestamp')}
     ORDER BY e.block_height DESC
     LIMIT 50
-  `).all() as { block: number; data: string; timestamp: number }[];
+  `).all(...windowParams) as { block: number; data: string; timestamp: number }[];
 
   const parsedUnshieldedDetails = unshieldedDetails.map(row => {
     try {
@@ -621,9 +628,7 @@ export function getPrivacyFromEvents(hours?: number) {
 
   // Trend: hourly breakdown from events (optionally filtered by hours)
   let trend: { hour: string; shielded: number; unshielded: number; total: number }[] = [];
-  if (hours) {
-    const cutoff = Math.floor(Date.now() / 1000) - hours * 3600;
-
+  if (hours && cutoff !== null) {
     // Get all TxApplied per hour
     const txAppliedPerHour = db.prepare(`
       SELECT datetime((timestamp / 3600) * 3600, 'unixepoch') as hour, COUNT(*) as count
