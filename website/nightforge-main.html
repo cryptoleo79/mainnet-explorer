@@ -1203,6 +1203,28 @@
   })();
   </script>
 
+  <!-- Twin feed — Recent Blocks + Recent Extrinsics. Lifted above the tab nav so the explorer reads as an explorer on first paint, not a research blog. -->
+  <div style="max-width:1200px;margin:0 auto;padding:0 16px 18px;">
+    <div class="grid lg:grid-cols-2 gap-4">
+      <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
+        <div class="px-5 py-3 border-b border-slate-700/50 flex items-center justify-between">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span data-i18n="recentBlocks">Recent Blocks</span></h3>
+          <button class="view-all-btn text-orange-400 text-xs hover:underline" data-tab="blocks" data-i18n="viewAll">View All</button>
+        </div>
+        <div id="recentBlocks" class="divide-y divide-slate-700/30 max-h-[320px] overflow-y-auto"></div>
+      </div>
+      <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
+        <div class="px-5 py-3 border-b border-slate-700/50 flex items-center justify-between">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-i18n="recentExtrinsics">Recent Extrinsics</span></h3>
+          <button class="view-all-btn text-orange-400 text-xs hover:underline" data-tab="extrinsics" data-i18n="viewAll">View All</button>
+        </div>
+        <div id="recentTxs" class="divide-y divide-slate-700/30 max-h-[320px] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Top Methods leaderboard remains preserved as a hidden DOM target so updateTopMethods() keeps wiring; surfaces visibly on the Extrinsics tab. -->
+  <div id="topMethods" style="display:none;"></div>
+
   <div class="bg-slate-900/85 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
     <div class="max-w-7xl mx-auto px-4">
       <nav class="flex items-center gap-1 py-2" id="tabNav">
@@ -1424,34 +1446,6 @@
             <p class="text-center text-slate-500 text-sm py-4"></p>
           </div>
         </div>
-      <div class="grid lg:grid-cols-2 gap-6">
-        <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-700/50 flex items-center justify-between">
-            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span data-i18n="recentBlocks">Recent Blocks</span></h3>
-            <button class="view-all-btn text-orange-400 text-sm hover:underline" data-tab="blocks" data-i18n="viewAll">View All</button>
-          </div>
-          <div id="recentBlocks" class="divide-y divide-slate-700/30 max-h-[400px] overflow-y-auto"></div>
-        </div>
-        <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-700/50 flex items-center justify-between">
-            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-i18n="recentExtrinsics">Recent Extrinsics</span></h3>
-            <button class="view-all-btn text-orange-400 text-sm hover:underline" data-tab="extrinsics" data-i18n="viewAll">View All</button>
-          </div>
-          <div id="recentTxs" class="divide-y divide-slate-700/30 max-h-[400px] overflow-y-auto"></div>
-          <!-- Top Methods Leaderboard -->
-          <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden mt-4">
-            <div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between">
-              <h3 class="font-semibold text-white flex items-center gap-2"><span data-i18n="topMethods">🏆 Top Methods</span></h3>
-              <span class="text-xs text-slate-500">Last 100 extrinsics</span>
-            </div>
-            <div id="topMethods" class="p-3 space-y-2">
-              <div class="animate-pulse bg-slate-700/30 h-6 rounded"></div>
-              <div class="animate-pulse bg-slate-700/30 h-6 rounded"></div>
-              <div class="animate-pulse bg-slate-700/30 h-6 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
     <div id="content-blocks" class="tab-content hidden">
       <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Blocks<button onclick="exportBlocksCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allBlocks" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
