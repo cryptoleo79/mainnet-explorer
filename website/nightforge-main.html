@@ -252,9 +252,68 @@
       </div>
     </div>
   </header>
+  <!-- HERO — CredentialGate (preview, on-chain, indexer-verified). Promoted from old Featured Contract + credGateLiveness blocks.
+       IDs cgStatus / cgProveLine / cgProveAgo / cgSwapLine / cgSwapAgo / cgVerifiedAt are preserved verbatim so loadCredentialGateLiveness() wires unchanged. -->
+  <section class="max-w-7xl mx-auto px-4 pt-6 pb-2 relative" style="z-index:2;">
+    <div class="relative rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/8 via-slate-800/85 to-slate-900/85 p-5 overflow-hidden isolate">
+      <div class="relative z-10">
+        <div class="flex items-start justify-between flex-wrap gap-4 mb-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2s-2 .9-2 2v4c0 1.1.9 2 2 2zm6 0h-1V7c0-2.8-2.2-5-5-5S7 4.2 7 7v4H6c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h2 class="text-base font-semibold text-white">CredentialGate &mdash; on-chain credential gate</h2>
+                <span id="cgStatus" class="text-sm font-semibold text-slate-400" title="Awaiting indexer data">&mdash;</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/60 text-slate-200 border border-slate-600/60 uppercase tracking-wider">Preview</span>
+                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span></span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Reference contract on Midnight preview. Verified by the preview indexer. The FAIL&rarr;PROVE&rarr;PASS demo proves selective-disclosure access control end-to-end.</p>
+            </div>
+          </div>
+          <a href="/credential-gate.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/25 transition flex-shrink-0">
+            See the proof flow
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] text-slate-500 uppercase tracking-wider">Contract</p>
+              <button onclick="copyFeatured('7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 border border-slate-600/40 transition">Copy</button>
+            </div>
+            <p class="mono text-xs text-cyan-300 mt-1" title="7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703">7ee02faf&hellip;fa7a3703</p>
+            <p class="text-[10px] text-slate-500 mt-1">Circuits: <span class="mono text-slate-300">add_issuer &middot; prove_kyc &middot; swap &middot; can_swap</span></p>
+          </div>
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] text-slate-500 uppercase tracking-wider">Deploy tx</p>
+              <button onclick="copyFeatured('cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 border border-slate-600/40 transition">Copy</button>
+            </div>
+            <p class="mono text-xs text-slate-300 mt-1" title="cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e">cf00cff5&hellip;a21d2c4e</p>
+            <p class="text-[10px] text-slate-500 mt-1">Block #454,958 &middot; 2026-04-25</p>
+          </div>
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
+            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Last prove_kyc</p>
+            <p id="cgProveLine" class="text-xs text-cyan-300 mono" title="Awaiting indexer data">&mdash;</p>
+            <p id="cgProveAgo" class="text-[10px] text-slate-500 mt-0.5">&mdash;</p>
+          </div>
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
+            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Last gated swap</p>
+            <p id="cgSwapLine" class="text-xs text-orange-300 mono" title="Awaiting indexer data">&mdash;</p>
+            <p id="cgSwapAgo" class="text-[10px] text-slate-500 mt-0.5">&mdash;</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-2 mt-3">
+          <p id="cgVerifiedAt" class="text-[10px] text-slate-500">Verified at &mdash;</p>
+          <a href="https://preview.nightforge.jp/tools/contracts.html?address=7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703" class="text-[11px] text-slate-400 hover:text-slate-200 underline decoration-dotted">View on preview explorer &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
   <!-- NightForge Product Surface. position:relative + z-index:2 keeps this
-       strip above the sakura petals (fixed, z-index:1) so animations never
-       obscure links or copy. -->
+       strip above decorative layers so animations never obscure links or copy. -->
 <div style="max-width:1200px;margin:0 auto;padding:24px 16px 16px;position:relative;z-index:2;">
   <div style="margin-bottom:16px;">
     <h2 style="color:#f1f5f9;font-size:1.25rem;font-weight:700;margin-bottom:4px;">NightForge</h2>
@@ -367,25 +426,7 @@
   </div>
 
   <!-- TIER 2: CONTRACT INTELLIGENCE (compact strip) -->
-  <div id="nfContractStrip" style="display:none;max-width:1200px;margin:0 auto;padding:0 16px 10px;">
-    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Contracts</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Deployed</span> <span id="nfContractDeploys" style="font-weight:700;color:#0ABAB5;" title="Awaiting indexer data">—</span></span>
-        <span style="color:rgba(100,116,139,0.3);">|</span>
-        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Calls</span> <span id="nfContractCalls" style="font-weight:700;color:#e2e8f0;" title="Awaiting indexer data">—</span></span>
-        <span style="color:rgba(100,116,139,0.3);">|</span>
-        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Shielded</span> <span id="nfContractShielded" style="font-weight:700;color:#a78bfa;" title="Awaiting indexer data">—</span></span>
-        <span style="color:rgba(100,116,139,0.3);">|</span>
-        <span style="font-size:12px;color:#e2e8f0;font-variant-numeric:tabular-nums;"><span style="color:#94a3b8;font-size:10px;">Privacy</span> <span id="nfContractGrade" style="font-weight:700;color:#22c55e;" title="Awaiting indexer data">—</span></span>
-      </div>
-      <a href="/tools/contracts.html" style="color:#94a3b8;font-size:10px;text-decoration:none;font-weight:500;">Contracts &rarr;</a>
-    </div>
-  </div>
-
-  <!-- TIER 2: ACTIVITY PULSE (compact strip — live DUST + shielded rates) -->
+<!-- TIER 2: ACTIVITY PULSE (compact strip — live DUST + shielded rates) -->
   <div id="nfActivityStrip" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
     <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
       <div style="display:flex;align-items:center;gap:6px;">
@@ -418,21 +459,7 @@
     </div>
   </div>
 
-  <!-- TIER 2: PRIVACY FLOW (compact strip — full Sankey at /tools/privacy-flow.html) -->
-  <div id="nfPrivacyFlow" style="max-width:1200px;margin:0 auto;padding:0 16px 18px;display:none;">
-    <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Privacy Flow</span>
-        <span id="nfPrivacyTotal" style="color:#64748b;font-size:9px;font-weight:500;"></span>
-      </div>
-      <div id="nfPrivacySummary" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums;">
-        <!-- Populated dynamically -->
-      </div>
-      <a href="/tools/privacy-flow.html" style="color:#0ABAB5;font-size:10px;text-decoration:none;font-weight:600;">View detail &rarr;</a>
-    </div>
-  </div>
-
-  <!-- ═══ ACTION STRIP — Data → Action ═══ -->
+<!-- ═══ ACTION STRIP — Data → Action ═══ -->
   <div style="max-width:1200px;margin:0 auto;padding:0 16px 18px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <a href="/verify-credentials.html" style="text-decoration:none;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.18);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor='rgba(34,197,94,0.18)'">
@@ -1291,7 +1318,6 @@
         <button data-tab="analytics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="analytics">📊 Analytics</button>
         <button data-tab="governance" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="governance">🏛 Governance</button>
         <button data-tab="epochs" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="epochs">⏱ Epochs</button>
-        <button data-tab="cardano" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="cardano">⛓ Cardano</button>
       </nav>
     </div>
   </div>
@@ -1435,105 +1461,7 @@
           </div>
         </div>
       </div>
-      <!-- Featured Contract (Midnight preview — verified by preview indexer). Decorative layer is behind content via z-0/z-10 stacking. -->
-      <section class="mb-8 relative rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/5 via-slate-800/40 to-slate-900/40 p-5 overflow-hidden isolate">
-        <div class="relative z-10">
-          <div class="flex items-start justify-between flex-wrap gap-4 mb-4">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2s-2 .9-2 2v4c0 1.1.9 2 2 2zm6 0h-1V7c0-2.8-2.2-5-5-5S7 4.2 7 7v4H6c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2z"/></svg>
-              </div>
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h3 class="text-base font-semibold text-white">Featured Contract &mdash; CredentialGate</h3>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">Live</span>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/60 text-slate-200 border border-slate-600/60 uppercase tracking-wider">Preview</span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">Credential-gated reference contract deployed on Midnight preview. Verified by the preview indexer.</p>
-              </div>
-            </div>
-            <a href="https://preview.nightforge.jp/tools/contracts.html?address=7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs font-medium text-cyan-300 hover:bg-cyan-500/20 transition flex-shrink-0">
-              View on preview explorer
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-            </a>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider">Contract address</p>
-                <button onclick="copyFeatured('7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 border border-slate-600/40 transition">Copy</button>
-              </div>
-              <p class="mono text-xs text-cyan-300 mt-1" title="7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703">7ee02faf&hellip;fa7a3703</p>
-            </div>
-            <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider">Deploy transaction</p>
-                <button onclick="copyFeatured('cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 border border-slate-600/40 transition">Copy</button>
-              </div>
-              <p class="mono text-xs text-slate-300 mt-1" title="cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e">cf00cff5&hellip;a21d2c4e</p>
-              <p class="text-[10px] text-slate-500 mt-1">Preview block #454,958 &middot; 2026-04-25 &middot; full prove&rarr;swap path verified</p>
-            </div>
-            <div class="md:col-span-2 bg-slate-800/85 rounded-lg border border-slate-700/60 p-3">
-              <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Circuits</p>
-              <div class="flex flex-wrap gap-1.5">
-                <span class="mono text-[11px] px-2 py-0.5 rounded bg-slate-700/50 text-slate-200 border border-slate-600/40">add_issuer</span>
-                <span class="mono text-[11px] px-2 py-0.5 rounded bg-slate-700/50 text-slate-200 border border-slate-600/40">prove_kyc</span>
-                <span class="mono text-[11px] px-2 py-0.5 rounded bg-slate-700/50 text-slate-200 border border-slate-600/40">swap</span>
-                <span class="mono text-[11px] px-2 py-0.5 rounded bg-slate-700/50 text-slate-200 border border-slate-600/40">can_swap</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <!-- Credential Gate liveness — live verification snapshot from preview indexer. Truth rule: em-dash on null. -->
-      <section id="credGateLiveness" class="mb-8 bg-slate-800/85 rounded-xl border border-slate-700/60 p-5">
-        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <div class="flex items-center gap-2">
-            <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span></span>
-            <h3 class="text-sm font-semibold text-white tracking-wide uppercase">Credential Gate &middot; live verification</h3>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/60 text-slate-200 border border-slate-600/60 uppercase tracking-wider">preview</span>
-          </div>
-          <span id="cgStatus" class="text-sm font-semibold text-slate-400" title="Awaiting indexer data">&mdash;</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div class="bg-slate-900/60 rounded-lg border border-slate-700/60 p-3">
-            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Last prove_kyc</p>
-            <p id="cgProveLine" class="text-xs text-cyan-300 mono" title="Awaiting indexer data">&mdash;</p>
-            <p id="cgProveAgo" class="text-[10px] text-slate-500 mt-0.5">&mdash;</p>
-          </div>
-          <div class="bg-slate-900/60 rounded-lg border border-slate-700/60 p-3">
-            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Last swap (gated)</p>
-            <p id="cgSwapLine" class="text-xs text-orange-300 mono" title="Awaiting indexer data">&mdash;</p>
-            <p id="cgSwapAgo" class="text-[10px] text-slate-500 mt-0.5">&mdash;</p>
-          </div>
-        </div>
-        <div class="flex items-center justify-between flex-wrap gap-2 mt-3">
-          <p id="cgVerifiedAt" class="text-[10px] text-slate-500">Verified at &mdash;</p>
-          <a href="/credential-gate.html" class="text-[11px] text-cyan-300 hover:text-cyan-200 underline decoration-dotted">See the proof flow and contract address &rarr;</a>
-        </div>
-      </section>
       <div class="grid lg:grid-cols-3 gap-4 mb-8">
-        <div class="lg:col-span-2 rounded-2xl overflow-hidden border border-slate-700/50 bg-gradient-to-b from-slate-800/80 to-slate-900/50">
-          <div class="flex items-center justify-between p-4 bg-gradient-to-r from-pink-600/20 via-purple-600/10 to-transparent border-b border-slate-700/30">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center border border-pink-500/20">
-                <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-              </div>
-              <div><h3 class="font-semibold text-white" data-i18n="blockActivity">Block Activity</h3><p class="text-xs text-slate-500" id="chartSubtitle" data-i18n="hourlyExtrinsics">Hourly extrinsics • UTC</p></div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="hidden"><button id="chartBarBtn" class="p-1.5 rounded text-slate-500"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg></button>
-                <button id="chartGridBtn" class="p-1.5 rounded bg-orange-500/20 text-orange-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg></button>
-              </div>
-              <div class="flex items-center gap-2"><span class="text-xs text-slate-500">Avg TPS</span><span class="text-lg font-bold text-white" id="tpsDisplay" title="Awaiting indexer data">—</span></div>
-              <div onclick="launchConfetti()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 cursor-pointer" title="Click for confetti!"><div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div><span class="text-xs font-medium text-green-400">Live</span></div>
-            </div>
-          </div>
-          <div class="p-4">
-            <div id="blockChart" class="flex items-end justify-between gap-1 h-44 opacity-0"></div>
-            <div id="blockLabels" class="flex justify-between text-[8px] text-slate-600 mt-1"></div>
-          </div>
-        </div>
         <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
           <div class="p-4 border-b border-slate-700/50">
             <div class="flex items-center justify-between">
@@ -1575,26 +1503,6 @@
             <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-700/50">
               <div class="flex items-center gap-2"><span id="syncedDot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="syncedLabel" class="text-sm text-slate-400" title="Awaiting indexer data">—</span></div>
               <span id="syncedPct" class="text-slate-400 font-medium" title="Awaiting indexer data">—</span>
-            </div>
-          </div>
-        </div>
-        <div class="bg-gradient-to-br from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/20 p-4 mt-4">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-semibold text-green-400" data-i18n="networkHealth">Network Health</p>
-            <span id="healthScore" class="text-2xl font-bold text-green-400"></span>
-          </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">Block Production</span>
-              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthBlocks" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthBlocksLabel" class="text-green-400 w-8 text-right"></span></div>
-            </div>
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">Validators</span>
-              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthValidators" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthValidatorsLabel" class="text-green-400 w-8 text-right"></span></div>
-            </div>
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">Privacy</span>
-              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthPrivacy" class="h-full bg-cyan-400 rounded-full" style="width:0%"></div></div><span id="healthPrivacyLabel" class="text-cyan-400 w-8 text-right"></span></div>
             </div>
           </div>
         </div>
@@ -2390,128 +2298,6 @@
     </div>
 
     <!-- Cardano Tab -->
-    <div id="content-cardano" class="tab-content hidden">
-      <div class="tab-fade-in">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold text-white flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-              <span class="text-lg">⛓</span>
-            </div>
-            <span data-i18n="cardanoAnchorPoints">Cardano Anchors</span>
-          </h2>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30">
-            <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-            <span class="text-xs font-medium text-blue-400" data-i18n="midnightCardanoBridge">Midnight ↔ Cardano Anchor Points</span>
-          </div>
-        </div>
-
-        <!-- Animated Bridge Visualization -->
-        <div class="glass rounded-2xl border border-blue-500/20 p-8 mb-6 card-hover relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none"></div>
-          <div class="relative flex items-center justify-between max-w-3xl mx-auto">
-            <div class="flex flex-col items-center gap-3">
-              <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-cyan-600/20 border-2 border-cyan-500/40 flex items-center justify-center live-glow">
-                <span class="text-3xl font-black text-cyan-400">M</span>
-              </div>
-              <span class="text-sm font-bold text-cyan-400">Midnight</span>
-              <div class="text-center">
-                <p class="text-xs text-slate-500">Epoch</p>
-                <p id="cardanoMidEpoch" class="text-lg font-bold text-white"></p>
-                <p class="text-xs text-slate-500 mt-1">Slot</p>
-                <p id="cardanoMidSlot" class="text-sm font-mono text-cyan-400"></p>
-              </div>
-            </div>
-            <div class="flex-1 mx-8 relative h-16">
-              <div class="absolute inset-x-0 top-1/2 h-0.5 bg-gradient-to-r from-cyan-500/60 via-purple-500/40 to-blue-500/60 transform -translate-y-1/2"></div>
-              <div class="cardano-flow-dot bg-cyan-400" style="left:0;animation-delay:0s"></div>
-              <div class="cardano-flow-dot bg-purple-400" style="left:0;animation-delay:1s"></div>
-              <div class="cardano-flow-dot bg-blue-400" style="left:0;animation-delay:2s"></div>
-              <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-purple-500/30">
-                <span class="text-xs font-bold text-purple-300">ANCHOR POINT</span>
-              </div>
-            </div>
-            <div class="flex flex-col items-center gap-3">
-              <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/30 to-blue-600/20 border-2 border-blue-500/40 flex items-center justify-center live-glow">
-                <span class="text-3xl font-black text-blue-400">C</span>
-              </div>
-              <span class="text-sm font-bold text-blue-400">Cardano</span>
-              <div class="text-center">
-                <p class="text-xs text-slate-500">Epoch</p>
-                <p id="cardanoCardEpoch" class="text-lg font-bold text-white"></p>
-                <p class="text-xs text-slate-500 mt-1">Slot</p>
-                <p id="cardanoCardSlot" class="text-sm font-mono text-blue-400"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Anchor History -->
-        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6">
-          <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/30 to-cyan-500/30 flex items-center justify-center"><span class="text-sm">⚓</span></div>
-              <div><h3 class="font-semibold text-white" data-i18n="anchorHistory">Anchor History</h3><p class="text-xs text-slate-500">Cardano ↔ Midnight checkpoint log</p></div>
-            </div>
-            <span id="cardanoAnchorCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full"></span>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="border-b border-slate-700/30">
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="midnightEpoch">Midnight Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="midnightSlot">Midnight Slot</th>
-                  <th class="text-center px-4 py-3 text-xs text-slate-500 uppercase"></th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoEpoch">Cardano Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoSlot">Cardano Slot</th>
-                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
-                </tr>
-              </thead>
-              <tbody id="cardanoAnchorTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500"></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Bridge Events -->
-        <div class="grid lg:grid-cols-3 gap-6">
-          <div class="glass rounded-2xl border border-green-500/20 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-green-500/10 to-transparent">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-green-500/30 flex items-center justify-center"><span class="text-sm">📥</span></div>
-                <div><h3 class="font-semibold text-white" data-i18n="registrations">Registrations</h3><p class="text-xs text-slate-500">Bridge registrations</p></div>
-              </div>
-            </div>
-            <div id="cardanoRegistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500"></div>
-            </div>
-          </div>
-          <div class="glass rounded-2xl border border-red-500/20 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-red-500/10 to-transparent">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-red-500/30 flex items-center justify-center"><span class="text-sm">📤</span></div>
-                <div><h3 class="font-semibold text-white" data-i18n="deregistrations">Deregistrations</h3><p class="text-xs text-slate-500">Bridge deregistrations</p></div>
-              </div>
-            </div>
-            <div id="cardanoDeregistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500"></div>
-            </div>
-          </div>
-          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-cyan-500/10 to-transparent">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-cyan-500/30 flex items-center justify-center"><span class="text-sm">🔗</span></div>
-                <div><h3 class="font-semibold text-white" data-i18n="mappingsAdded">Mappings Added</h3><p class="text-xs text-slate-500">Cross-chain mappings</p></div>
-              </div>
-            </div>
-            <div id="cardanoMappings" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
   <footer class="mt-8 py-6 border-t border-slate-800/50 bg-slate-900/50 relative z-10">
     <div class="max-w-7xl mx-auto px-4">
@@ -3511,10 +3297,10 @@ function loadAnalyticsChart(){
 var lineChart=null;
 function renderChartGrid(b){
   if(!b||!b.length)return;
-  var container=document.getElementById("blockChart");
+  var container=document.getElementById("blockChart");if(!container)return;
   container.className="relative h-44";
   container.innerHTML='<canvas id="lineChartCanvas"></canvas>';
-  document.getElementById("blockLabels").innerHTML="";
+  var lbl=document.getElementById("blockLabels");if(lbl)lbl.innerHTML="";
   
   var points=b.slice(0,15).reverse();
   var labels=points.map(function(p){return "#"+p.height});
@@ -3593,6 +3379,7 @@ function renderChartGrid(b){
   });
 }
 function renderChart(b){
+  var c=document.getElementById("blockChart");if(!c)return;
   var max=1;for(var i=0;i<b.length;i++){if((b[i].extrinsics_count||0)>max)max=b[i].extrinsics_count}
   var html="",labels="";var rev=b.slice().reverse();
   for(var i=0;i<rev.length;i++){
@@ -3603,7 +3390,8 @@ function renderChart(b){
     html+='<div class="flex-1 flex flex-col items-center gap-1 group cursor-pointer chart-bar" data-height="'+x.height+'"><div class="relative w-full flex justify-center"><div class="w-full max-w-[24px] rounded-t-lg transition-all duration-500 '+(isLatest?"animate-pulse":"")+'" style="height:'+h+'%;min-height:8px;background:'+barColor+'"></div><div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-600 rounded-lg px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">'+bt+'s #'+x.height+'</div></div></div>';
     labels+="<span>"+x.height+"</span>";
   }
-  document.getElementById("blockChart").className="flex items-end justify-between gap-1 h-44";document.getElementById("blockChart").innerHTML=html;document.getElementById("blockLabels").innerHTML=labels;
+  c.className="flex items-end justify-between gap-1 h-44";c.innerHTML=html;
+  var lbl=document.getElementById("blockLabels");if(lbl)lbl.innerHTML=labels;
   document.querySelectorAll(".chart-bar").forEach(function(el){el.addEventListener("click",function(){clickBlock(parseInt(el.dataset.height))})});
 }
 function renderTicker(d){
@@ -3827,22 +3615,21 @@ window.addEventListener("load",function(){
 });
 
 // Chart view toggle
-document.getElementById("chartBarBtn").addEventListener("click",function(){
-  this.classList.add("bg-orange-500/20","text-orange-400");
-  this.classList.remove("text-slate-500");
-  document.getElementById("chartGridBtn").classList.remove("bg-orange-500/20","text-orange-400");
-  document.getElementById("chartGridBtn").classList.add("text-slate-500");
-  chartView="bar";
-  renderChart(blocks);
-});
-document.getElementById("chartGridBtn").addEventListener("click",function(){
-  this.classList.add("bg-orange-500/20","text-orange-400");
-  this.classList.remove("text-slate-500");
-  document.getElementById("chartBarBtn").classList.remove("bg-orange-500/20","text-orange-400");
-  document.getElementById("chartBarBtn").classList.add("text-slate-500");
-  chartView="line";
-  loadAnalyticsChart();
-});
+// Block Activity chart was removed from the homepage; guard the listener attachments.
+(function(){
+  var bb=document.getElementById("chartBarBtn");
+  if(bb)bb.addEventListener("click",function(){
+    this.classList.add("bg-orange-500/20","text-orange-400");this.classList.remove("text-slate-500");
+    var gb=document.getElementById("chartGridBtn");if(gb){gb.classList.remove("bg-orange-500/20","text-orange-400");gb.classList.add("text-slate-500");}
+    chartView="bar";renderChart(blocks);
+  });
+  var gb=document.getElementById("chartGridBtn");
+  if(gb)gb.addEventListener("click",function(){
+    this.classList.add("bg-orange-500/20","text-orange-400");this.classList.remove("text-slate-500");
+    var bbi=document.getElementById("chartBarBtn");if(bbi){bbi.classList.remove("bg-orange-500/20","text-orange-400");bbi.classList.add("text-slate-500");}
+    chartView="line";loadAnalyticsChart();
+  });
+})();
 
 // Sakura particles - subtle & elegant 🌸
 function createSakura(){
@@ -4437,17 +4224,19 @@ function loadAnalyticsDash(){
   // Fetch overview stats
   fetch(API+"/analytics/overview").then(function(r){return r.json()}).then(function(data){
     if(!data)return;
-    animateCounter(document.getElementById("anTotalBlocks"),data.blocks||data.totalBlocks||0);
-    animateCounter(document.getElementById("anTotalExts"),data.extrinsics||data.totalExtrinsics||0);
+    var blkN=(typeof data.blocks==="number")?data.blocks:(typeof data.totalBlocks==="number"?data.totalBlocks:null);
+    var extN=(typeof data.extrinsics==="number")?data.extrinsics:(typeof data.totalExtrinsics==="number"?data.totalExtrinsics:null);
+    var tbEl=document.getElementById("anTotalBlocks");if(tbEl){if(blkN!==null)animateCounter(tbEl,blkN);else{tbEl.textContent="—";tbEl.title="Awaiting indexer data";}}
+    var teEl=document.getElementById("anTotalExts");if(teEl){if(extN!==null)animateCounter(teEl,extN);else{teEl.textContent="—";teEl.title="Awaiting indexer data";}}
     var avgBt=document.getElementById("anAvgBlock");
-    if(avgBt)avgBt.textContent="~"+(data.avgBlockTime||6)+"s";
+    if(avgBt){if(typeof data.avgBlockTime==="number")avgBt.textContent="~"+data.avgBlockTime+"s";else{avgBt.textContent="—";avgBt.title="Awaiting indexer data";}}
     var tpsEl=document.getElementById("anTPS");
-    if(tpsEl)tpsEl.textContent=(data.tps||0).toFixed(3);
+    if(tpsEl){if(typeof data.tps==="number")tpsEl.textContent=data.tps.toFixed(3);else{tpsEl.textContent="—";tpsEl.title="Awaiting indexer data";}}
 
     // Compare networks section
-    document.getElementById("cmpMainBlocks").textContent=fmt(data.blocks||0);
-    document.getElementById("cmpMainExts").textContent=fmt(data.extrinsics||0);
-    document.getElementById("cmpMainTPS").textContent=(data.tps||0).toFixed(3);
+    var cmb=document.getElementById("cmpMainBlocks");if(cmb)cmb.textContent=blkN!==null?fmt(blkN):"—";
+    var cme=document.getElementById("cmpMainExts");if(cme)cme.textContent=extN!==null?fmt(extN):"—";
+    var cmt=document.getElementById("cmpMainTPS");if(cmt)cmt.textContent=(typeof data.tps==="number")?data.tps.toFixed(3):"—";
     // Fetch preprod and preview stats
     fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(s){
       document.getElementById("cmpPreprodBlocks").textContent=s.blocks?fmt(s.blocks):"";
