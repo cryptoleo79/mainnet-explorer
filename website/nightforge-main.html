@@ -24,11 +24,17 @@
     .sakura { position: fixed; top: 0; pointer-events: none; z-index: 0; animation: sakura-fall linear forwards; }
     /* Decorative layers (canvas, sakura) live at z:0 as fixed siblings of body.
        Lift every normal-flow body child above them so cards, tickers, and tabs
-       never get covered. Fixed-position children opt out via :not selectors. */
-    body > *:not(canvas):not(.sakura):not(#deepLoader):not(script):not(style) {
+       never get covered. Fixed-position children + the header opt out via :not()
+       so the header keeps its Tailwind z-50 (otherwise this rule's specificity
+       would silently demote it to z-1 and the network dropdown would render
+       behind the hero section below). */
+    body > *:not(canvas):not(.sakura):not(#deepLoader):not(script):not(style):not(header) {
       position: relative;
       z-index: 1;
     }
+    /* Network dropdown — escape every stacking context. Header is z-50 already;
+       this puts the open menu well above any future inline z-index drift. */
+    #networkMenu { z-index: 9999 !important; }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px rgba(6,182,212,0.3); } 50% { box-shadow: 0 0 20px rgba(6,182,212,0.6); } }
     .live-glow { animation: pulse-glow 2s ease-in-out infinite; }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
@@ -254,8 +260,8 @@
   </header>
   <!-- HERO — CredentialGate (preview, on-chain, indexer-verified). Promoted from old Featured Contract + credGateLiveness blocks.
        IDs cgStatus / cgProveLine / cgProveAgo / cgSwapLine / cgSwapAgo / cgVerifiedAt are preserved verbatim so loadCredentialGateLiveness() wires unchanged. -->
-  <section class="max-w-7xl mx-auto px-4 pt-6 pb-2 relative" style="z-index:2;">
-    <div class="relative rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/8 via-slate-800/85 to-slate-900/85 p-5 overflow-hidden isolate">
+  <section class="max-w-7xl mx-auto px-4 pt-6 pb-4 relative" style="z-index:2;">
+    <div class="relative rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/8 via-slate-800/85 to-slate-900/85 p-6 overflow-hidden isolate">
       <div class="relative z-10">
         <div class="flex items-start justify-between flex-wrap gap-4 mb-4">
           <div class="flex items-center gap-3 min-w-0">
@@ -313,7 +319,7 @@
     </div>
   </section>
   <!-- A. NETWORK PULSE + B. EPOCH INTELLIGENCE (side-by-side, restored after over-cut) -->
-  <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 16px 16px;">
     <div class="nf-pulse-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;">
       <div id="nfPulseCard" style="background:rgba(30,41,59,0.45);border:1px solid rgba(10,186,181,0.12);border-radius:10px;padding:12px 14px;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
@@ -359,7 +365,7 @@
   </div>
 
   <!-- ═══ TIER 1: LIVE FEED (signal of life — always above fold) ═══ -->
-  <div id="nfBlockTicker" style="max-width:1200px;margin:0 auto;padding:0 16px 18px;">
+  <div id="nfBlockTicker" style="max-width:1280px;margin:0 auto;padding:0 16px 16px;">
     <div style="background:rgba(30,41,59,0.4);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div style="display:flex;align-items:center;gap:6px;">
@@ -380,7 +386,7 @@
   </div>
 
   <!-- ═══ TIER 3 DIVIDER — Deep analytics (collapsible) ═══ -->
-  <div style="max-width:1200px;margin:0 auto;padding:0 16px 10px;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 16px 16px;">
     <button id="nfDeepToggle" onclick="(function(){var p=document.getElementById('nfDeepPanel');var c=document.getElementById('nfDeepChevron');var open=p.style.display!=='none';p.style.display=open?'none':'block';if(c)c.style.transform=open?'rotate(0deg)':'rotate(180deg)';})()" style="width:100%;background:transparent;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
       <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">Deep Analytics</span>
       <span style="flex:1;height:1px;background:linear-gradient(90deg,rgba(100,116,139,0.25),transparent);"></span>
@@ -401,7 +407,7 @@
   <div id="nfDeepPanel" style="display:none;">
 
     <!-- Decentralization Dial -->
-    <div id="nfDecentDial" style="max-width:1200px;margin:0 auto;padding:0 16px 10px;display:none;">
+    <div id="nfDecentDial" style="max-width:1280px;margin:0 auto;padding:0 16px 16px;display:none;">
       <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:8px;">
@@ -418,7 +424,7 @@
     </div>
 
     <!-- Epoch Pulse Dual-Ring (cross-chain anchor) -->
-    <div id="nfEpochPulse" style="max-width:1200px;margin:0 auto;padding:0 16px 18px;display:none;">
+    <div id="nfEpochPulse" style="max-width:1280px;margin:0 auto;padding:0 16px 16px;display:none;">
       <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Epoch Pulse</span>
@@ -1204,7 +1210,7 @@
   </script>
 
   <!-- Twin feed — Recent Blocks + Recent Extrinsics. Lifted above the tab nav so the explorer reads as an explorer on first paint, not a research blog. -->
-  <div style="max-width:1200px;margin:0 auto;padding:0 16px 18px;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 16px 16px;">
     <div class="grid lg:grid-cols-2 gap-4">
       <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
         <div class="px-5 py-3 border-b border-slate-700/50 flex items-center justify-between">
@@ -2439,7 +2445,7 @@ var __nfStartCanvas=function(){
   var prefersReduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var saveData=navigator.connection&&navigator.connection.saveData;
   var w=innerWidth,small=w<900;
-  var N=small?20:40,D=small?100:120;
+  var N=small?14:28,D=small?100:120;
   var n=[],last=0,FRAME=1000/30;
   function resize(){c.width=innerWidth;c.height=innerHeight;}
   function createNodes(){n=[];for(var i=0;i<N;i++){n.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*2.5+1,o:Math.random()*0.6+0.3})}}
@@ -3531,8 +3537,8 @@ function createSakura(){
   sakura.className="sakura";
   sakura.innerHTML="🌸";
   sakura.style.left=Math.random()*100+"vw";
-  sakura.style.fontSize=(Math.random()*6+10)+"px";
-  sakura.style.animationDuration=(Math.random()*12+18)+"s";
+  sakura.style.fontSize=(Math.random()*4+9)+"px";
+  sakura.style.animationDuration=(Math.random()*14+22)+"s";
   document.body.appendChild(sakura);
   setTimeout(function(){sakura.remove()},30000);
 }
@@ -3548,8 +3554,8 @@ var chartView="line";
 (window.requestIdleCallback||function(f){return setTimeout(f,1500)})(function(){
   var prefersReduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(prefersReduce)return;
-  setTimeout(createSakura,3000);
-  setInterval(createSakura,12000);
+  setTimeout(createSakura,4000);
+  setInterval(createSakura,20000);
 },{timeout:3000});
 
 // Init tracking & start real-time updates
