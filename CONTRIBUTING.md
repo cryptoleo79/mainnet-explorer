@@ -93,11 +93,48 @@ Write like an engineer.
 | `website/nightforge-main.html` | The deployed homepage source |
 | `data/` | SQLite databases (gitignored) |
 
-## Deployment
+## Deploying NightForge
 
-`mainnet.nightforge.jp` and `nightforge.jp` serve from `/var/www/explorer-mainnet` and `/var/www/explorer-main` respectively. The latter is root-owned and requires `sudo cp` to update.
+NightForge is served from **four** doc roots, one per environment. They must stay in sync, or visitors land on stale builds depending on which subdomain they hit.
 
-Tools pages are served live by the Node server at port 3005 with `cache-control: no-store`, so changes to `/home/midnight/mainnet-explorer/tools/*.html` are visible immediately.
+| Environment | Subdomain | Doc root | Owner |
+|---|---|---|---|
+| apex | `nightforge.jp` | `/var/www/explorer-main` | `root` (sudo) |
+| mainnet | `mainnet.nightforge.jp` | `/var/www/explorer-mainnet` | `midnight` |
+| preview | `preview.nightforge.jp` | `/var/www/explorer-lite` | `root` (sudo) |
+| preprod | `preprod.nightforge.jp` | `/var/www/explorer-preprod` | `midnight` |
+
+### One command to deploy everywhere
+
+```bash
+npm run deploy
+```
+
+This runs `bash scripts/deploy-all.sh`, which:
+
+1. Renders an environment-specific `index.html` per target with `<title>`, `og:title`, and `og:url` substituted to advertise the right network.
+2. Copies `website/nightforge-main.html` and `website/credential-gate.html` into each doc root.
+3. Uses `sudo` only on root-owned roots (`explorer-main`, `explorer-lite`); never blanket-elevates.
+4. Prints per-target ✓ / ✗ with deployed size and mtime.
+5. Exits non-zero if any target fails. **Never silently skips.**
+
+To preview the plan without writing:
+
+```bash
+npm run deploy -- --dry-run
+```
+
+### Do not manually copy files
+
+**Never `cp` directly into `/var/www/explorer-*`.** That is how environments drift — apex ends up on yesterday's build, preview keeps an older title, preprod misses a fix. Any deploy that does not go through `scripts/deploy-all.sh` is presumed wrong, even if the diff looks the same: the script also rewrites the per-environment metadata (`<title>`, OG tags) that a raw `cp` would clobber.
+
+If the script fails for a target, fix the target (missing dir, permissions, wrong nginx config) and re-run the script. Do not "just `sudo cp` it for now" — that is the problem this script exists to remove.
+
+CI on `main` may eventually add a check that flags PRs whose merge timestamp does not have a matching `deploy-all.sh` invocation. Until then, this is a documented norm: read it as a hard rule.
+
+### Tools pages
+
+Tools pages under `/home/midnight/mainnet-explorer/tools/*.html` are served live by the Node API at port 3005 with `cache-control: no-store`. Edits there are visible immediately and do **not** go through `deploy-all.sh`.
 
 ## What This Project Is Not
 

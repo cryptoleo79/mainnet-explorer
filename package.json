@@ -9,7 +9,9 @@
     "start": "tsx src/index.ts",
     "build": "tsc",
     "indexer": "tsx src/index.ts",
-    "api-only": "tsx src/api/server.ts"
+    "api-only": "tsx src/api/server.ts",
+    "deploy": "bash scripts/deploy-all.sh",
+    "deploy:dry": "bash scripts/deploy-all.sh --dry-run"
   },
   "keywords": ["midnight", "blockchain", "explorer", "indexer", "mainnet"],
   "author": "",
