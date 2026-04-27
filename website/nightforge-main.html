@@ -3422,9 +3422,52 @@ setTimeout(function(){
   }
 },8000);
 
-document.getElementById("networkBtn").addEventListener("click",function(e){e.stopPropagation();document.getElementById("networkMenu").classList.toggle("hidden")});
-document.addEventListener("click",function(){document.getElementById("networkMenu").classList.add("hidden")});
-document.querySelectorAll(".network-opt").forEach(function(btn){btn.addEventListener("click",function(){var net=btn.dataset.network;if(net==="preview"){window.location.href="https://preview.nightforge.jp";return}if(net==="preprod"){window.location.href="https://preprod.nightforge.jp";return}if(net==="mainnet"){document.getElementById("networkMenu").classList.add("hidden");return}document.getElementById("networkMenu").classList.add("hidden")})});
+// Network dropdown — escape every parent stacking context by relocating the
+// menu element to <body> and switching from absolute (positioned vs an ancestor
+// that may live in a clipped/transformed/opaque context) to fixed (positioned
+// vs the viewport). This is the structural fix; z-index alone could not win
+// against ancestors that created their own stacking traps.
+(function(){
+  var btn  = document.getElementById("networkBtn");
+  var menu = document.getElementById("networkMenu");
+  if (!btn || !menu) return;
+  // 1. Move menu out of the header into <body> so no ancestor can clip or trap it.
+  if (menu.parentElement !== document.body) document.body.appendChild(menu);
+  // 2. Strip absolute-positioning classes (top-full / mt-2 / left-0 were keyed
+  //    to the original ancestor); switch to fixed against the viewport.
+  menu.classList.remove("absolute","top-full","mt-2","left-0");
+  menu.style.position = "fixed";
+  menu.style.zIndex   = "9999";
+  function position(){
+    var r = btn.getBoundingClientRect();
+    menu.style.top  = (r.bottom + 8) + "px";
+    menu.style.left = r.left + "px";
+  }
+  function open(){  position(); menu.classList.remove("hidden"); btn.setAttribute("aria-expanded","true");  }
+  function close(){ menu.classList.add("hidden");                btn.setAttribute("aria-expanded","false"); }
+  btn.setAttribute("aria-haspopup","menu");
+  btn.setAttribute("aria-expanded","false");
+  btn.addEventListener("click", function(e){
+    e.stopPropagation();
+    menu.classList.contains("hidden") ? open() : close();
+  });
+  document.addEventListener("click", function(e){
+    if (menu.classList.contains("hidden")) return;
+    if (!menu.contains(e.target) && !btn.contains(e.target)) close();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
+  window.addEventListener("scroll", function(){ if (!menu.classList.contains("hidden")) position(); }, {passive:true});
+  window.addEventListener("resize", function(){ if (!menu.classList.contains("hidden")) position(); });
+  menu.querySelectorAll(".network-opt").forEach(function(opt){
+    opt.addEventListener("click", function(){
+      var net = opt.dataset.network;
+      if (net === "preview") { window.location.href = "https://preview.nightforge.jp"; return; }
+      if (net === "preprod") { window.location.href = "https://preprod.nightforge.jp"; return; }
+      if (net === "mainnet") { window.location.href = "https://mainnet.nightforge.jp"; return; }
+      close();
+    });
+  });
+})();
 
 // Load time tracking
 var loadStart=performance.now();
