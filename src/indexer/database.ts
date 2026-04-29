@@ -742,20 +742,41 @@ export function getContractAddresses() {
     ORDER BY e.block_height DESC
   `).all() as { block_height: number; data: string; timestamp: number; block_hash: string }[];
 
+  // Truth-rule helper: a real hash/address is a non-empty string that does NOT
+  // itself look like JSON. Returning a stringified-JSON value as if it were a
+  // hash (the prior bug) is dishonest — fall back to null instead.
+  const isHashString = (v: any): boolean =>
+    typeof v === 'string' && v.length > 0 && !v.startsWith('{') && !v.startsWith('[');
+
   const contracts = rows.map(row => {
     try {
       const parsed = JSON.parse(row.data);
-      // Some ContractDeploy events double-encode the payload: parsed.txHash is
-      // itself a JSON string of {txHash, contractAddress}. Unwrap that layer.
+      // Two on-the-wire shapes have been observed for ContractDeploy event data:
+      //   A. Single-element array carrying a stringified inner object:
+      //      ["{\"txHash\":\"0x..\",\"contractAddress\":\"0x..\"}"]   (current mainnet shape)
+      //   B. Object whose .txHash is itself a stringified inner object:
+      //      {"txHash":"{\"txHash\":\"0x..\",\"contractAddress\":\"0x..\"}"}
+      // Plus the older flat shapes — clean object {txHash, contractAddress} or
+      // 2-element array [txHash, contractAddress]. Detect each, unwrap once.
       let inner: any = parsed;
-      if (typeof parsed?.txHash === 'string' && parsed.txHash.startsWith('{')) {
+      if (Array.isArray(parsed) && parsed.length === 1
+          && typeof parsed[0] === 'string' && parsed[0].startsWith('{')) {
+        try { inner = JSON.parse(parsed[0]); } catch { /* keep parsed */ }
+      } else if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+                 && typeof parsed.txHash === 'string' && parsed.txHash.startsWith('{')) {
         try { inner = JSON.parse(parsed.txHash); } catch { /* keep parsed */ }
       }
-      const address = inner?.contractAddress ?? (Array.isArray(inner) ? inner[1] : null);
-      const txHash = inner?.txHash ?? (Array.isArray(inner) ? inner[0] : null);
+      const address =
+        isHashString(inner?.contractAddress) ? inner.contractAddress
+        : (Array.isArray(inner) && isHashString(inner[1])) ? inner[1]
+        : null;
+      const txHash =
+        isHashString(inner?.txHash) ? inner.txHash
+        : (Array.isArray(inner) && isHashString(inner[0])) ? inner[0]
+        : null;
       return {
-        address: typeof address === 'string' ? address : null,
-        txHash: typeof txHash === 'string' ? txHash : null,
+        address,
+        txHash,
         block: row.block_height,
         blockHash: row.block_hash,
         timestamp: row.timestamp,
