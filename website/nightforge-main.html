@@ -3441,6 +3441,33 @@ setTimeout(function(){
   menu.classList.remove("absolute","top-full","mt-2","left-0");
   menu.style.position = "fixed";
   menu.style.zIndex   = "9999";
+  // 3. Reflect the actual current network in the button label and on the
+  //    correct menu item — preview.nightforge.jp must NOT show "Mainnet".
+  (function(){
+    var host = (window.location.hostname || "").toLowerCase();
+    var current = "mainnet";
+    if (host.indexOf("preview") === 0) current = "preview";
+    else if (host.indexOf("preprod") === 0) current = "preprod";
+    var labelMap = { mainnet: "MAINNET", preview: "PREVIEW", preprod: "PREPROD" };
+    var colorMap = { mainnet: "text-green-400", preview: "text-cyan-400", preprod: "text-orange-400" };
+    var lbl = document.getElementById("networkLabel");
+    if (lbl) {
+      lbl.textContent = labelMap[current];
+      lbl.classList.remove("text-green-400","text-cyan-400","text-orange-400");
+      lbl.classList.add(colorMap[current]);
+    }
+    // Move the active-check (the trailing svg in the matching .network-opt) so
+    // only the current network shows the check, not always Mainnet. Also mark
+    // the active item visually (left border) since preview/preprod items have
+    // no check svg to enable.
+    menu.querySelectorAll(".network-opt").forEach(function(opt){
+      var lastSvg = opt.querySelector(":scope > svg:last-of-type");
+      var active  = opt.dataset.network === current;
+      if (lastSvg) lastSvg.style.display = active ? "" : "none";
+      opt.style.borderLeft = active ? ("3px solid " + ({mainnet:"#22c55e",preview:"#22d3ee",preprod:"#f97316"}[current])) : "none";
+      opt.style.background = active ? "rgba(255,255,255,0.04)" : "";
+    });
+  })();
   function position(){
     var r = btn.getBoundingClientRect();
     menu.style.top  = (r.bottom + 8) + "px";
