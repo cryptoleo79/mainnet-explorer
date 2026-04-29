@@ -51,12 +51,29 @@ dim()     { printf '\033[2m%s\033[0m' "$*"; }
 
 # Render an environment-specific index.html into $TMP_DIR/<name>-index.html
 # then copy to the doc root, prompting for sudo if the root is not writable.
+#
+# Substitutions applied:
+#  - <title>            -> per-env title
+#  - og:title           -> per-env OG title
+#  - og:url             -> per-env canonical URL
+#  - networkLabel span  -> per-env label text + color, so the dropdown shows
+#                          the right network on first paint with no JS flash.
+#                          Source HTML ships the neutral "Network" / slate
+#                          placeholder; this script overrides it per env.
 render_index() {
   local name="$1" label="$2" og_url="$3" out="$TMP_DIR/${name}-index.html"
+  local label_upper label_color
+  case "$label" in
+    Mainnet)  label_upper="MAINNET";  label_color="text-green-400"  ;;
+    Preview)  label_upper="PREVIEW";  label_color="text-cyan-400"   ;;
+    Preprod)  label_upper="PREPROD";  label_color="text-orange-400" ;;
+    *)        label_upper="Network"; label_color="text-slate-400"  ;;
+  esac
   sed \
     -e "s|<title>NightForge Explorer - Mainnet</title>|<title>NightForge Explorer - ${label}</title>|" \
     -e "s|content=\"NightForge Explorer - Midnight Mainnet\"|content=\"NightForge Explorer - Midnight ${label}\"|" \
     -e "s|content=\"https://mainnet.nightforge.jp\"|content=\"${og_url}\"|" \
+    -e "s|<span id=\"networkLabel\" class=\"text-sm font-medium text-slate-400\">Network</span>|<span id=\"networkLabel\" class=\"text-sm font-medium ${label_color}\">${label_upper}</span>|" \
     "$SRC_INDEX" > "$out"
   echo "$out"
 }
