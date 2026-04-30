@@ -212,7 +212,7 @@
           <div class="relative">
             <button id="networkBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-orange-500/50 transition">
               <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span id="networkLabel" class="text-sm font-medium __NETWORK_COLOR__">__NETWORK_LABEL__</span>
+              <span id="networkLabel" class="text-sm font-medium __NETWORK_COLOR__">__NETWORK_LABEL__</span><script>/* SAFETY FALLBACK ONLY — runs synchronously during parse, before first paint, ONLY if scripts/deploy-all.sh did not run and the placeholder leaked through. Substituted deploys never enter this branch — the textContent check is exact. Truth rule: unknown env -> "Network", never "Mainnet". */(function(){var l=document.getElementById("networkLabel");if(l&&l.textContent==="__NETWORK_LABEL__"){l.textContent="Network";l.classList.remove("__NETWORK_COLOR__");l.classList.add("text-slate-400");}})();</script>
               <svg class="w-4 h-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[100] min-w-[220px] overflow-hidden">
@@ -3441,48 +3441,29 @@ setTimeout(function(){
   menu.classList.remove("absolute","top-full","mt-2","left-0");
   menu.style.position = "fixed";
   menu.style.zIndex   = "9999";
-  // 3. Network label + menu active-state.
-  //    Canonical path: scripts/deploy-all.sh substitutes __NETWORK_LABEL__
-  //    and __NETWORK_COLOR__ at deploy time, so the label is correct on
-  //    first paint with no JS hydration. The block below is a SAFETY NET
-  //    for ad-hoc deploys that bypass the script and ship the raw source —
-  //    in that case the placeholder leaks into the DOM and we replace it
-  //    here. JS must never "correct" an already-substituted label, only
-  //    confirm — that's enforced by the explicit placeholder check.
+  // 3. Menu item active-state — runs regardless of the (already correct) label.
+  //
+  //    The button label itself is set at deploy time by scripts/deploy-all.sh
+  //    via the __NETWORK_LABEL__ / __NETWORK_COLOR__ placeholders, with a
+  //    synchronous inline-script safety-net immediately after the span (in
+  //    the markup above) that only fires if the placeholder leaked through.
+  //    THIS block does not touch the label. It only highlights the matching
+  //    .network-opt inside the menu — which is independent of label state
+  //    and only visible after the user opens the menu, so no flicker.
   (function(){
     var host = (window.location.hostname || "").toLowerCase();
     var current = null;
     if (host.indexOf("preview") === 0) current = "preview";
     else if (host.indexOf("preprod") === 0) current = "preprod";
     else if (host === "nightforge.jp" || host.indexOf("mainnet") === 0) current = "mainnet";
-
-    var lbl = document.getElementById("networkLabel");
-    var unsubstituted = lbl && (lbl.textContent === "__NETWORK_LABEL__" || lbl.classList.contains("__NETWORK_COLOR__"));
-    if (unsubstituted) {
-      var labelMap = { mainnet: "Mainnet", preview: "Preview", preprod: "Preprod" };
-      var colorMap = { mainnet: "text-green-400", preview: "text-cyan-400", preprod: "text-orange-400" };
-      lbl.classList.remove("__NETWORK_COLOR__","text-slate-400","text-green-400","text-cyan-400","text-orange-400");
-      if (current) {
-        lbl.textContent = labelMap[current];
-        lbl.classList.add(colorMap[current]);
-      } else {
-        // Fallback per the truth rule: unknown hostname -> "Network", not Mainnet.
-        lbl.textContent = "Network";
-        lbl.classList.add("text-slate-400");
-      }
-    }
-
-    // Menu item active-state — runs regardless of the label path because the
-    // dropdown items are static HTML (deploy script doesn't touch them).
-    if (current) {
-      menu.querySelectorAll(".network-opt").forEach(function(opt){
-        var lastSvg = opt.querySelector(":scope > svg:last-of-type");
-        var active  = opt.dataset.network === current;
-        if (lastSvg) lastSvg.style.display = active ? "" : "none";
-        opt.style.borderLeft = active ? ("3px solid " + ({mainnet:"#22c55e",preview:"#22d3ee",preprod:"#f97316"}[current])) : "none";
-        opt.style.background = active ? "rgba(255,255,255,0.04)" : "";
-      });
-    }
+    if (!current) return;
+    menu.querySelectorAll(".network-opt").forEach(function(opt){
+      var lastSvg = opt.querySelector(":scope > svg:last-of-type");
+      var active  = opt.dataset.network === current;
+      if (lastSvg) lastSvg.style.display = active ? "" : "none";
+      opt.style.borderLeft = active ? ("3px solid " + ({mainnet:"#22c55e",preview:"#22d3ee",preprod:"#f97316"}[current])) : "none";
+      opt.style.background = active ? "rgba(255,255,255,0.04)" : "";
+    });
   })();
   function position(){
     var r = btn.getBoundingClientRect();
