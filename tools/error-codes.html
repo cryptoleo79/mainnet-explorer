@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Midnight Error-Code Decoder - NightForge Explorer</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Plain-English decoder for Midnight Network transaction error codes. Symptom, root cause, fix, and upstream issue link for each observed code. Independent reference, citations only." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; }
+
+    /* Header */
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #e2e8f0;
+    }
+    .header-brand img {
+      height: 32px;
+      width: 32px;
+      border-radius: 6px;
+    }
+    .header-brand span {
+      font-weight: 700;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .header-nav a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: #f97316; }
+    .header-nav a.active { color: #f97316; }
+
+    /* Main content */
+    .main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* Page header */
+    .page-title {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+    .page-title h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #f97316, #f59e0b, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-title p {
+      color: #94a3b8;
+      line-height: 1.6;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* Truth note */
+    .truth-note {
+      background: rgba(6,182,212,0.06);
+      border: 1px solid rgba(6,182,212,0.18);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #94a3b8;
+    }
+    .truth-note strong { color: #67e8f9; font-weight: 700; }
+    .truth-note a { color: #22d3ee; text-decoration: none; font-weight: 600; }
+    .truth-note a:hover { text-decoration: underline; }
+
+    /* Index strip */
+    .index-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+    }
+    .index-strip .label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      align-self: center;
+      margin-right: 0.5rem;
+    }
+    .index-strip a {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      text-decoration: none;
+      background: rgba(15, 23, 42, 0.7);
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.15s;
+    }
+    .index-strip a:hover {
+      border-color: rgba(249,115,22,0.4);
+      color: #f97316;
+    }
+
+    /* Error card */
+    .err-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+      scroll-margin-top: 80px;
+    }
+    .err-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .err-code {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .err-name {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .err-anchor {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: #475569;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .err-anchor:hover { color: #06b6d4; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .pill-fixed {
+      background: rgba(34,197,94,0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .pill-upstream {
+      background: rgba(249,115,22,0.12);
+      color: #fb923c;
+      border: 1px solid rgba(249,115,22,0.3);
+    }
+    .pill-unknown {
+      background: rgba(148,163,184,0.1);
+      color: #94a3b8;
+      border: 1px solid rgba(148,163,184,0.25);
+    }
+    .pill .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .pill-fixed .dot { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .pill-upstream .dot { background: #f97316; }
+    .pill-unknown .dot { background: #94a3b8; }
+
+    .err-rows {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 0.5rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .err-rows dt {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      padding-top: 0.15rem;
+    }
+    .err-rows dd {
+      color: #cbd5e1;
+    }
+    .err-rows dd code {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(15,23,42,0.7);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+    .err-rows dd a {
+      color: #22d3ee;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .err-rows dd a:hover { text-decoration: underline; }
+
+    /* Read-an-error footer block */
+    .reading-block {
+      background: rgba(15,23,42,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-top: 2.5rem;
+    }
+    .reading-block h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.75rem;
+    }
+    .reading-block p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+    .reading-block p:last-child { margin-bottom: 0; }
+    .reading-block code {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(30,41,59,0.7);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+    .reading-block a {
+      color: #22d3ee;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .reading-block a:hover { text-decoration: underline; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .footer a { color: #64748b; text-decoration: none; }
+    .footer a:hover { color: #f97316; }
+
+    @media (max-width: 600px) {
+      .err-rows { grid-template-columns: 1fr; gap: 0.25rem; }
+      .err-rows dt { padding-top: 0.5rem; }
+      .err-head { gap: 0.5rem; }
+      .err-anchor { margin-left: 0; }
+      .page-title h1 { font-size: 1.5rem; }
+      .header-nav { gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="/favicon.ico" alt="NightForge" style="height:32px;width:32px;border-radius:6px;" />
+        <span>NightForge</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Explorer</a>
+        <a href="/tools/">Tools</a>
+        <a href="/tools/error-codes.html" class="active">Error Codes</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-title">
+      <h1>Midnight Error-Code Decoder</h1>
+      <p>Plain-English mapping for the Midnight Network transaction error codes most often seen in the wild. Symptom, root cause, wallet-side fix, and upstream issue link per code.</p>
+    </div>
+
+    <div class="truth-note">
+      <strong>Truth rule.</strong> Every fix listed below is sourced from a YAMORI build session log or a real GitHub issue and cited inline. Codes that have not been personally observed end-to-end are flagged <code>UNKNOWN</code> rather than guessed. This page is independent and not endorsed by the Midnight Foundation.
+    </div>
+
+    <div class="index-strip">
+      <span class="label">Jump to</span>
+      <a href="#1010">1010</a>
+      <a href="#1016">1016</a>
+      <a href="#138">138</a>
+      <a href="#170">170</a>
+      <a href="#171">171</a>
+      <a href="#186">186</a>
+      <a href="#199">199</a>
+    </div>
+
+    <!-- 1010 -->
+    <article class="err-card" id="1010">
+      <div class="err-head">
+        <span class="err-code mono">1010</span>
+        <span class="err-name mono">Invalid Transaction</span>
+        <span class="pill pill-unknown"><span class="dot"></span>Wrapper</span>
+        <a href="#1010" class="err-anchor mono">#1010</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd>RPC returns <code>1010: Invalid Transaction: Custom error: &lt;n&gt;</code>. The trailing integer is the actual cause &mdash; <code>1010</code> by itself only means the node refused the extrinsic.</dd>
+
+        <dt>Root cause</dt>
+        <dd>Substrate-level wrapper around any rejected extrinsic. The inner <code>Custom error</code> number is what you must decode &mdash; see the rest of this page for the common ones.</dd>
+
+        <dt>Fix</dt>
+        <dd>Read the inner <code>Custom error: N</code> integer and look it up. Don&rsquo;t treat <code>1010</code> as the diagnosis.</dd>
+
+        <dt>Status</dt>
+        <dd>Substrate framing, not a Midnight bug. Always present when any tx is rejected.</dd>
+      </dl>
+    </article>
+
+    <!-- 1016 -->
+    <article class="err-card" id="1016">
+      <div class="err-head">
+        <span class="err-code mono">1016</span>
+        <span class="err-name mono">Immediately Dropped</span>
+        <span class="pill pill-unknown"><span class="dot"></span>Unknown</span>
+        <a href="#1016" class="err-anchor mono">#1016</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd>Mainnet contract deploys reportedly fail with Substrate <code>1016: Immediately Dropped</code>; the extrinsic never reaches a block.</dd>
+
+        <dt>Root cause</dt>
+        <dd><strong>UNKNOWN &mdash; not personally observed end-to-end.</strong> Open community thread on the Midnight dev forum reports 100% rejection on mainnet contract deploy with this code; no canonical fix has been published.</dd>
+
+        <dt>Fix</dt>
+        <dd>None known. Watch the Midnight dev forum thread and the <code>midnight-node</code> 1.0.0 release notes (TransactionExtension envelope migration is the leading suspect, but unverified).</dd>
+
+        <dt>Status</dt>
+        <dd>Community-reported on mainnet contract deploys; no upstream issue link confirmed at time of writing. Listed here as <code>UNKNOWN</code> deliberately.</dd>
+      </dl>
+    </article>
+
+    <!-- 138 -->
+    <article class="err-card" id="138">
+      <div class="err-head">
+        <span class="err-code mono">138</span>
+        <span class="err-name mono">BalanceCheckOverspend</span>
+        <span class="pill pill-fixed"><span class="dot"></span>Fixed in wallet</span>
+        <a href="#138" class="err-anchor mono">#138</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd><code>1010: Invalid Transaction: Custom error: 138</code> on every send, even with NIGHT in the wallet.</dd>
+
+        <dt>Root cause</dt>
+        <dd>Transaction had zero DUST inputs. <strong>DUST is mandatory for all Midnight fees</strong>, not NIGHT. The ledger&rsquo;s balance check sums fee-paying coins and fails when DUST is missing.</dd>
+
+        <dt>Fix</dt>
+        <dd>YAMORI uses a <code>WalletFacade</code> with three sub-wallets (Unshielded + Shielded + Dust), registers NIGHT UTXOs for DUST generation first, and sets <code>additionalFeeOverhead: 300_000_000_000_000n</code> when building fee inputs. Resolved in YAMORI v0.17 on 2026-04-08 with the first successful preprod tx <code>00b12909&hellip;</code> (3813 bytes, 100 NIGHT).</dd>
+
+        <dt>Status</dt>
+        <dd>Fixed wallet-side. Soft drift noted: hardcoded <code>additionalFeeOverhead</code> should be replaced with a live <code>FeePrices</code> query when the SDK exposes one cleanly.</dd>
+      </dl>
+    </article>
+
+    <!-- 170 -->
+    <article class="err-card" id="170">
+      <div class="err-head">
+        <span class="err-code mono">170</span>
+        <span class="err-name mono">InvalidDustSpendProof</span>
+        <span class="pill pill-fixed"><span class="dot"></span>Fixed in wallet</span>
+        <a href="#170" class="err-anchor mono">#170</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd><code>1010: Invalid Transaction: Custom error: 170</code> intermittently after wallet load, often paired with <code>Unable to download all specified images</code> in the prover console.</dd>
+
+        <dt>Root cause</dt>
+        <dd>S3 ZK proving-key download failed or returned partial data &rArr; prover used stale/missing keys &rArr; generated DUST spend proof that fails on-chain verification. Identified as <code>MalformedTransaction::InvalidDustSpendProof</code> in <code>midnight-node</code> <code>ledger/src/versions/common/types.rs</code>.</dd>
+
+        <dt>Fix</dt>
+        <dd>YAMORI ships a <code>MIDNIGHT_ERROR_CODES</code> map plus a <code>_resolveErrorCode()</code> helper that translates the Custom-error integer to a name in logs. On code 170 the wallet clears its <code>_kmpCache</code> (forces ZK key re-download from S3) and resets the facade. Applied to both transfer and shield/unshield paths. Resolved in v0.43 (2026-04-12); refined in v1.1.0 to avoid nuking the dust cache on every retry.</dd>
+
+        <dt>Status</dt>
+        <dd>Fixed wallet-side. If it persists after a clean retry, check that the proof server version matches the active ledger and that <code>ZK_VER</code> matches what the network expects.</dd>
+      </dl>
+    </article>
+
+    <!-- 171 -->
+    <article class="err-card" id="171">
+      <div class="err-head">
+        <span class="err-code mono">171</span>
+        <span class="err-name mono">OutOfDustValidityWindow</span>
+        <span class="pill pill-fixed"><span class="dot"></span>Fixed in wallet</span>
+        <a href="#171" class="err-anchor mono">#171</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd><code>1010: Invalid Transaction: Custom error: 171</code> after the wallet has been idle for a while.</dd>
+
+        <dt>Root cause</dt>
+        <dd>Cached DUST coins moved outside their on-chain validity window while the wallet was offline. The ledger rejects spends of expired dust state.</dd>
+
+        <dt>Fix</dt>
+        <dd>YAMORI resets the facade with the dust-cache clear path on code 171 so the next tx rebuilds against a fresh DUST view. Resolved together with the 170 handler in v0.40 / v0.43.</dd>
+
+        <dt>Status</dt>
+        <dd>Fixed wallet-side.</dd>
+      </dl>
+    </article>
+
+    <!-- 186 -->
+    <article class="err-card" id="186">
+      <div class="err-head">
+        <span class="err-code mono">186</span>
+        <span class="err-name mono">EffectsCheckFailure (sister to 199)</span>
+        <span class="pill pill-upstream"><span class="dot"></span>Upstream tracked</span>
+        <a href="#186" class="err-anchor mono">#186</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd>Combined <code>sendShielded</code> + <code>insertCoin</code>-on-change transactions reportedly fail with <code>EffectsCheckFailure</code> as Custom error 186.</dd>
+
+        <dt>Root cause</dt>
+        <dd>Sister case to issue #1206 &mdash; same family of effects-check failure, different trigger path. Tracked at <a href="https://github.com/midnightntwrk/midnight-node/issues/1374" target="_blank" rel="noopener noreferrer">midnightntwrk/midnight-node #1374</a> (opened 2026-04-21, P3 planned, OPEN as of 2026-05-02).</dd>
+
+        <dt>Fix</dt>
+        <dd>Nothing wallet-side. Wait on upstream node patch.</dd>
+
+        <dt>Status</dt>
+        <dd>Upstream tracked. No PR linked yet at time of writing.</dd>
+      </dl>
+    </article>
+
+    <!-- 199 -->
+    <article class="err-card" id="199">
+      <div class="err-head">
+        <span class="err-code mono">199</span>
+        <span class="err-name mono">InvariantViolation / AllCommitmentsSubsetCheckFailure</span>
+        <span class="pill pill-upstream"><span class="dot"></span>Upstream tracked</span>
+        <a href="#199" class="err-anchor mono">#199</a>
+      </div>
+      <dl class="err-rows">
+        <dt>Symptom</dt>
+        <dd>Every shielded mint / shield (<code>initSwap</code>) on preprod returns <code>1010: Invalid Transaction: Custom error: 199</code>. Unshielded sends on the same wallet succeed.</dd>
+
+        <dt>Root cause</dt>
+        <dd>Node-level <code>EffectsCheckFailure(AllCommitmentsSubsetCheckFailure)</code> on shielded minting. <strong>Not a wallet bug</strong> &mdash; verified by upgrading the proof server from 6.1 to 8.1 with no change in behaviour. Tracked at <a href="https://github.com/midnightntwrk/midnight-node/issues/1206" target="_blank" rel="noopener noreferrer">midnightntwrk/midnight-node #1206</a> (opened 2026-04-01, OPEN as of 2026-05-02, no PR linked).</dd>
+
+        <dt>Fix</dt>
+        <dd>Nothing wallet-side. YAMORI ships a friendly error-199 message in v0.48 explaining the upstream block. <code>initSwap</code> is the correct shield method &mdash; <code>transferTransaction</code> cannot cross pools, so this is not a workable substitute.</dd>
+
+        <dt>Status</dt>
+        <dd>Upstream tracked. Preprod shielded mint blocked. Watch testnet upgrades and node 1.0.0 RC release notes.</dd>
+      </dl>
+    </article>
+
+    <!-- How to read a Midnight error -->
+    <section class="reading-block">
+      <h2>How to read a Midnight error</h2>
+      <p>A Midnight tx failure surfaces as a layered chain. The outer frame is almost always Substrate&rsquo;s <code>1010 Invalid Transaction</code>. Inside that you get <code>Custom error: N</code> where <code>N</code> is the actual Midnight ledger code. JS callers see this through Effect&rsquo;s <code>cause</code> chain, which preserves both layers but stringifies the inner one as a bare integer.</p>
+      <p>The pattern that has worked in practice: parse the <code>Custom error: \d+</code> integer out of the message and look it up in a code map &mdash; YAMORI&rsquo;s <code>MIDNIGHT_ERROR_CODES</code> map plus its <code>_resolveErrorCode()</code> helper turns the integer into a name in the wallet&rsquo;s service-worker log so a developer never has to memorise codes. The full code table was reconstructed from <code>ledger/src/versions/common/types.rs</code> in <a href="https://github.com/midnightntwrk/midnight-node" target="_blank" rel="noopener noreferrer">midnightntwrk/midnight-node</a>.</p>
+      <p>If your wallet treats <code>1010</code> itself as the error and stops there, you&rsquo;ll never see the real diagnosis. Always extract and surface the inner integer before deciding what to do.</p>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 <a href="/">NightForge Explorer</a> &mdash; Built for the Midnight Network</p>
+  </footer>
+
+</body>
+</html>
