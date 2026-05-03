@@ -504,6 +504,118 @@
       .pulse-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
 
+    /* Federated-phase banner */
+    .phase-banner {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      color: #fde68a;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+    }
+    .phase-banner .banner-icon {
+      flex-shrink: 0;
+      color: #fbbf24;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .phase-banner a {
+      color: #fbbf24;
+      text-decoration: underline;
+    }
+    .phase-banner a:hover { color: #fef3c7; }
+
+    /* Nakamoto + headline metric strip */
+    .headline-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-tile {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+    }
+    .metric-tile.nakamoto {
+      border-color: rgba(34, 197, 94, 0.25);
+      background: rgba(34,197,94,0.04);
+    }
+    .metric-tile-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+    }
+    .metric-tile-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      margin: 0.2rem 0 0.15rem;
+      line-height: 1;
+    }
+    .metric-tile.nakamoto .metric-tile-value { color: #4ade80; }
+    .metric-tile-sub {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    /* Per-validator signing strip */
+    .signing-strip-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .signing-strip {
+      display: inline-block;
+      vertical-align: middle;
+      flex: 0 0 auto;
+    }
+    .signing-strip rect.cell-produced { fill: #22c55e; }
+    .signing-strip rect.cell-other    { fill: rgba(100,116,139,0.35); }
+    .signing-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    /* Validator class chip */
+    .v-class-chip {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .v-class-chip.permissioned {
+      background: rgba(245,158,11,0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245,158,11,0.35);
+    }
+    .v-class-chip.registered {
+      background: rgba(34,197,94,0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.35);
+    }
+    .v-class-chip.federated-genesis {
+      background: rgba(168,85,247,0.12);
+      color: #c4b5fd;
+      border: 1px solid rgba(168,85,247,0.35);
+    }
+
     /* Empty state */
     .empty-card {
       background: rgba(30, 41, 59, 0.6);
@@ -575,6 +687,31 @@
     <div class="page-title">
       <h1>Validator Directory</h1>
       <p>SPO registry with performance, stake distribution, and delegation metrics for the Midnight network.</p>
+    </div>
+
+    <!-- Federated-phase banner (computed from /api/committee + /api/validators/directory) -->
+    <div id="phaseBanner" class="phase-banner" style="display:none;">
+      <span class="banner-icon">i</span>
+      <div id="phaseBannerText">Awaiting indexer data&hellip;</div>
+    </div>
+
+    <!-- Headline metric strip: Nakamoto Coefficient + committee + registered SPOs -->
+    <div class="headline-metrics">
+      <div class="metric-tile nakamoto" title="Smallest validator subset whose combined stake exceeds 33% of total. Computed from /api/committee.">
+        <div class="metric-tile-label">Nakamoto Coefficient</div>
+        <div class="metric-tile-value" id="nakamotoValue">&mdash;</div>
+        <div class="metric-tile-sub" id="nakamotoSub">smallest committee subset controlling &gt;33% of stake</div>
+      </div>
+      <div class="metric-tile" title="Distinct committee validators from /api/committee.">
+        <div class="metric-tile-label">Committee size</div>
+        <div class="metric-tile-value" id="metricCommitteeSize">&mdash;</div>
+        <div class="metric-tile-sub" id="metricCommitteeSub">distinct committee validators</div>
+      </div>
+      <div class="metric-tile" title="Registered SPOs from /api/validators/directory (Mōhalu phase).">
+        <div class="metric-tile-label">Registered SPOs</div>
+        <div class="metric-tile-value" id="metricSpoCount">&mdash;</div>
+        <div class="metric-tile-sub">populates when Mōhalu activation begins</div>
+      </div>
     </div>
 
     <!-- Liveness Pulse -->
@@ -704,6 +841,87 @@
       return 'Silent';
     }
 
+    // Render validator-class chip if the API exposes it.
+    // The committee endpoint returns `type` ("permissioned"); the SPO performance
+    // endpoint will return `validatorClass`/`identityLabel` once federated->mohalu
+    // transition begins. Truth rule: skip the chip if no class info.
+    function renderClassChip(v) {
+      const cls = (v.validatorClass || v.type || '').toLowerCase();
+      if (!cls) return '';
+      let cssCls = '';
+      let label = cls;
+      if (cls === 'permissioned' || cls === 'federated' || cls === 'federated-genesis') {
+        cssCls = cls === 'permissioned' ? 'permissioned' : 'federated-genesis';
+        label = cls === 'permissioned' ? 'permissioned' : 'federated';
+      } else if (cls === 'registered' || cls === 'spo') {
+        cssCls = 'registered';
+        label = 'registered';
+      } else {
+        return '';
+      }
+      return `<span class="v-class-chip ${cssCls}">${label}</span>`;
+    }
+
+    // SVG signing density strip — each cell = 1 of the last N blocks observed.
+    // We don't have per-slot author history in the current API; what we have is
+    // an aggregate count of blocks produced by this validator over the window.
+    // So the strip shows DENSITY, not slot order, and the column header says so.
+    function renderSigningStrip(produced, windowSize) {
+      if (!windowSize || windowSize <= 0) {
+        return '<svg class="signing-strip" width="0" height="10"></svg>';
+      }
+      const cellW = 3;
+      const cellGap = 1;
+      const cellH = 10;
+      const total = windowSize;
+      const greenCount = Math.min(produced, total);
+      const cells = [];
+      for (let i = 0; i < total; i++) {
+        const x = i * (cellW + cellGap);
+        const cls = i < greenCount ? 'cell-produced' : 'cell-other';
+        cells.push(`<rect class="${cls}" x="${x}" y="0" width="${cellW}" height="${cellH}" rx="0.5"/>`);
+      }
+      const stripW = total * (cellW + cellGap) - cellGap;
+      return `<svg class="signing-strip" width="${stripW}" height="${cellH}" viewBox="0 0 ${stripW} ${cellH}">${cells.join('')}</svg>`;
+    }
+
+    // Nakamoto Coefficient: smallest k such that the top k validators
+    // by stake control >33% of total stake. Sorted desc.
+    // If members lack a `stake` field (federated phase, equal stake), every
+    // validator counts equally and NC = ceil(size * 0.33) + 1 honest baseline.
+    function computeNakamotoCoefficient(members) {
+      if (!members || !members.length) return null;
+      const stakes = members.map(m => {
+        const s = m.stake != null ? Number(m.stake) :
+                  m.activeStake != null ? Number(m.activeStake) :
+                  m.liveStake != null ? Number(m.liveStake) : null;
+        return Number.isFinite(s) ? s : null;
+      });
+      const haveStake = stakes.every(s => s != null && s > 0);
+      let nc;
+      let basis;
+      if (haveStake) {
+        const sorted = stakes.slice().sort((a, b) => b - a);
+        const total = sorted.reduce((a, b) => a + b, 0);
+        const threshold = total / 3; // strictly >33.33% means we cross 1/3
+        let cum = 0;
+        nc = 0;
+        for (let i = 0; i < sorted.length; i++) {
+          cum += sorted[i];
+          nc = i + 1;
+          if (cum > threshold) break;
+        }
+        basis = 'stake-weighted';
+      } else {
+        // Equal-stake federated phase: every member has the same effective weight.
+        // NC = smallest k where k/n > 1/3.
+        const n = members.length;
+        nc = Math.floor(n / 3) + 1;
+        basis = 'equal-weight (federated phase, no per-validator stake reported)';
+      }
+      return { value: nc, basis, total: members.length };
+    }
+
     function renderPulseGrid(data) {
       const validators = data.validators || [];
       const grid = document.getElementById('pulseGrid');
@@ -731,16 +949,28 @@
         return;
       }
 
+      const windowBlocks = data.windowBlocks || 0;
+
       let html = '<table class="ltable"><thead><tr>';
-      html += '<th>#</th><th>Aura Key</th><th>Blocks (window)</th><th>Last Block</th><th>Last Seen</th><th>Status</th>';
+      html += '<th>#</th><th>Class</th><th>Aura Key</th>';
+      html += `<th title="Each cell = 1 of the last ${windowBlocks} blocks observed; green cells = blocks produced by this validator. Density only — not slot order.">Signing density (last ${windowBlocks} blocks)</th>`;
+      html += '<th>Last Block</th><th>Last Seen</th><th>Status</th>';
       html += '</tr></thead><tbody>';
 
       validators.forEach(v => {
         const badgeCls = badgeStatusClass(v);
+        const chipHtml = renderClassChip(v);
+        const stripHtml = renderSigningStrip(v.blocksProduced || 0, windowBlocks);
         html += `<tr>
           <td class="mono" style="color:#cbd5e1;font-weight:600;">V${v.id}</td>
+          <td>${chipHtml}</td>
           <td class="mono" style="color:#94a3b8;">${truncateKey(v.auraKey)}</td>
-          <td class="mono">${v.blocksProduced}</td>
+          <td>
+            <div class="signing-strip-wrap">
+              ${stripHtml}
+              <span class="signing-count">${v.blocksProduced}/${windowBlocks}</span>
+            </div>
+          </td>
           <td class="mono">${v.lastBlockHeight != null ? v.lastBlockHeight.toLocaleString() : '<span style="color:#64748b;">never</span>'}</td>
           <td class="mono" style="color:${v.lastBlockAgeSeconds != null && v.lastBlockAgeSeconds <= 60 ? '#4ade80' : '#94a3b8'};">${formatAge(v.lastBlockAgeSeconds)}</td>
           <td><span class="status-badge ${badgeCls}"><span class="dot"></span>${statusLabel(v)}</span></td>
@@ -806,6 +1036,33 @@
       if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
       if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
       return num.toFixed(0);
+    }
+
+    function renderPhaseBanner(committee, regCount, federated) {
+      const banner = document.getElementById('phaseBanner');
+      const text = document.getElementById('phaseBannerText');
+      if (!banner || !text) return;
+      if (!committee || typeof committee.size !== 'number') {
+        banner.style.display = 'none';
+        return;
+      }
+      const members = Array.isArray(committee.members) ? committee.members : [];
+      const permissioned = members.filter(m => (m.type || '').toLowerCase() === 'permissioned').length;
+      const registered = (typeof regCount === 'number' ? regCount : 0);
+      const inFederatedPhase = federated || permissioned === committee.size;
+      if (inFederatedPhase) {
+        text.innerHTML =
+          `Midnight is in <strong>FEDERATED</strong> phase &mdash; ` +
+          `<strong>${permissioned}</strong> permissioned producer${permissioned === 1 ? '' : 's'}, ` +
+          `<strong>${registered}</strong> registered SPO${registered === 1 ? '' : 's'}. ` +
+          `<a href="/#nfDecentDial">Decentralization Dial &rarr;</a>`;
+      } else {
+        text.innerHTML =
+          `Mōhalu activation in progress &mdash; ` +
+          `<strong>${permissioned}</strong> permissioned + <strong>${registered}</strong> registered. ` +
+          `<a href="/#nfDecentDial">Decentralization Dial &rarr;</a>`;
+      }
+      banner.style.display = '';
     }
 
     function renderEmpty() {
@@ -875,8 +1132,10 @@
 
         // Committee (truth source for size and totalEntries)
         let committeeFederated = false;
+        let committeeData = null;
         if (commRes.status === 'fulfilled' && commRes.value.ok) {
           const c = await commRes.value.json();
+          committeeData = c;
           committeeFederated = !!c.federated;
           const cv = document.getElementById('committeeValidators');
           if (cv) cv.textContent = (typeof c.size === 'number') ? c.size : '—';
@@ -884,6 +1143,35 @@
           if (ce) ce.textContent = (typeof c.totalEntries === 'number') ? c.totalEntries : '—';
           const lcs = document.getElementById('livenessCommitteeSize');
           if (lcs) lcs.textContent = (typeof c.size === 'number') ? c.size : '—';
+
+          // Headline tile: committee size
+          const mcs = document.getElementById('metricCommitteeSize');
+          if (mcs) mcs.textContent = (typeof c.size === 'number') ? c.size : '—';
+          const mcsub = document.getElementById('metricCommitteeSub');
+          if (mcsub) {
+            const allPerm = Array.isArray(c.members) && c.members.length > 0 &&
+              c.members.every(m => (m.type || '').toLowerCase() === 'permissioned');
+            mcsub.textContent = allPerm
+              ? 'all permissioned (federated phase)'
+              : 'distinct committee validators';
+          }
+
+          // Nakamoto Coefficient (computed client-side from /api/committee)
+          const nc = computeNakamotoCoefficient(c.members || []);
+          const ncEl = document.getElementById('nakamotoValue');
+          const ncSub = document.getElementById('nakamotoSub');
+          if (nc && ncEl) {
+            ncEl.textContent = nc.value;
+            if (ncSub) {
+              ncSub.textContent = `smallest subset >33% of stake (${nc.basis})`;
+            }
+          } else if (ncEl) {
+            ncEl.textContent = '—';
+            ncEl.title = 'Awaiting committee data';
+          }
+        } else {
+          const ncEl = document.getElementById('nakamotoValue');
+          if (ncEl) { ncEl.textContent = '—'; ncEl.title = 'Awaiting committee data'; }
         }
 
         // Validator directory (Mohalu / SPO registry)
@@ -913,9 +1201,17 @@
               ? 'No registered SPOs in current federated phase. Will populate when Mohalu activation begins.'
               : regCount + ' registered SPO' + (regCount === 1 ? '' : 's');
 
+          // Headline metric tile
+          const spoEl = document.getElementById('metricSpoCount');
+          if (spoEl) spoEl.textContent = regCount;
+
+          // Federated-phase banner — built from live data only.
+          renderPhaseBanner(committeeData, regCount, committeeFederated);
+
           renderValidators(validators);
         } else {
           renderEmpty();
+          renderPhaseBanner(committeeData, null, committeeFederated);
         }
 
         // D-Parameter

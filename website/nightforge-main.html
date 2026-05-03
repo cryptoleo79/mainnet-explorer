@@ -409,7 +409,7 @@
   <!-- TIER 3: Deep analytics panel (hidden by default, toggles on click) -->
   <div id="nfDeepPanel" style="display:none;">
 
-    <!-- Decentralization Dial -->
+    <!-- Decentralization Dial + Nakamoto Coefficient -->
     <div id="nfDecentDial" class="container" style="padding-bottom:16px;display:none;">
       <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -419,9 +419,16 @@
           </div>
           <span id="nfDecentPhase" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;"></span>
         </div>
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
+        <div style="display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;">
           <svg id="nfDecentGauge" viewBox="0 0 200 120" style="width:200px;height:120px;"></svg>
           <div id="nfDecentBreakdown" style="display:flex;flex-direction:column;gap:6px;font-size:11px;font-variant-numeric:tabular-nums;"></div>
+          <a href="/tools/validators.html" id="nfNakamotoCard"
+             title="Smallest validator subset whose combined stake exceeds 33% of total. Computed from /api/committee."
+             style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 14px;border-left:1px solid rgba(100,116,139,0.18);min-width:110px;text-decoration:none;color:inherit;">
+            <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;text-align:center;">Nakamoto Coefficient</span>
+            <span id="nfNakamotoValue" style="color:#4ade80;font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;">&mdash;</span>
+            <span id="nfNakamotoSub" style="color:#94a3b8;font-size:9px;text-align:center;line-height:1.3;">&gt;33% of stake</span>
+          </a>
         </div>
       </div>
     </div>
@@ -1064,6 +1071,28 @@
       var shares=blocksArr.map(function(x){return x/total*100;});
       return Math.round(shares.reduce(function(s,v){return s+v*v;},0));
     }
+    // Nakamoto Coefficient: smallest k such that the top-k validators' stake
+    // crosses 33% of the total. If members lack stake (federated phase, equal
+    // stake), every member counts equally and NC = floor(n/3)+1.
+    function computeNakamoto(members){
+      if(!members||!members.length)return null;
+      var stakes=members.map(function(m){
+        var s=m.stake!=null?Number(m.stake):
+              m.activeStake!=null?Number(m.activeStake):
+              m.liveStake!=null?Number(m.liveStake):null;
+        return (s!=null&&isFinite(s))?s:null;
+      });
+      var haveStake=stakes.every(function(s){return s!=null&&s>0;});
+      if(haveStake){
+        var sorted=stakes.slice().sort(function(a,b){return b-a;});
+        var total=sorted.reduce(function(a,b){return a+b;},0);
+        var threshold=total/3;
+        var cum=0,k=0;
+        for(var i=0;i<sorted.length;i++){cum+=sorted[i];k=i+1;if(cum>threshold)break;}
+        return {value:k,basis:'stake-weighted'};
+      }
+      return {value:Math.floor(members.length/3)+1,basis:'equal-weight'};
+    }
     function renderDecentralizationDial(){
       var wrap=document.getElementById("nfDecentDial");
       if(!wrap)return;
@@ -1074,6 +1103,18 @@
         fetch("/api/epoch/current").then(function(r){return r.json()}).catch(function(){return null;})
       ]).then(function(res){
         var dparam=res[0],committee=res[1],producers=res[2],epoch=res[3];
+        // Nakamoto card — depends only on committee, populate independently of the dial gate.
+        if(committee&&Array.isArray(committee.members)){
+          var nc=computeNakamoto(committee.members);
+          var nv=document.getElementById('nfNakamotoValue');
+          var ns=document.getElementById('nfNakamotoSub');
+          if(nc&&nv){nv.textContent=nc.value;}
+          if(nc&&ns){
+            ns.textContent=nc.basis==='stake-weighted'
+              ?'smallest subset >33% of stake'
+              :'smallest subset >33% (equal weight)';
+          }
+        }
         // Require committee + d-parameter (epoch is a bonus)
         if(!committee||!committee.members||!dparam||!dparam.history||!dparam.history.length)return;
         var latest=dparam.history[dparam.history.length-1];
