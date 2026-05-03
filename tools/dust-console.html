@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DUST Console - NightForge Explorer</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="DUST mechanics, live network status, fee calculator, and economic charts for the Midnight network &mdash; unified in one console." />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; }
+
+    /* ---------- Header ---------- */
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #e2e8f0;
+    }
+    .header-brand img {
+      height: 32px;
+      width: 32px;
+      border-radius: 6px;
+    }
+    .header-brand span {
+      font-weight: 700;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .header-nav a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: #f97316; }
+    .header-nav a.active { color: #f97316; }
+
+    /* ---------- Sub-tab nav ---------- */
+    .subnav {
+      background: rgba(15, 23, 42, 0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 64px;
+      z-index: 50;
+    }
+    .subnav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      gap: 0.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .subnav-inner::-webkit-scrollbar { display: none; }
+    .subnav-link {
+      flex: 0 0 auto;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .subnav-link:hover { color: #e2e8f0; }
+    .subnav-link.active {
+      color: #f59e0b;
+      border-bottom-color: #f59e0b;
+    }
+    .subnav-link .pill {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(245,158,11,0.15);
+      color: #fbbf24;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ---------- Main / page title ---------- */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-title {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+    .page-title h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-title h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #f1f5f9;
+    }
+    .page-title p {
+      color: #94a3b8;
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Tab panels ---------- */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.18s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- Shared card / stat / msg styles ---------- */
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-box {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .search-box label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 0.625rem;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .search-box input[type="text"],
+    .search-box input[type="number"] {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input[type="number"] { -moz-appearance: textfield; }
+    .search-box input[type="number"]::-webkit-inner-spin-button,
+    .search-box input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .search-box input::placeholder { color: #475569; }
+    .search-box input[type="text"]:focus { border-color: #22c55e; }
+    .search-box input[type="number"]:focus { border-color: #f97316; }
+
+    .btn-check {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-check:hover {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      box-shadow: 0 4px 16px rgba(34,197,94,0.4);
+    }
+    .btn-check:disabled, .btn-calc:disabled, .btn-refresh:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-calc {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-calc:hover {
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      box-shadow: 0 4px 16px rgba(249,115,22,0.4);
+    }
+
+    /* Slider */
+    .slider-section { margin-top: 1.25rem; }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .slider-header span {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .slider-value {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.8rem;
+      color: #fb923c;
+      font-weight: 600;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #f97316 0%, #06b6d4 100%);
+      outline: none;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    input[type="range"]:hover { opacity: 1; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f97316;
+      cursor: pointer;
+      border: 2px solid #0f172a;
+      box-shadow: 0 2px 8px rgba(249,115,22,0.5);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f97316;
+      cursor: pointer;
+      border: 2px solid #0f172a;
+      box-shadow: 0 2px 8px rgba(249,115,22,0.5);
+    }
+
+    /* Preset buttons */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+    .presets > span {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 0.25rem;
+    }
+    .preset-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-btn:hover {
+      border-color: #f97316;
+      color: #fb923c;
+      background: rgba(249,115,22,0.08);
+    }
+    .preset-btn.active {
+      border-color: #f97316;
+      color: #f97316;
+      background: rgba(249,115,22,0.12);
+    }
+
+    /* Messages */
+    .msg {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .msg-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+    }
+    .msg-loading {
+      background: rgba(6,182,212,0.08);
+      border: 1px solid rgba(6,182,212,0.2);
+      color: #67e8f9;
+    }
+
+    /* Results */
+    .results { display: none; }
+    .results.visible {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Result card */
+    .result-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1rem;
+    }
+    .result-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .result-card-header h2,
+    .result-card-header h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+    .result-card-header .night-amount {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #fb923c;
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.25);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+    }
+
+    /* Stat grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .stat-item {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 0.375rem;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .stat-value.highlight { color: #4ade80; }
+    .stat-value.cyan      { color: #22d3ee; }
+    .stat-value.orange    { color: #fb923c; }
+    .stat-value.green     { color: #4ade80; }
+    .stat-value.purple    { color: #a78bfa; }
+    .stat-sub {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.875rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-registered, .badge-surplus {
+      background: rgba(34,197,94,0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .badge-unregistered, .badge-deficit {
+      background: rgba(239,68,68,0.12);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.25);
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .badge-registered .badge-dot, .badge-surplus .badge-dot { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .badge-unregistered .badge-dot, .badge-deficit .badge-dot { background: #ef4444; }
+
+    /* CTA register */
+    .cta-register {
+      display: none;
+      background: linear-gradient(135deg, rgba(249,115,22,0.1), rgba(234,179,8,0.08));
+      border: 1px solid rgba(249,115,22,0.25);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .cta-register.visible { display: block; }
+    .cta-register p {
+      color: #fbbf24;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .cta-register a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.625rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    .cta-register a:hover {
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      box-shadow: 0 4px 16px rgba(249,115,22,0.4);
+    }
+
+    /* Eligibility gauge */
+    .eligibility-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-top: 2rem;
+    }
+    .eligibility-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .eligibility-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .eligibility-header .window-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .eligibility-pct {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #22c55e, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .eligibility-pct.empty {
+      background: none;
+      -webkit-text-fill-color: #475569;
+      color: #475569;
+    }
+    .eligibility-sub {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+    .eligibility-sub.empty { color: #64748b; font-style: italic; }
+    .eligibility-bar-wrap {
+      width: 100%;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .eligibility-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #06b6d4);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.6s ease-out;
+    }
+    .eligibility-bar-fill.empty {
+      background: rgba(71, 85, 105, 0.4);
+    }
+    .eligibility-footer {
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: #475569;
+      letter-spacing: 0.03em;
+    }
+
+    /* Progress bar */
+    .progress-section { margin-top: 1.25rem; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .progress-label span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .progress-label .progress-days {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      color: #22d3ee;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #f97316, #06b6d4);
+      transition: width 0.6s ease-out;
+      min-width: 0;
+    }
+    .progress-markers {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.375rem;
+    }
+    .progress-markers span {
+      font-size: 0.65rem;
+      color: #475569;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    }
+
+    /* Refresh row (economics) */
+    .refresh-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .btn-refresh {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.625rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-refresh:hover {
+      background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+      box-shadow: 0 4px 16px rgba(139,92,246,0.4);
+    }
+    .last-updated {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    /* Section heading */
+    .section-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-heading.gen  { color: #4ade80; }
+    .section-heading.con  { color: #f97316; }
+    .section-heading.flow { color: #8b5cf6; }
+
+    /* Sustainability gauge */
+    .gauge-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .gauge-ring {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+    .gauge-ring svg {
+      transform: rotate(-90deg);
+      width: 100px;
+      height: 100px;
+    }
+    .gauge-ring .bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.06);
+      stroke-width: 8;
+    }
+    .gauge-ring .fg {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s ease, stroke 0.4s;
+    }
+    .gauge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+    .gauge-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .flow-row {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .flow-stats {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .flow-gauge {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Collapsible parameters */
+    .params-toggle {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.25rem 1.75rem;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+      margin-bottom: 0;
+    }
+    .params-toggle:hover {
+      border-color: rgba(139,92,246,0.3);
+      color: #c4b5fd;
+    }
+    .params-toggle .chevron {
+      transition: transform 0.3s;
+      font-size: 0.75rem;
+    }
+    .params-toggle.open .chevron { transform: rotate(180deg); }
+    .params-toggle.open {
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+    }
+    .params-body {
+      display: none;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 0 1.75rem 1.75rem;
+    }
+    .params-body.open {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .param-item {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 10px;
+      padding: 0.875rem;
+    }
+    .param-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+    .param-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #c4b5fd;
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Info box */
+    .info-box {
+      background: rgba(6,182,212,0.06);
+      border: 1px solid rgba(6,182,212,0.15);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+    .info-box.purple {
+      background: rgba(139,92,246,0.06);
+      border-color: rgba(139,92,246,0.15);
+    }
+    .info-box h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #67e8f9;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .info-box.purple h3 { color: #c4b5fd; }
+    .info-box p {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+    .info-box p:last-child { margin-bottom: 0; }
+    .info-box a {
+      color: #22d3ee;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .info-box.purple a { color: #a78bfa; }
+    .info-box a:hover { text-decoration: underline; }
+    .info-box code {
+      background: rgba(255,255,255,0.06);
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      color: #e2e8f0;
+    }
+    .info-box ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+    .info-box ul li {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      padding-left: 1.25rem;
+      position: relative;
+    }
+    .info-box ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.65em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #06b6d4;
+    }
+    .info-box strong { color: #e2e8f0; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(103,232,249,0.3);
+      border-top-color: #67e8f9;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .footer a { color: #64748b; text-decoration: none; }
+    .footer a:hover { color: #f97316; }
+
+    @media (max-width: 600px) {
+      .page-title h1 { font-size: 1.5rem; }
+      .header-nav { gap: 0.75rem; }
+      .subnav { top: 60px; }
+      .subnav-link { padding: 0.7rem 0.85rem; font-size: 0.8rem; }
+      .input-row { flex-direction: column; }
+      .btn-check, .btn-calc { width: 100%; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .flow-row { flex-direction: column; }
+      .param-grid { grid-template-columns: 1fr; }
+      .gauge-ring { width: 80px; height: 80px; }
+      .gauge-ring svg { width: 80px; height: 80px; }
+      .presets { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="/favicon.ico" alt="NightForge" />
+        <span>NightForge</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Explorer</a>
+        <a href="/tools/">Tools</a>
+        <a href="/tools/dust-console.html" class="active">DUST Console</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Sub-tab nav: hash-routed (#mechanics default, #status, #calc, #economics) -->
+  <nav class="subnav" role="tablist" aria-label="DUST Console sections">
+    <div class="subnav-inner">
+      <a href="#mechanics" class="subnav-link" data-tab="mechanics" role="tab" aria-selected="true" aria-controls="panel-mechanics" id="tab-mechanics">
+        Mechanics
+      </a>
+      <a href="#status" class="subnav-link" data-tab="status" role="tab" aria-selected="false" aria-controls="panel-status" id="tab-status">
+        Status
+        <span class="pill">live</span>
+      </a>
+      <a href="#calc" class="subnav-link" data-tab="calc" role="tab" aria-selected="false" aria-controls="panel-calc" id="tab-calc">
+        Calculator
+      </a>
+      <a href="#economics" class="subnav-link" data-tab="economics" role="tab" aria-selected="false" aria-controls="panel-economics" id="tab-economics">
+        Economics
+      </a>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="page-title">
+      <h1>DUST Console</h1>
+      <p>One place for everything DUST: how it works, what the network is doing right now, what your transaction will cost, and where the supply is going.</p>
+    </div>
+
+    <!-- ========== MECHANICS ========== -->
+    <section id="panel-mechanics" class="tab-panel active" role="tabpanel" aria-labelledby="tab-mechanics">
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7h7l-5.5 4.5L18 22l-6-4-6 4 1.5-8.5L2 9h7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          DUST Mechanics &mdash; Canonical Parameters
+        </div>
+        <p style="color:#94a3b8; font-size:0.85rem; line-height:1.6; margin-bottom:1.25rem;">
+          Static on-chain constants from the Midnight ledger spec. These are protocol facts, not live values.
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:0.75rem;">
+          <div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:1rem;">
+            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:0.4rem;">night_dust_ratio</div>
+            <div class="mono" style="font-size:1.1rem; font-weight:700; color:#f1f5f9; margin-bottom:0.4rem;" title="Source: https://github.com/midnightntwrk/midnight-ledger/blob/main/spec/dust.md">5,000,000,000</div>
+            <div style="font-size:0.78rem; color:#94a3b8; line-height:1.5;">5 DUST per NIGHT cap &mdash; the maximum DUST balance any NIGHT holder can accrue.</div>
+          </div>
+          <div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:1rem;">
+            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:0.4rem;">generation_decay_rate</div>
+            <div class="mono" style="font-size:1.1rem; font-weight:700; color:#f1f5f9; margin-bottom:0.4rem;" title="Source: https://github.com/midnightntwrk/midnight-ledger/blob/main/spec/dust.md">8,267</div>
+            <div style="font-size:0.78rem; color:#94a3b8; line-height:1.5;">~1 week to fill or decay &mdash; sets how fast DUST regenerates from NIGHT and decays once spent.</div>
+          </div>
+          <div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:1rem;">
+            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:0.4rem;">dust_grace_period</div>
+            <div class="mono" style="font-size:1.1rem; font-weight:700; color:#f1f5f9; margin-bottom:0.4rem;" title="Source: https://docs.midnight.network/blog/dust-architecture">3 hours</div>
+            <div style="font-size:0.78rem; color:#94a3b8; line-height:1.5;">Timestamp tolerance &mdash; how far a transaction's claimed time may drift from chain time before rejection.</div>
+          </div>
+          <div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:1rem;">
+            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:0.4rem;">genesis</div>
+            <div class="mono" style="font-size:1.1rem; font-weight:700; color:#f1f5f9; margin-bottom:0.4rem;" title="Mainnet debut announced by Charles Hoskinson, last week of March 2026">2026-03-31T16:00:00Z</div>
+            <div style="font-size:0.78rem; color:#94a3b8; line-height:1.5;">Midnight chain genesis &mdash; the time origin used by every DUST decay and generation calculation.</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem; font-size:0.75rem; color:#64748b;">
+          Sources:
+          <a href="https://docs.midnight.network/blog/dust-architecture" target="_blank" rel="noopener" style="color:#67e8f9; text-decoration:none;">DUST Architecture blog</a>
+          &middot;
+          <a href="https://github.com/midnightntwrk/midnight-ledger/blob/main/spec/dust.md" target="_blank" rel="noopener" style="color:#67e8f9; text-decoration:none;">midnight-ledger/spec/dust.md</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STATUS ========== -->
+    <section id="panel-status" class="tab-panel" role="tabpanel" aria-labelledby="tab-status" hidden>
+      <!-- Address lookup -->
+      <div class="search-box">
+        <label for="s-addressInput">Cardano Reward Address</label>
+        <div class="input-row">
+          <input type="text" id="s-addressInput" placeholder="stake1u8a9qstrmj4rvc3k5z8fems7f0j2vztz8det6mghz3wv2qcvzuure" spellcheck="false" autocomplete="off" />
+          <button class="btn-check" id="s-checkBtn" type="button">Check Status</button>
+        </div>
+      </div>
+
+      <div class="msg msg-error" id="s-errorMsg" role="alert"></div>
+      <div class="msg msg-loading" id="s-loadingMsg"><span class="spinner"></span>Fetching DUST status&hellip;</div>
+
+      <div class="results" id="s-results">
+        <div class="result-card">
+          <div class="result-card-header">
+            <h2>DUST Status</h2>
+            <div id="s-statusBadge"></div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-item">
+              <div class="stat-label">NIGHT Balance</div>
+              <div class="stat-value highlight" id="s-nightBalance" title="Awaiting indexer data">&mdash;</div>
+              <div class="stat-sub" id="s-nightBalanceSub"></div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Generation Rate</div>
+              <div class="stat-value cyan" id="s-genRate" title="Awaiting indexer data">&mdash;</div>
+              <div class="stat-sub">DUST per epoch</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Capacity</div>
+              <div class="stat-value orange" id="s-capacity" title="Awaiting indexer data">&mdash;</div>
+              <div class="stat-sub" id="s-capacitySub">max DUST storable</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">DUST Accumulated</div>
+              <div class="stat-value" id="s-dustAccum" title="Awaiting indexer data">&mdash;</div>
+              <div class="stat-sub" id="s-dustAccumSub"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-register" id="s-ctaRegister">
+          <p>This address is not registered for DUST generation. Register to start earning DUST from your NIGHT holdings.</p>
+          <a href="https://dust.nethermind.dev" target="_blank" rel="noopener noreferrer">Register at Nethermind DUST Generator &rarr;</a>
+        </div>
+      </div>
+
+      <div class="eligibility-card" id="s-eligibilityCard">
+        <div class="eligibility-header">
+          <h3 id="s-eligibilityTitle">DUST eligibility</h3>
+          <span class="window-label" id="s-eligibilityWindow">last 600 blocks</span>
+        </div>
+        <div class="eligibility-pct empty mono" id="s-eligibilityPct" title="Awaiting indexer data">&mdash;</div>
+        <div class="eligibility-sub empty" id="s-eligibilitySub">Awaiting indexer data</div>
+        <div class="eligibility-bar-wrap">
+          <div class="eligibility-bar-fill empty" id="s-eligibilityBar"></div>
+        </div>
+        <div class="eligibility-footer">Share of recently created NIGHT UTXOs registered for DUST generation.</div>
+      </div>
+    </section>
+
+    <!-- ========== CALCULATOR ========== -->
+    <section id="panel-calc" class="tab-panel" role="tabpanel" aria-labelledby="tab-calc" hidden>
+      <div class="page-title">
+        <h2>DUST Calculator</h2>
+        <p>Enter a NIGHT amount to project DUST generation rate, capacity, and time to max.</p>
+      </div>
+
+      <div class="search-box">
+        <label for="c-nightInput">NIGHT Amount</label>
+        <div class="input-row">
+          <input type="number" id="c-nightInput" placeholder="1000" min="0" max="999999999" step="any" />
+          <button class="btn-calc" id="c-btn" type="button">Calculate</button>
+        </div>
+
+        <div class="slider-section">
+          <div class="slider-header">
+            <span>Quick Adjust</span>
+            <span class="slider-value" id="c-sliderLabel">0 NIGHT</span>
+          </div>
+          <input type="range" id="c-nightSlider" min="0" max="10000" value="0" step="1" />
+        </div>
+
+        <div class="presets" id="c-presets">
+          <span>Presets:</span>
+          <button class="preset-btn" data-preset="100" type="button">100</button>
+          <button class="preset-btn" data-preset="500" type="button">500</button>
+          <button class="preset-btn" data-preset="1000" type="button">1,000</button>
+          <button class="preset-btn" data-preset="5000" type="button">5,000</button>
+          <button class="preset-btn" data-preset="10000" type="button">10,000</button>
+        </div>
+      </div>
+
+      <div class="msg msg-error" id="c-errorMsg" role="alert"></div>
+      <div class="msg msg-loading" id="c-loadingMsg"><span class="spinner"></span>Calculating DUST generation&hellip;</div>
+
+      <div class="results" id="c-results">
+        <div class="result-card">
+          <div class="result-card-header">
+            <h3>Generation Rates</h3>
+            <span class="night-amount" id="c-nightLabel" title="Awaiting indexer data">&mdash; NIGHT</span>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">DUST per Day</div><div class="stat-value orange" id="c-dustPerDay" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">daily generation</div></div>
+            <div class="stat-item"><div class="stat-label">DUST per Week</div><div class="stat-value cyan" id="c-dustPerWeek" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">weekly generation</div></div>
+            <div class="stat-item"><div class="stat-label">Max Capacity</div><div class="stat-value highlight" id="c-maxCapacity" title="Awaiting indexer data">&mdash;</div><div class="stat-sub" id="c-capacitySub">5 DUST per NIGHT</div></div>
+            <div class="stat-item"><div class="stat-label">Specks per Second</div><div class="stat-value" id="c-specksPerSec" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">smallest DUST unit</div></div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Time to Max Capacity</span>
+              <span class="progress-days" id="c-daysToMax" title="Awaiting indexer data">&mdash; days</span>
+            </div>
+            <div class="progress-bar-track"><div class="progress-bar-fill" id="c-progressFill" style="width:0%;"></div></div>
+            <div class="progress-markers"><span>0d</span><span id="c-midMarker">&mdash;</span><span id="c-endMarker">&mdash;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <h3>How DUST Generation Works</h3>
+        <p>DUST is the gas token on Midnight. It is generated passively by holders of NIGHT on Cardano.</p>
+        <ul>
+          <li>Each NIGHT generates DUST at <code>8,267 specks/star/sec</code></li>
+          <li>Max capacity is <code>5 DUST per NIGHT held</code></li>
+          <li>Full capacity reaches in <code>~7 days</code></li>
+          <li>DUST is non-transferable and decays when backing NIGHT is spent</li>
+          <li>Register your reward address at the <a href="https://dust.nethermind.dev" target="_blank" rel="noopener noreferrer">Nethermind DUST Generator</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ========== ECONOMICS ========== -->
+    <section id="panel-economics" class="tab-panel" role="tabpanel" aria-labelledby="tab-economics" hidden>
+      <div class="page-title">
+        <h2>DUST Economics Observatory</h2>
+        <p>Real-time generation, consumption, and sustainability metrics for the Midnight Network.</p>
+      </div>
+
+      <div class="refresh-row">
+        <button class="btn-refresh" id="e-refreshBtn" type="button">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5M20 20v-5h-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 005.64 5.64L4 9m16 6l-1.64 3.36A9 9 0 014.51 15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Refresh
+        </button>
+        <span class="last-updated" id="e-lastUpdated"></span>
+      </div>
+
+      <div class="msg msg-error" id="e-errorMsg" role="alert"></div>
+      <div class="msg msg-loading" id="e-loadingMsg"><span class="spinner"></span>Fetching DUST economics&hellip;</div>
+
+      <div class="results" id="e-results">
+
+        <div class="section-heading gen">Generation</div>
+        <div class="result-card">
+          <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">Estimated Staked NIGHT</div><div class="stat-value green" id="e-stakedNight" title="Awaiting indexer data">&mdash;</div><div class="stat-sub" id="e-stakedNightSub">&mdash;</div></div>
+            <div class="stat-item"><div class="stat-label">DUST Per Day</div><div class="stat-value green" id="e-dustPerDay" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">network-wide</div></div>
+            <div class="stat-item"><div class="stat-label">DUST Per Week</div><div class="stat-value cyan" id="e-dustPerWeek" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">7-day projected</div></div>
+            <div class="stat-item"><div class="stat-label">Max Network Capacity</div><div class="stat-value orange" id="e-maxCapacity" title="Awaiting indexer data">&mdash;</div><div class="stat-sub" id="e-maxCapacitySub">&mdash;</div></div>
+            <div class="stat-item"><div class="stat-label">Days to Max Capacity</div><div class="stat-value purple" id="e-daysToMax" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">at current rate</div></div>
+          </div>
+        </div>
+
+        <div class="section-heading con">Consumption</div>
+        <div class="result-card">
+          <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">Avg Daily Transactions</div><div class="stat-value orange" id="e-avgDailyTx" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">network-wide</div></div>
+            <div class="stat-item"><div class="stat-label">DUST Burn Per Day</div><div class="stat-value orange" id="e-dustBurn" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">est. consumption</div></div>
+            <div class="stat-item"><div class="stat-label">Avg Fee Per Transaction</div><div class="stat-value cyan" id="e-avgFee" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">in specks</div></div>
+          </div>
+        </div>
+
+        <div class="section-heading flow">Net Flow</div>
+        <div class="result-card">
+          <div class="flow-row">
+            <div class="flow-stats">
+              <div class="stat-item"><div class="stat-label">Daily Net DUST</div><div class="stat-value green" id="e-dailyNet" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">generation minus burn</div></div>
+              <div class="stat-item"><div class="stat-label">Status</div><div id="e-flowBadge" style="margin-top:0.375rem;">&mdash;</div></div>
+            </div>
+            <div class="flow-gauge">
+              <div class="gauge-container">
+                <div class="gauge-ring">
+                  <svg viewBox="0 0 100 100" aria-hidden="true">
+                    <circle class="bg" cx="50" cy="50" r="42" />
+                    <circle class="fg" id="e-gaugeCircle" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89" />
+                  </svg>
+                  <div class="gauge-text" id="e-gaugeText" title="Awaiting indexer data">&mdash;</div>
+                </div>
+                <div class="gauge-label">Sustainability</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="params-toggle" id="e-paramsToggle" aria-expanded="false" type="button">
+          <span>Technical Parameters</span><span class="chevron">&#9660;</span>
+        </button>
+        <div class="params-body" id="e-paramsBody"><div class="param-grid" id="e-paramGrid"></div></div>
+      </div>
+
+      <div class="info-box purple">
+        <h3>Understanding DUST Economics</h3>
+        <p><strong>Generation:</strong> DUST is produced passively from staked NIGHT. Each address caps at 5x its NIGHT balance.</p>
+        <p><strong>Consumption:</strong> Every Midnight transaction burns DUST. 1 DUST = 10^15 specks.</p>
+        <p><strong>Sustainability:</strong> 100 = strong surplus. Healthy economies stay above 80.</p>
+      </div>
+
+      <div class="info-box purple">
+        <h3>DUST Sponsorship</h3>
+        <p>One wallet can pay another's DUST fee. <code>WalletFacade</code> supports it natively, useful while DUST is warming up.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 <a href="/">NightForge Explorer</a> &mdash; Built for the Midnight Network</p>
+  </footer>
+
+  <!-- ============================================================
+       Tab routing (hash-based) — preserves query params per tab
+       ============================================================ -->
+  <script>
+    (function () {
+      var VALID_TABS = ['mechanics', 'status', 'calc', 'economics'];
+      var DEFAULT_TAB = 'mechanics';
+
+      function tabFromHash() {
+        var raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
+        return VALID_TABS.indexOf(raw) >= 0 ? raw : DEFAULT_TAB;
+      }
+
+      function activate(tab) {
+        for (var i = 0; i < VALID_TABS.length; i++) {
+          var name  = VALID_TABS[i];
+          var panel = document.getElementById('panel-' + name);
+          var link  = document.getElementById('tab-' + name);
+          if (!panel || !link) continue;
+          var on = (name === tab);
+          panel.classList.toggle('active', on);
+          if (on) panel.removeAttribute('hidden'); else panel.setAttribute('hidden', '');
+          link.classList.toggle('active', on);
+          link.setAttribute('aria-selected', on ? 'true' : 'false');
+          link.setAttribute('tabindex', on ? '0' : '-1');
+        }
+        var label = tab.charAt(0).toUpperCase() + tab.slice(1);
+        document.title = 'DUST Console - ' + label + ' - NightForge Explorer';
+        try {
+          document.dispatchEvent(new CustomEvent('tab:show', { detail: { id: 'panel-' + tab, tab: tab } }));
+        } catch (_) {}
+      }
+
+      function bindClicks() {
+        var links = document.querySelectorAll('.subnav-link[data-tab]');
+        for (var i = 0; i < links.length; i++) {
+          links[i].addEventListener('click', function (e) {
+            var target = e.currentTarget.getAttribute('data-tab');
+            if (!target) return;
+            // Preserve query string when switching tabs.
+            var search = window.location.search || '';
+            try {
+              history.replaceState({}, '', window.location.pathname + search + '#' + target);
+            } catch (_) { window.location.hash = '#' + target; }
+            e.preventDefault();
+            activate(target);
+          });
+        }
+      }
+
+      function bindKeys() {
+        var nav = document.querySelector('.subnav');
+        if (!nav) return;
+        nav.addEventListener('keydown', function (e) {
+          if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+          var current = tabFromHash();
+          var idx = VALID_TABS.indexOf(current);
+          if (idx < 0) idx = 0;
+          var nextIdx = e.key === 'ArrowRight'
+            ? (idx + 1) % VALID_TABS.length
+            : (idx - 1 + VALID_TABS.length) % VALID_TABS.length;
+          window.location.hash = '#' + VALID_TABS[nextIdx];
+          e.preventDefault();
+        });
+      }
+
+      window.addEventListener('hashchange', function () { activate(tabFromHash()); });
+      document.addEventListener('DOMContentLoaded', function () {
+        bindClicks();
+        bindKeys();
+        activate(tabFromHash());
+      });
+      if (document.readyState !== 'loading') {
+        bindClicks();
+        bindKeys();
+        activate(tabFromHash());
+      }
+    })();
+  </script>
+
+  <!-- ============================================================
+       Status tab — address lookup + network eligibility gauge
+       ============================================================ -->
+  <script>
+    (function () {
+      var addressInput = document.getElementById('s-addressInput');
+      var checkBtn     = document.getElementById('s-checkBtn');
+      var errorMsg     = document.getElementById('s-errorMsg');
+      var loadingMsg   = document.getElementById('s-loadingMsg');
+      var resultsEl    = document.getElementById('s-results');
+      var ctaEl        = document.getElementById('s-ctaRegister');
+
+      var ELIGIBILITY_WINDOW_BLOCKS = 600;
+      var ELIGIBILITY_REFRESH_MS    = 60000;
+      var EM_DASH = '—';
+
+      function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+      function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.style.display = 'block';
+        loadingMsg.style.display = 'none';
+        resultsEl.classList.remove('visible');
+      }
+      function hideMessages() {
+        errorMsg.style.display = 'none';
+        loadingMsg.style.display = 'none';
+      }
+      function fmt(n, decimals) {
+        if (n === null || n === undefined) return EM_DASH;
+        var num = parseFloat(n);
+        if (!Number.isFinite(num)) return EM_DASH;
+        var d = (decimals === undefined ? 2 : decimals);
+        if (num >= 1e9) return (num / 1e9).toFixed(d) + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(d) + 'M';
+        if (num >= 1e3) return num.toLocaleString(undefined, { maximumFractionDigits: d });
+        return num.toFixed(d);
+      }
+
+      async function checkStatus() {
+        var address = (addressInput.value || '').trim();
+        if (!address) { showError('Please enter a Cardano reward address.'); return; }
+        if (!address.indexOf || address.indexOf('stake1') !== 0) { showError('Address must be a Cardano reward address starting with "stake1...".'); return; }
+
+        hideMessages();
+        loadingMsg.style.display = 'block';
+        resultsEl.classList.remove('visible');
+        ctaEl.classList.remove('visible');
+        checkBtn.disabled = true;
+
+        try {
+          var resp = await fetch('/api/dust-eligibility?address=' + encodeURIComponent(address), { cache: 'no-store' });
+          if (resp.status === 404) { renderResults({ registered: false }); return; }
+          if (!resp.ok) {
+            // Fallback to the legacy endpoint if the brief endpoint isn't yet served.
+            var legacy = await fetch('/api/dust-status?address=' + encodeURIComponent(address), { cache: 'no-store' });
+            if (legacy.status === 404) { renderResults({ registered: false }); return; }
+            if (!legacy.ok) throw new Error((await legacy.text()) || ('Server returned ' + legacy.status));
+            renderResults(await legacy.json());
+            return;
+          }
+          renderResults(await resp.json());
+        } catch (err) {
+          showError('Failed to fetch status: ' + err.message);
+        } finally {
+          checkBtn.disabled = false;
+        }
+      }
+
+      function renderResults(data) {
+        data = data || {};
+        hideMessages();
+        var isRegistered = data.registered !== false;
+        var badge = document.getElementById('s-statusBadge');
+        badge.innerHTML = isRegistered
+          ? '<span class="status-badge badge-registered"><span class="badge-dot"></span>Registered</span>'
+          : '<span class="status-badge badge-unregistered"><span class="badge-dot"></span>Not Registered</span>';
+        if (!isRegistered) ctaEl.classList.add('visible');
+
+        var night = data.nightBalance != null ? data.nightBalance : data.night_balance;
+        set('s-nightBalance', fmt(night));
+        document.getElementById('s-nightBalanceSub').textContent =
+          Number.isFinite(parseFloat(night)) ? parseFloat(night).toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' NIGHT' : '';
+
+        set('s-genRate', fmt(data.generationRate != null ? data.generationRate : data.generation_rate));
+
+        var cap = data.capacity;
+        set('s-capacity', fmt(cap));
+        document.getElementById('s-capacitySub').textContent =
+          (data.capacityPct != null && Number.isFinite(parseFloat(data.capacityPct)))
+            ? parseFloat(data.capacityPct).toFixed(1) + '% filled'
+            : 'max DUST storable';
+
+        var dust = data.dustAccumulated != null ? data.dustAccumulated
+                 : data.dust_accumulated != null ? data.dust_accumulated
+                 : data.dustBalance;
+        set('s-dustAccum', fmt(dust));
+        document.getElementById('s-dustAccumSub').textContent = data.lastClaim ? ('Last claim: ' + data.lastClaim) : '';
+
+        resultsEl.classList.add('visible');
+      }
+
+      function renderEligibilityEmpty(reason) {
+        var pctEl = document.getElementById('s-eligibilityPct');
+        var subEl = document.getElementById('s-eligibilitySub');
+        var barEl = document.getElementById('s-eligibilityBar');
+        pctEl.classList.add('empty'); pctEl.innerHTML = '&mdash;';
+        subEl.classList.add('empty'); subEl.textContent = reason || 'Awaiting indexer data';
+        barEl.classList.add('empty'); barEl.style.width = '0%';
+      }
+      function renderEligibility(data) {
+        var total      = Number(data.totalUtxos      != null ? data.totalUtxos      : (data.total      != null ? data.total      : data.total_utxos));
+        var registered = Number(data.registeredUtxos != null ? data.registeredUtxos : (data.registered != null ? data.registered : data.registered_utxos));
+        var win        = Number(data.windowBlocks    != null ? data.windowBlocks    : (data.window_blocks != null ? data.window_blocks : ELIGIBILITY_WINDOW_BLOCKS));
+        if (!Number.isFinite(total) || total <= 0) { renderEligibilityEmpty('Awaiting indexer data'); return; }
+        var ratio = Math.max(0, Math.min(1, registered / total));
+        var pct   = ratio * 100;
+        var pctEl = document.getElementById('s-eligibilityPct');
+        var subEl = document.getElementById('s-eligibilitySub');
+        var barEl = document.getElementById('s-eligibilityBar');
+        var winEl = document.getElementById('s-eligibilityWindow');
+        pctEl.classList.remove('empty'); pctEl.textContent = pct.toFixed(pct >= 10 ? 1 : 2) + '%';
+        subEl.classList.remove('empty'); subEl.textContent = registered.toLocaleString() + ' registered / ' + total.toLocaleString() + ' NIGHT UTXOs in last ' + win.toLocaleString() + ' blocks';
+        barEl.classList.remove('empty'); barEl.style.width = pct.toFixed(2) + '%';
+        winEl.textContent = 'last ' + win.toLocaleString() + ' blocks';
+      }
+      async function loadEligibility() {
+        try {
+          var resp = await fetch('/api/mainnet/dust-eligibility?windowBlocks=' + ELIGIBILITY_WINDOW_BLOCKS, { cache: 'no-store' });
+          if (!resp.ok) { renderEligibilityEmpty('Awaiting indexer data'); return; }
+          renderEligibility(await resp.json());
+        } catch (_) { renderEligibilityEmpty('Awaiting indexer data'); }
+      }
+
+      checkBtn.addEventListener('click', checkStatus);
+      addressInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') checkStatus(); });
+
+      var params = new URLSearchParams(window.location.search);
+      var addr = params.get('address') || params.get('addr');
+      if (addr) { addressInput.value = addr; checkStatus(); }
+
+      loadEligibility();
+      setInterval(loadEligibility, ELIGIBILITY_REFRESH_MS);
+    })();
+  </script>
+
+  <!-- ============================================================
+       Calculator + Economics tabs
+       ============================================================ -->
+  <script>
+    (function () {
+      function fmt(n, decimals) {
+        if (n === null || n === undefined) return '—';
+        var num = parseFloat(n);
+        if (isNaN(num)) return '—';
+        var d = decimals == null ? 2 : decimals;
+        if (num >= 1e12) return (num / 1e12).toFixed(d) + 'T';
+        if (num >= 1e9)  return (num / 1e9).toFixed(d) + 'B';
+        if (num >= 1e6)  return (num / 1e6).toFixed(d) + 'M';
+        if (num >= 1e3)  return num.toLocaleString(undefined, { maximumFractionDigits: d });
+        return decimals == null && num % 1 === 0 ? num.toString() : num.toFixed(d);
+      }
+      function $(id) { return document.getElementById(id); }
+      function showMsg(errId, loadId, text) {
+        var e = $(errId); e.textContent = text; e.style.display = 'block';
+        $(loadId).style.display = 'none';
+      }
+      function hideMsgs(errId, loadId) { $(errId).style.display = 'none'; $(loadId).style.display = 'none'; }
+
+      // ---------- Calculator ----------
+      var cInput   = $('c-nightInput');
+      var cSlider  = $('c-nightSlider');
+      var cLabel   = $('c-sliderLabel');
+      var cBtn     = $('c-btn');
+      var cResults = $('c-results');
+
+      function calcUpdatePresetHighlight(val) {
+        document.querySelectorAll('#c-presets .preset-btn').forEach(function (btn) {
+          btn.classList.toggle('active', parseFloat(btn.dataset.preset) === val);
+        });
+      }
+
+      cSlider.addEventListener('input', function () {
+        var v = parseInt(cSlider.value, 10);
+        cInput.value = v;
+        cLabel.textContent = v.toLocaleString() + ' NIGHT';
+        calcUpdatePresetHighlight(v);
+        runCalc();
+      });
+      cInput.addEventListener('input', function () {
+        var v = parseFloat(cInput.value) || 0;
+        if (v >= 0 && v <= 10000) cSlider.value = v;
+        cLabel.textContent = Math.round(v).toLocaleString() + ' NIGHT';
+        calcUpdatePresetHighlight(v);
+      });
+      cInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') runCalc(); });
+      cBtn.addEventListener('click', runCalc);
+
+      document.querySelectorAll('#c-presets .preset-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var v = parseFloat(btn.dataset.preset);
+          cInput.value = v;
+          cSlider.value = Math.min(v, 10000);
+          cLabel.textContent = v.toLocaleString() + ' NIGHT';
+          calcUpdatePresetHighlight(v);
+          runCalc();
+        });
+      });
+
+      async function runCalc() {
+        var n = parseFloat(cInput.value);
+        if (!cInput.value || isNaN(n)) return showMsg('c-errorMsg', 'c-loadingMsg', 'Please enter a NIGHT amount.');
+        if (n < 0)  return showMsg('c-errorMsg', 'c-loadingMsg', 'NIGHT amount must be positive.');
+        if (n === 0) return showMsg('c-errorMsg', 'c-loadingMsg', 'Enter a NIGHT amount greater than zero.');
+
+        hideMsgs('c-errorMsg', 'c-loadingMsg');
+        $('c-loadingMsg').style.display = 'block';
+        cResults.classList.remove('visible');
+        cBtn.disabled = true;
+        try {
+          var r = await fetch('/api/dust-calculator?night=' + encodeURIComponent(n));
+          if (!r.ok) throw new Error((await r.text()) || ('Server returned ' + r.status));
+          renderCalc(await r.json());
+        } catch (err) {
+          showMsg('c-errorMsg', 'c-loadingMsg', 'Failed to calculate: ' + err.message);
+        } finally {
+          cBtn.disabled = false;
+        }
+      }
+
+      function renderCalc(d) {
+        hideMsgs('c-errorMsg', 'c-loadingMsg');
+        $('c-nightLabel').textContent  = fmt(d.nightHeld) + ' NIGHT';
+        $('c-dustPerDay').textContent  = fmt(d.dustPerDay, 6);
+        $('c-dustPerWeek').textContent = fmt(d.dustPerWeek, 6);
+        $('c-maxCapacity').textContent = fmt(d.maxCapacity);
+        $('c-capacitySub').textContent = '5 DUST per NIGHT held';
+        $('c-specksPerSec').textContent = fmt(d.specksPerSecond);
+
+        var days = parseFloat(d.daysToMaxCapacity) || 0;
+        $('c-daysToMax').textContent = days.toFixed(1) + ' days';
+        var fillPct = days > 0 ? Math.min((7 / days) * 100, 100) : 100;
+        $('c-progressFill').style.width = fillPct + '%';
+        $('c-midMarker').textContent = (days / 2).toFixed(1) + 'd';
+        $('c-endMarker').textContent = days.toFixed(1) + 'd';
+        cResults.classList.add('visible');
+      }
+
+      // pre-fill from URL ?night=
+      (function () {
+        var p = new URLSearchParams(location.search);
+        var n = p.get('night');
+        if (n) {
+          var v = parseFloat(n);
+          if (!isNaN(v) && v > 0) {
+            cInput.value = v;
+            cSlider.value = Math.min(v, 10000);
+            cLabel.textContent = Math.round(v).toLocaleString() + ' NIGHT';
+            calcUpdatePresetHighlight(v);
+            runCalc();
+          }
+        }
+      })();
+
+      // ---------- Economics ----------
+      var eBtn   = $('e-refreshBtn');
+      var eRes   = $('e-results');
+      var eStamp = $('e-lastUpdated');
+
+      eBtn.addEventListener('click', fetchEcon);
+      $('e-paramsToggle').addEventListener('click', function () {
+        var t = $('e-paramsToggle');
+        var b = $('e-paramsBody');
+        var open = t.classList.toggle('open');
+        b.classList.toggle('open', open);
+        t.setAttribute('aria-expanded', String(open));
+      });
+
+      function scoreColor(s) { return s >= 80 ? '#22c55e' : s >= 50 ? '#eab308' : '#ef4444'; }
+      function scoreText(s)  { return s >= 80 ? 'color:#4ade80' : s >= 50 ? 'color:#facc15' : 'color:#fca5a5'; }
+
+      function setGauge(score) {
+        var c = $('e-gaugeCircle'), t = $('e-gaugeText');
+        var circ = 2 * Math.PI * 42;
+        var v = Math.max(0, Math.min(100, score));
+        c.style.strokeDashoffset = circ - (v / 100) * circ;
+        c.style.stroke = scoreColor(v);
+        t.textContent = Math.round(v);
+        t.style.cssText = scoreText(v);
+      }
+
+      function renderParams(params) {
+        var labels = {
+          specksPerStarPerSecond: 'Specks / Star / Second',
+          starsPerNight: 'Stars Per NIGHT',
+          specksPerDust: 'Specks Per DUST',
+          capRatio: 'Capacity Ratio',
+          timeToCapSeconds: 'Time to Cap (seconds)',
+          gracePeriodHours: 'Grace Period (hours)'
+        };
+        var grid = $('e-paramGrid');
+        grid.innerHTML = '';
+        Object.entries(params || {}).forEach(function (entry) {
+          var k = entry[0], v = entry[1];
+          var div = document.createElement('div');
+          div.className = 'param-item';
+          div.innerHTML = '<div class="param-label">' + (labels[k] || k) + '</div><div class="param-value">' + (v == null ? '—' : v) + '</div>';
+          grid.appendChild(div);
+        });
+      }
+
+      async function fetchEcon() {
+        hideMsgs('e-errorMsg', 'e-loadingMsg');
+        $('e-loadingMsg').style.display = 'block';
+        eRes.classList.remove('visible');
+        eBtn.disabled = true;
+        try {
+          var r = await fetch('/api/dust-economics');
+          if (!r.ok) throw new Error((await r.text()) || ('Server returned ' + r.status));
+          renderEcon(await r.json());
+        } catch (err) {
+          showMsg('e-errorMsg', 'e-loadingMsg', 'Failed to fetch economics data: ' + err.message);
+        } finally {
+          eBtn.disabled = false;
+        }
+      }
+
+      function renderEcon(data) {
+        hideMsgs('e-errorMsg', 'e-loadingMsg');
+        var gen = data.generation || {};
+        $('e-stakedNight').textContent    = fmt(gen.estimatedStakedNight);
+        var raw = parseFloat(gen.estimatedStakedNight || 0);
+        $('e-stakedNightSub').textContent = raw ? raw.toLocaleString() + ' NIGHT' : '—';
+        $('e-dustPerDay').textContent     = fmt(gen.dustPerDay);
+        $('e-dustPerWeek').textContent    = fmt(gen.dustPerWeek);
+        $('e-maxCapacity').textContent    = fmt(gen.maxNetworkCapacity);
+        $('e-maxCapacitySub').textContent = gen.maxNetworkCapacity ? fmt(gen.maxNetworkCapacity) + ' DUST total' : '—';
+        $('e-daysToMax').textContent      = gen.daysToMaxCapacity != null ? parseFloat(gen.daysToMaxCapacity).toFixed(1) : '—';
+
+        var con = data.consumption || {};
+        $('e-avgDailyTx').textContent = fmt(con.avgDailyTransactions);
+        $('e-dustBurn').textContent   = fmt(con.estimatedDustBurnPerDay);
+        $('e-avgFee').textContent     = con.avgFeePerTransaction == null ? '—' : con.avgFeePerTransaction;
+
+        var flow = data.netFlow || {};
+        $('e-dailyNet').textContent = fmt(flow.dailyNetDust);
+        var status = (flow.status || '').toLowerCase();
+        $('e-flowBadge').innerHTML = status === 'surplus'
+          ? '<span class="status-badge badge-surplus"><span class="badge-dot"></span>Surplus</span>'
+          : status === 'deficit'
+            ? '<span class="status-badge badge-deficit"><span class="badge-dot"></span>Deficit</span>'
+            : '—';
+
+        var score = parseFloat(flow.sustainabilityScore);
+        if (!isNaN(score)) setGauge(score);
+        if (data.parameters) renderParams(data.parameters);
+        eStamp.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        eRes.classList.add('visible');
+      }
+
+      // Lazy-fetch Economics the first time its tab is shown.
+      var econFetched = false;
+      document.addEventListener('tab:show', function (ev) {
+        if (ev && ev.detail && ev.detail.tab === 'economics' && !econFetched) {
+          econFetched = true;
+          fetchEcon();
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>
