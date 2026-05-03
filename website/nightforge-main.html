@@ -378,7 +378,13 @@
         </div>
         <a href="/tools/live-feed.html" style="color:#64748b;font-size:10px;text-decoration:none;font-weight:500;">Full feed &rarr;</a>
       </div>
-      <div id="nfTickerItems" style="display:flex;gap:6px;overflow:hidden;"></div>
+      <div id="nfFeedTabs" role="tablist" aria-label="Live feed category" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
+        <button class="nf-feed-tab nf-feed-tab-on"  data-cat="all"       role="tab" aria-selected="true"  type="button">All</button>
+        <button class="nf-feed-tab"                 data-cat="contracts" role="tab" aria-selected="false" type="button">Contracts</button>
+        <button class="nf-feed-tab"                 data-cat="dust"      role="tab" aria-selected="false" type="button">DUST</button>
+        <button class="nf-feed-tab"                 data-cat="anomalies" role="tab" aria-selected="false" type="button">Anomalies</button>
+      </div>
+      <div id="nfTickerItems" style="display:flex;gap:6px;overflow:hidden;flex-wrap:wrap;"></div>
     </div>
   </div>
 
@@ -468,6 +474,51 @@
     .nf-block { transition: opacity 0.4s ease, border-color 0.4s ease; }
     .nf-block-new { animation: nfSlideIn 0.35s ease-out, nfPulse 0.6s ease-out; }
     .nf-block-hot { border-color: rgba(250,204,21,0.35) !important; }
+    /* Categorical feed tabs */
+    .nf-feed-tab {
+      background:transparent; border:1px solid rgba(100,116,139,0.18);
+      color:#94a3b8; font-size:9px; font-weight:600;
+      text-transform:uppercase; letter-spacing:0.08em;
+      padding:3px 8px; border-radius:4px; cursor:pointer;
+      font-family:inherit; line-height:1.2;
+      transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .nf-feed-tab:hover { color:#e2e8f0; border-color:rgba(100,116,139,0.35); }
+    .nf-feed-tab.nf-feed-tab-on {
+      color:#0ABAB5; border-color:rgba(10,186,181,0.45);
+      background:rgba(10,186,181,0.08);
+    }
+    /* Category-coded left borders + glyph + momentum */
+    .nf-evt {
+      position:relative; flex-shrink:0;
+      background:rgba(15,23,42,0.6);
+      border:1px solid rgba(100,116,139,0.15);
+      border-left-width:3px;
+      border-radius:6px;
+      padding:5px 10px 5px 8px;
+      display:inline-flex; align-items:center; gap:6px;
+      transition: opacity 0.4s ease, border-color 0.4s ease;
+    }
+    .nf-evt-block    { border-left-color:#0ABAB5; }       /* teal */
+    .nf-evt-call     { border-left-color:#a78bfa; }       /* violet */
+    .nf-evt-dust     { border-left-color:#f59e0b; }       /* amber */
+    .nf-evt-bridge   { border-left-color:#ec4899; }       /* pink */
+    .nf-evt-anomaly  { border-left-color:#ef4444; }       /* red */
+    .nf-evt-glyph {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size:11px; font-weight:700; line-height:1;
+      flex-shrink:0;
+    }
+    .nf-evt-block .nf-evt-glyph    { color:#0ABAB5; }
+    .nf-evt-call .nf-evt-glyph     { color:#a78bfa; }
+    .nf-evt-dust .nf-evt-glyph     { color:#f59e0b; }
+    .nf-evt-bridge .nf-evt-glyph   { color:#ec4899; }
+    .nf-evt-anomaly .nf-evt-glyph  { color:#ef4444; }
+    .nf-evt-momentum {
+      margin-left:6px; font-size:9px; font-weight:600;
+      color:#94a3b8; font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+    }
     .nf-tx-burst {
       position:absolute; top:-8px; right:4px;
       font-size:9px; font-weight:700; color:#0ABAB5;
@@ -801,9 +852,240 @@
     }
 
     // ─── C. SIGNAL-MODE LIVE FEED ──────────────────────
+    // 50-block rolling tx-count ring buffer for momentum metric. Distinct from
+    // blockHistory (snapshot of last fetch) so momentum survives across fetches.
+    var txRingBuf=[]; var TX_RING_MAX=50;
+    function ringPush(h,tx){
+      // dedupe by height (the fetch returns overlapping windows)
+      for(var k=0;k<txRingBuf.length;k++){ if(txRingBuf[k].h===h)return; }
+      txRingBuf.push({h:h,tx:tx});
+      if(txRingBuf.length>TX_RING_MAX)txRingBuf.shift();
+    }
+    function ringAvg(){
+      if(txRingBuf.length===0)return 0;
+      var s=0;for(var k=0;k<txRingBuf.length;k++)s+=txRingBuf[k].tx;
+      return s/txRingBuf.length;
+    }
+    // Per-circuit hourly call counter, keyed by section.method, prunes >1h old.
+    var circuitCalls={};
+    function bumpCircuit(key,tsSec){
+      var nowSec=Math.floor(Date.now()/1000);
+      var arr=circuitCalls[key]||[];
+      arr.push(tsSec||nowSec);
+      var cutoff=nowSec-3600;
+      while(arr.length&&arr[0]<cutoff)arr.shift();
+      circuitCalls[key]=arr;
+      return arr.length;
+    }
+    // Active filter tab; default "all".
+    var activeCat='all';
+    // Latest payloads, kept so tab switches re-render without re-fetch.
+    var latestBlocks=[]; var latestContractActions=[]; var latestDustEvents=[];
+    // Track which heights / contract events have already been counted.
+    var seenHeights={};
+    var seenContractKeys={};
+
+    // Build a unified event row list from the three payload arrays.
+    function buildEvents(blocks,contractActions,dustEvents){
+      var events=[];
+      var newBlocks=[];
+      if(lastHeight>0){
+        for(var n=0;n<blocks.length;n++){
+          if(blocks[n].height>lastHeight)newBlocks.push(blocks[n].height);
+        }
+      }
+      // Tally per-block contract calls for anomaly detection (>3 calls in one block).
+      var callsPerBlock={};
+      for(var c=0;c<contractActions.length;c++){
+        var ca=contractActions[c];
+        callsPerBlock[ca.block_height]=(callsPerBlock[ca.block_height]||0)+1;
+      }
+
+      // 1. Blocks (always include — most general).
+      for(var i=0;i<blocks.length;i++){
+        var b=blocks[i];
+        var tx=b.extrinsics_count||0;
+        var isNewB=newBlocks.indexOf(b.height)!==-1;
+        if(!seenHeights[b.height]){
+          ringPush(b.height,tx);
+          seenHeights[b.height]=1;
+        }
+        var avg=ringAvg();
+        var diff=avg>0?(tx-avg):0;
+        var mom="";
+        if(avg>0){
+          var sign=diff>=0?"+":"";
+          mom=sign+diff.toFixed(1)+" tx vs avg";
+        }
+        var anomalyReasons=[];
+        var isHotB=(txRingBuf.length>=5)&&(avg>0)&&(tx>avg*1.5)&&(tx>=4);
+        if(isHotB)anomalyReasons.push("tx burst");
+        if(callsPerBlock[b.height]&&callsPerBlock[b.height]>3){
+          anomalyReasons.push("contract burst x"+callsPerBlock[b.height]);
+        }
+        events.push({
+          cat:'block',
+          ts:b.timestamp,
+          height:b.height,
+          label:"#"+b.height.toLocaleString()+" - "+tx+" tx",
+          momentum:mom,
+          isNew:isNewB,
+          isHot:isHotB,
+          anomalyReasons:anomalyReasons,
+          clickHeight:b.height
+        });
+      }
+
+      // 2. Contract calls
+      for(var c2=0;c2<contractActions.length;c2++){
+        var ca2=contractActions[c2];
+        var key=(ca2.section||"?")+"."+(ca2.method||"?");
+        var dedupe=ca2.block_height+":"+key+":"+ca2.timestamp;
+        var n=0;
+        if(!seenContractKeys[dedupe]){
+          n=bumpCircuit(key,ca2.timestamp);
+          seenContractKeys[dedupe]=1;
+        } else {
+          n=(circuitCalls[key]||[]).length;
+        }
+        var ord=n+(n%100>=11&&n%100<=13?"th":(n%10===1?"st":n%10===2?"nd":n%10===3?"rd":"th"));
+        events.push({
+          cat:'call',
+          ts:ca2.timestamp,
+          height:ca2.block_height,
+          label:key,
+          momentum:ord+" call/h "+key,
+          isNew:false, isHot:false, anomalyReasons:[],
+          clickHeight:ca2.block_height
+        });
+      }
+
+      // 3. DUST events
+      for(var d2=0;d2<dustEvents.length;d2++){
+        var de=dustEvents[d2];
+        var lbl=(de.section||"?")+"."+(de.method||"?");
+        events.push({
+          cat:'dust',
+          ts:de.timestamp,
+          height:de.block_height,
+          label:lbl,
+          momentum:"", // gen-rate would require a derived series we don't expose; omit per truth rule
+          isNew:false, isHot:false, anomalyReasons:[],
+          clickHeight:de.block_height
+        });
+      }
+
+      events.sort(function(a,b){
+        var dt=(b.ts||0)-(a.ts||0);
+        if(dt!==0)return dt;
+        return (b.height||0)-(a.height||0);
+      });
+      return events;
+    }
+
+    function filterEvents(events,cat){
+      if(cat==='all')return events;
+      if(cat==='contracts')return events.filter(function(e){return e.cat==='call';});
+      if(cat==='dust')return events.filter(function(e){return e.cat==='dust';});
+      if(cat==='anomalies'){
+        return events.filter(function(e){return e.cat==='block' && e.anomalyReasons.length>0;});
+      }
+      return events;
+    }
+
+    function renderFeed(){
+      var events=buildEvents(latestBlocks,latestContractActions,latestDustEvents);
+      var rows=filterEvents(events,activeCat);
+      if(!rows.length){
+        var msg='Waiting for blocks...';
+        if(activeCat==='contracts')msg='No recent contract calls in the indexed window.';
+        else if(activeCat==='dust')msg='No recent DUST events in the indexed window.';
+        else if(activeCat==='anomalies')msg='No anomalies in the current window.';
+        tickerEl.innerHTML='<span style="color:#475569;font-size:10px;">'+msg+'</span>';
+        return;
+      }
+      var GLYPH={block:'▲',call:'◆',dust:'✦',bridge:'↔',anomaly:'!'};
+      var count=Math.min(rows.length,8);
+      var frag=document.createDocumentFragment();
+      for(var i=0;i<count;i++){
+        var e=rows[i];
+        var renderCat=(activeCat==='anomalies')?'anomaly':e.cat;
+        var glyphChar=GLYPH[renderCat]||GLYPH.block;
+        var opacity=i===0?1:Math.max(0.4,1-(i*0.08));
+        var div=document.createElement("div");
+        div.className="nf-evt nf-evt-"+renderCat+(e.isNew?" nf-block-new":"")+(e.isHot?" nf-block-hot":"");
+        div.style.opacity=opacity;
+        if(e.clickHeight){
+          div.style.cursor="pointer";
+          div.title="Block #"+e.clickHeight+" - click to inspect";
+          div.setAttribute("data-height",e.clickHeight);
+          div.onclick=function(){var h=this.getAttribute("data-height");if(h){document.getElementById("searchInput").value=h;document.getElementById("searchBtn").click();}};
+        }
+        var g=document.createElement("span");
+        g.className="nf-evt-glyph";
+        g.textContent=glyphChar;
+        div.appendChild(g);
+        var lbl=document.createElement("span");
+        lbl.style.cssText="color:#e2e8f0;font-size:11px;font-weight:600;";
+        lbl.textContent=e.label;
+        div.appendChild(lbl);
+        if(e.anomalyReasons&&e.anomalyReasons.length){
+          var sig=document.createElement("span");
+          sig.className="nf-signal";
+          sig.style.cssText="font-size:8px;font-weight:600;padding:1px 4px;border-radius:3px;margin-left:4px;background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);";
+          sig.textContent=e.anomalyReasons.join(" / ");
+          div.appendChild(sig);
+        }
+        var tSpan=document.createElement("span");
+        tSpan.className="nf-time";
+        tSpan.setAttribute("data-ts",e.ts||0);
+        tSpan.style.cssText="color:#334155;font-size:9px;margin-left:4px;";
+        tSpan.textContent=e.ts?timeAgo(e.ts):"";
+        div.appendChild(tSpan);
+        if(e.momentum){
+          var mom=document.createElement("span");
+          mom.className="nf-evt-momentum";
+          mom.textContent=e.momentum;
+          div.appendChild(mom);
+        }
+        if(e.isNew&&e.cat==='block'){
+          var burst=document.createElement("span");
+          burst.className="nf-tx-burst";
+          burst.textContent="new";
+          div.appendChild(burst);
+        }
+        frag.appendChild(div);
+      }
+      tickerEl.innerHTML="";
+      tickerEl.appendChild(frag);
+    }
+
+    // Wire categorical tabs.
+    (function wireFeedTabs(){
+      var tabs=document.querySelectorAll('.nf-feed-tab');
+      for(var t=0;t<tabs.length;t++){
+        tabs[t].addEventListener('click',function(){
+          var c=this.getAttribute('data-cat');
+          if(!c||c===activeCat)return;
+          activeCat=c;
+          var all=document.querySelectorAll('.nf-feed-tab');
+          for(var u=0;u<all.length;u++){
+            var on=all[u].getAttribute('data-cat')===activeCat;
+            all[u].classList.toggle('nf-feed-tab-on',on);
+            all[u].setAttribute('aria-selected',on?'true':'false');
+          }
+          renderFeed();
+        });
+      }
+    })();
+
+    // renderTicker is the legacy entry point called from fetchAll (blocks payload).
+    // It still drives blockHistory + lastHeight + heartbeat; the actual DOM render
+    // is delegated to renderFeed() so tab filtering applies.
     function renderTicker(blocks){
       if(!blocks||!blocks.length){
-        tickerEl.innerHTML='<span style="color:#475569;font-size:10px;">Waiting for blocks...</span>';
+        latestBlocks=[];
+        renderFeed();
         return;
       }
       var newBlocks=[];
@@ -812,62 +1094,9 @@
           if(blocks[n].height>lastHeight)newBlocks.push(blocks[n].height);
         }
       }
-      var count=Math.min(blocks.length,8);
-      var frag=document.createDocumentFragment();
-      for(var i=0;i<count;i++){
-        var b=blocks[i];
-        var isNew=newBlocks.indexOf(b.height)!==-1;
-        var txCount=b.extrinsics_count||0;
-        // Signal detection: is this block notable?
-        var isHot=txCount>Math.max(4,avgTxPerBlock*1.5);
-        // Time decay opacity
-        var opacity=i===0?1:Math.max(0.4,1-(i*0.08));
-        var borderColor=isNew?'rgba(10,186,181,0.4)':isHot?'rgba(250,204,21,0.25)':'rgba(100,116,139,'+(0.15-i*0.01).toFixed(2)+')';
-        var div=document.createElement("div");
-        div.className="nf-block"+(isNew?" nf-block-new":"")+(isHot?" nf-block-hot":"");
-        div.style.cssText="position:relative;flex-shrink:0;background:rgba(15,23,42,0.6);border:1px solid "+borderColor+";border-radius:6px;padding:5px 10px;min-width:0;opacity:"+opacity+";cursor:pointer;";
-        div.title="Block #"+b.height+" — click to inspect";
-        div.setAttribute("data-height",b.height);
-        div.onclick=function(){var h=this.getAttribute("data-height");if(h)window.location.hash="";document.getElementById("searchInput").value=h;document.getElementById("searchBtn").click();};
-        // Height
-        var hSpan=document.createElement("span");
-        hSpan.style.cssText="color:#0ABAB5;font-size:11px;font-weight:700;";
-        hSpan.textContent="#"+b.height.toLocaleString();
-        div.appendChild(hSpan);
-        // Tx count with emphasis for high-activity blocks
-        var txSpan=document.createElement("span");
-        txSpan.style.cssText="color:"+(isHot?"#facc15":i===0?"#64748b":"#475569")+";font-size:9px;margin-left:6px;"+(isHot?"font-weight:700;":"");
-        txSpan.textContent=txCount+" tx";
-        div.appendChild(txSpan);
-        // Signal tags (derived from real data, not fake)
-        if(isHot){
-          var sig=document.createElement("span");
-          sig.className="nf-signal";
-          sig.style.cssText="font-size:8px;font-weight:600;padding:1px 4px;border-radius:3px;margin-left:4px;background:rgba(250,204,21,0.12);color:#facc15;border:1px solid rgba(250,204,21,0.2);";
-          sig.textContent="active";
-          div.appendChild(sig);
-        }
-        // Time ago
-        var tSpan=document.createElement("span");
-        tSpan.className="nf-time";
-        tSpan.setAttribute("data-ts",b.timestamp);
-        tSpan.style.cssText="color:#334155;font-size:9px;margin-left:4px;";
-        tSpan.textContent=timeAgo(b.timestamp);
-        div.appendChild(tSpan);
-        // Tx burst on new blocks
-        if(isNew&&txCount>0){
-          var burst=document.createElement("span");
-          burst.className="nf-tx-burst";
-          burst.textContent="+"+txCount+" tx";
-          div.appendChild(burst);
-        }
-        frag.appendChild(div);
-      }
-      tickerEl.innerHTML="";
-      tickerEl.appendChild(frag);
+      latestBlocks=blocks;
       if(blocks[0])lastHeight=blocks[0].height;
       blockHistory=blocks;
-      // Show rolling rate in feed header
       var rateEl=document.getElementById("nfTickerRate");
       if(rateEl&&blocks.length>=2){
         var span=blocks[0].timestamp-blocks[blocks.length-1].timestamp;
@@ -876,13 +1105,25 @@
           rateEl.textContent=bps+" blk/min";
         }
       }
-      // Pulse effects
+      renderFeed();
       if(newBlocks.length>0){
         dotEl.style.boxShadow="0 0 10px #22c55e";
         setTimeout(function(){dotEl.style.boxShadow="0 0 6px #22c55e";},400);
         hbStalled=0;
         if(hbRing){hbRing.classList.remove("nf-beating");void hbRing.offsetWidth;hbRing.classList.add("nf-beating");setTimeout(function(){hbRing.classList.remove("nf-beating");},600);}
       } else { hbStalled++; }
+    }
+
+    // Pull /api/live/recent for contract + DUST event streams. No new backend.
+    function fetchLiveRecent(){
+      fetch("/api/mainnet/live/recent?limit=15").then(function(r){return r.json()}).then(function(d){
+        if(!d)return;
+        latestContractActions=Array.isArray(d.contractActions)?d.contractActions:[];
+        latestDustEvents=Array.isArray(d.dustEvents)?d.dustEvents:[];
+        renderFeed();
+      }).catch(function(){
+        // Soft-fail: keep last good payload, don't blank the feed.
+      });
     }
 
     // ─── FETCH ORCHESTRATION ───────────────────────────
@@ -896,6 +1137,8 @@
       }).catch(function(){
         if(dotEl)dotEl.style.background="#f59e0b";
       });
+      // Categorical streams (contract calls + DUST events) for the feed tabs.
+      fetchLiveRecent();
       // Activity Pulse — DUST + shielded per-minute rates
       fetchActivityPulse();
     }
