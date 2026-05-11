@@ -212,7 +212,16 @@
           <div class="relative">
             <button id="networkBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-orange-500/50 transition">
               <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span id="networkLabel" class="text-sm font-medium __NETWORK_COLOR__">__NETWORK_LABEL__</span><script>/* SAFETY FALLBACK ONLY — runs synchronously during parse, before first paint, ONLY if scripts/deploy-all.sh did not run and the placeholder leaked through. Substituted deploys never enter this branch — the textContent check is exact. Truth rule: unknown env -> "Network", never "Mainnet". */(function(){var l=document.getElementById("networkLabel");if(l&&l.textContent==="__NETWORK_LABEL__"){l.textContent="Network";l.classList.remove("__NETWORK_COLOR__");l.classList.add("text-slate-400");}})();</script>
+              <span id="networkLabel" class="text-sm font-medium __NETWORK_COLOR__">__NETWORK_LABEL__</span>
+              <!-- No JS fallback. The deploy-all.sh sed substitution is the
+                   single source of truth for the label and color. If the
+                   deploy did not run, the literal __NETWORK_LABEL__ /
+                   __NETWORK_COLOR__ tokens are visible — loud and obviously
+                   broken — which is the alarm we want. A prior inline
+                   fallback was self-defeating because sed also substituted
+                   its own comparison string, flipping the correct label
+                   back to "Network" on every successful deploy. -->
+
               <svg class="w-4 h-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[100] min-w-[220px] overflow-hidden">
@@ -2839,7 +2848,12 @@ function loadCredentialGateLiveness(){
     line.title=d.txHash;
     ago.textContent=d.timestamp?timeAgo(d.timestamp):'—';
   }
-  fetch('/api/credential-gate/liveness').then(function(r){return r.json()}).then(function(d){
+  fetch('/api/credential-gate/liveness', { signal: AbortSignal.timeout(4000) }).then(function(r){
+    if(!r.ok) throw new Error('http_'+r.status);
+    var ct = (r.headers.get('content-type')||'').toLowerCase();
+    if(ct.indexOf('application/json') === -1) throw new Error('non_json:'+ct);
+    return r.json();
+  }).then(function(d){
     if(!d||d.error)throw new Error('bad');
     var st=$('cgStatus'),ping=$('cgPing');
     if(d.verified){
