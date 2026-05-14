@@ -12,7 +12,7 @@
 #   preprod  preprod.nightforge.jp   /var/www/explorer-preprod   midnight-owned
 #
 # Usage:
-#   ./scripts/deploy-all.sh                  # deploy index + credential-gate
+#   ./scripts/deploy-all.sh                  # deploy index + credential-gate + yamori
 #   ./scripts/deploy-all.sh --dry-run        # show what would happen, don't write
 #
 # Exits non-zero if any target failed. Never silently skips.
@@ -25,6 +25,7 @@ DRY_RUN=0
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_INDEX="$REPO_ROOT/website/nightforge-main.html"
 SRC_CG="$REPO_ROOT/website/credential-gate.html"
+SRC_YAMORI="$REPO_ROOT/website/yamori.html"
 
 if [[ ! -f "$SRC_INDEX" ]]; then
   echo "ERROR: source index not found at $SRC_INDEX" >&2
@@ -123,7 +124,8 @@ format_size() {
 echo
 echo "$(bold 'NightForge deploy-all') · $STAMP"
 echo "  source index:           $SRC_INDEX ($(format_size "$(stat -c '%s' "$SRC_INDEX")"))"
-[[ -f "$SRC_CG" ]] && echo "  source credential-gate: $SRC_CG ($(format_size "$(stat -c '%s' "$SRC_CG")"))"
+[[ -f "$SRC_CG" ]]     && echo "  source credential-gate: $SRC_CG ($(format_size "$(stat -c '%s' "$SRC_CG")"))"
+[[ -f "$SRC_YAMORI" ]] && echo "  source yamori:          $SRC_YAMORI ($(format_size "$(stat -c '%s' "$SRC_YAMORI")"))"
 (( DRY_RUN )) && echo "  $(yellow 'DRY RUN') — no files will be written"
 echo
 
@@ -161,6 +163,13 @@ for row in "${TARGETS[@]}"; do
     fi
   fi
 
+  if [[ -f "$SRC_YAMORI" ]]; then
+    if ! deploy_file "$SRC_YAMORI" "$docroot/yamori.html"; then
+      echo "  $(red '✗') yamori.html failed"
+      step_ok=0
+    fi
+  fi
+
   if (( DRY_RUN )); then
     results+=("$name:DRY")
     ok+=1
@@ -177,6 +186,10 @@ for row in "${TARGETS[@]}"; do
     if [[ -f "$docroot/credential-gate.html" ]]; then
       cg_size="$(stat -c '%s' "$docroot/credential-gate.html")"
       echo "  $(green '✓') credential-gate    $(format_size "$cg_size")"
+    fi
+    if [[ -f "$docroot/yamori.html" ]]; then
+      ym_size="$(stat -c '%s' "$docroot/yamori.html")"
+      echo "  $(green '✓') yamori.html        $(format_size "$ym_size")"
     fi
     results+=("$name:OK")
     ok+=1
