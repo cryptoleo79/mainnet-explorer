@@ -78,6 +78,18 @@ next milestone is **someone else using them**, not more features.
   for either. YAMORI's `mainnetConfirmed` gate keeps the shield UI off
   until upstream lands a fix. Tracked by a scheduled remote agent
   (`trig_01APqfwv2SG5ckmhL5UYJJBK`) re-checking weekly.
+- **YAMORI header link `/yamori.html` is apex-only.** The file lives at
+  `/var/www/explorer-main/yamori.html` (45,650 bytes, mtime 2026-04-16)
+  and is **not** in the source repo. `scripts/deploy-all.sh` copies
+  `index.html` and `credential-gate.html` only, so the other three
+  docroots never received `yamori.html`. On `mainnet.nightforge.jp`,
+  `preview.nightforge.jp`, and `preprod.nightforge.jp` the URL
+  `/yamori.html` returns HTTP 200 but is the 336 KB SPA fallthrough —
+  the user clicks "YAMORI" and the page appears not to change.
+  Recorded 2026-05-13. Fix proposal (Option A in that day's report):
+  put `yamori.html` under source control and add a `deploy_file` step
+  in `deploy-all.sh`. Pending operator decision; non-blocking for the
+  external test plan.
 
 ## Next validation task
 
