@@ -3,17 +3,20 @@
 NightForge, YAMORI, and CredentialGate are considered operational. The
 next milestone is **someone else using them**, not more features.
 
-## Current stable state (2026-05-13)
+## Current stable state (2026-05-17)
 
-- **NightForge** — four domains live, deploys synced 2026-05-12 03:16 UTC:
+- **NightForge** — four domains live, deploys synced 2026-05-14:
   - `nightforge.jp`, `mainnet.nightforge.jp` → Mainnet (text-green-400)
   - `preview.nightforge.jp` → Preview (text-cyan-400)
   - `preprod.nightforge.jp` → Preprod (text-orange-400)
   - First-paint network label correct on all four; no placeholder, no safety-fallback script.
   - `/api/stats` returns JSON on all four hosts.
-- **YAMORI** — `main` clean, in sync with `origin/main` at `22a8074`. Extension
-  dist built 2026-05-11. Issuer flow live (gen-issuer + issue + verify-credential)
-  and shipped to origin.
+  - `/yamori.html` (45,650 B) deploys to all four hosts via `scripts/deploy-all.sh`.
+- **YAMORI** — `main` clean. Latest release is **v1.5.0**: dist built
+  2026-05-14T23:34:41Z from `main @ 22a8074`, shipped on release commit
+  `138369c`. Zip at `/home/midnight/YAMORI/yamori-v1.5.0.zip`
+  (6,502,023 bytes, 52 files). Issuer flow live (`gen-issuer`,
+  `issue`, `verify-credential`).
 - **CredentialGate** — preview deployment at
   `7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703`,
   deploy tx `cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e`,
@@ -74,9 +77,11 @@ next milestone is **someone else using them**, not more features.
 - **Shield blocker upstream** — `midnight-node` issues `#1206`
   (`AllCommitmentsSubsetCheckFailure` on shielded mint) and `#1374`
   (sister EffectsCheckFailure on `sendShielded`) are both open with no
-  PR linked. `toolkit-1.0.0-rc.6` (2026-05-12) does not include a fix
-  for either. YAMORI's `mainnetConfirmed` gate keeps the shield UI off
-  until upstream lands a fix. Tracked by a scheduled remote agent
+  PR linked. `toolkit-1.0.0-rc.6` (2026-05-12), `rc.7` (2026-05-13),
+  and `rc.8` (2026-05-14) do not include a fix for either. Live
+  preview/preprod RPCs are still on `0.22.5` / `0.22.2`; rc line not
+  promoted yet. YAMORI's `mainnetConfirmed` gate keeps the shield UI
+  off until upstream lands a fix. Tracked by a scheduled remote agent
   (`trig_01APqfwv2SG5ckmhL5UYJJBK`) re-checking weekly.
 - **YAMORI header link `/yamori.html` is apex-only.** The file lives at
   `/var/www/explorer-main/yamori.html` (45,650 bytes, mtime 2026-04-16)

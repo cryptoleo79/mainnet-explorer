@@ -51,10 +51,11 @@ with the contract address pre-filled.
 ## 5. (Developer) Run the demo
 
 ```sh
-git clone https://github.com/cryptoleo79/YAMORI.git
+# repo is currently invite-only — ask operator if 404
+git clone git@github.com:cryptoleo79/YAMORI.git
 cd YAMORI/contracts/credential-gate/deploy
 npm install
-cp .env.example .env       # then add MIDNIGHT_MNEMONIC
+cp .env.template .env       # then add MIDNIGHT_MNEMONIC
 npm run demo:clean
 ```
 

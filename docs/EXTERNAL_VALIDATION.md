@@ -46,10 +46,14 @@ is part of the test.
 
    ```sh
    npm install
-   cp .env.example .env
+   cp .env.template .env
    # Open .env and set MIDNIGHT_MNEMONIC=<your 24-word preview mnemonic>
    # Or: npm run gen   (generates a fresh mnemonic into .env)
    ```
+
+   Note: the repo at `github.com/cryptoleo79/YAMORI` is currently
+   invite-only. If `git clone` returns 404, ask the operator for access
+   or a release tarball of `contracts/credential-gate/`.
 
 3. **Start the proof server** (in a separate terminal)
 
