@@ -249,16 +249,10 @@
             <span class="text-xs text-slate-500">MCap</span>
             <span id="headerMcap" class="text-slate-300 text-xs" style="display:none"></span>
           </div>
-          <div class="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-slate-800/85 border border-slate-700" id="indexedStrip" style="display:none">
-            <span id="headerIndexed" class="font-semibold text-white text-sm"></span>
-            <span class="text-xs text-slate-500" data-i18n="indexed">INDEXED</span>
-          </div>
-          <div id="connBadge" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/30" title="Awaiting indexer data">
-            <span id="connLabel" class="text-xs font-medium text-slate-400">—</span>
-          </div>
           <div id="liveBadge" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/30" title="Awaiting indexer data">
             <div id="liveDot" class="w-2 h-2 rounded-full bg-slate-500"></div>
             <span id="liveLabel" class="text-xs font-medium text-slate-400">—</span>
+            <span id="headerIndexed" class="text-xs text-slate-500 font-mono"></span>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -380,26 +374,6 @@
     </div>
   </div>
 
-  <!-- ═══ TIER 1: LIVE FEED (signal of life — always above fold) ═══ -->
-  <div id="nfBlockTicker" class="container" style="padding-bottom:16px;">
-    <div style="background:rgba(30,41,59,0.4);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:10px 14px;overflow:hidden;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span id="nfTickerDot" style="width:6px;height:6px;border-radius:50%;background:#64748b;" title="Awaiting indexer data"></span>
-          <span style="color:#94a3b8;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Live Feed</span>
-          <span id="nfTickerRate" style="color:#64748b;font-size:9px;font-weight:500;"></span>
-        </div>
-        <a href="/tools/live-feed.html" style="color:#64748b;font-size:10px;text-decoration:none;font-weight:500;">Full feed &rarr;</a>
-      </div>
-      <div id="nfFeedTabs" role="tablist" aria-label="Live feed category" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
-        <button class="nf-feed-tab nf-feed-tab-on"  data-cat="all"       role="tab" aria-selected="true"  type="button">All</button>
-        <button class="nf-feed-tab"                 data-cat="contracts" role="tab" aria-selected="false" type="button">Contracts</button>
-        <button class="nf-feed-tab"                 data-cat="dust"      role="tab" aria-selected="false" type="button">DUST</button>
-        <button class="nf-feed-tab"                 data-cat="anomalies" role="tab" aria-selected="false" type="button">Anomalies</button>
-      </div>
-      <div id="nfTickerItems" style="display:flex;gap:6px;overflow:hidden;flex-wrap:wrap;"></div>
-    </div>
-  </div>
 
   <!-- Hidden Activity strip preserved so fetchActivityPulse() targets continue to exist; not visible. DUST/min surfaces at /tools/dust-economics.html. -->
   <div id="nfActivityStrip" style="display:none;">
@@ -407,64 +381,6 @@
     <span id="nfGovSep"></span><span id="nfGovChange"></span><span id="nfGovDparam"></span><span id="nfGovTc"></span>
   </div>
 
-  <!-- ═══ TIER 3 DIVIDER — Deep analytics (collapsible) ═══ -->
-  <div class="container" style="padding-bottom:16px;">
-    <button id="nfDeepToggle" onclick="(function(){var p=document.getElementById('nfDeepPanel');var c=document.getElementById('nfDeepChevron');var open=p.style.display!=='none';p.style.display=open?'none':'block';if(c)c.style.transform=open?'rotate(0deg)':'rotate(180deg)';})()" style="width:100%;background:transparent;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
-      <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">Deep Analytics</span>
-      <span style="flex:1;height:1px;background:linear-gradient(90deg,rgba(100,116,139,0.25),transparent);"></span>
-      <span id="nfDeepChevron" style="color:#64748b;font-size:11px;transition:transform 0.2s;">▾</span>
-    </button>
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:10px;">
-      <a href="/tools/validators.html" style="color:#94a3b8;text-decoration:none;">Validator liveness &rarr;</a>
-      <span style="color:rgba(100,116,139,0.3);">|</span>
-      <a href="/tools/contracts.html" style="color:#94a3b8;text-decoration:none;">Contract heatmap &rarr;</a>
-      <span style="color:rgba(100,116,139,0.3);">|</span>
-      <a href="/tools/privacy-flow.html" style="color:#94a3b8;text-decoration:none;">Privacy flow &rarr;</a>
-      <span style="color:rgba(100,116,139,0.3);">|</span>
-      <a href="/tools/epochs.html" style="color:#94a3b8;text-decoration:none;">Epoch history &rarr;</a>
-    </div>
-  </div>
-
-  <!-- TIER 3: Deep analytics panel (hidden by default, toggles on click) -->
-  <div id="nfDeepPanel" style="display:none;">
-
-    <!-- Decentralization Dial + Nakamoto Coefficient -->
-    <div id="nfDecentDial" class="container" style="padding-bottom:16px;display:none;">
-      <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Decentralization Dial</span>
-            <span style="color:#64748b;font-size:9px;font-weight:500;">federated &rarr; sovereign</span>
-          </div>
-          <span id="nfDecentPhase" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;"></span>
-        </div>
-        <div style="display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;">
-          <svg id="nfDecentGauge" viewBox="0 0 200 120" style="width:200px;height:120px;"></svg>
-          <div id="nfDecentBreakdown" style="display:flex;flex-direction:column;gap:6px;font-size:11px;font-variant-numeric:tabular-nums;"></div>
-          <a href="/tools/validators.html" id="nfNakamotoCard"
-             title="Smallest validator subset whose combined stake exceeds 33% of total. Computed from /api/committee."
-             style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 14px;border-left:1px solid rgba(100,116,139,0.18);min-width:110px;text-decoration:none;color:inherit;">
-            <span style="color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;text-align:center;">Nakamoto Coefficient</span>
-            <span id="nfNakamotoValue" style="color:#4ade80;font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;">&mdash;</span>
-            <span id="nfNakamotoSub" style="color:#94a3b8;font-size:9px;text-align:center;line-height:1.3;">&gt;33% of stake</span>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Epoch Pulse Dual-Ring (cross-chain anchor) -->
-    <div id="nfEpochPulse" class="container" style="padding-bottom:16px;display:none;">
-      <div style="background:rgba(30,41,59,0.45);border:1px solid rgba(100,116,139,0.12);border-radius:10px;padding:14px 18px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Epoch Pulse</span>
-          <span style="color:#64748b;font-size:9px;">Midnight ↔ Cardano anchor</span>
-        </div>
-        <svg id="nfEpochPulseSvg" viewBox="0 0 1000 200" style="width:100%;height:200px;" preserveAspectRatio="xMidYMid meet"></svg>
-        <p id="nfLatestAnchor" style="color:#94a3b8;font-size:10px;text-align:center;margin-top:8px;font-variant-numeric:tabular-nums;"></p>
-      </div>
-    </div>
-
-  </div>
   <style>
     @keyframes nfSlideIn {
       from { opacity:0; transform:translateX(-12px) scale(0.96); }
@@ -574,6 +490,12 @@
     // ─── SHARED STATE ──────────────────────────────────
     var tickerEl=document.getElementById("nfTickerItems");
     var dotEl=document.getElementById("nfTickerDot");
+    // Live Feed strip was demoted from the homepage. Network Pulse + heartbeat
+    // still live in this IIFE and need to keep running. Make the ticker dom
+    // refs into no-op stubs so any later innerHTML/appendChild/querySelectorAll
+    // is harmless rather than null-throw.
+    if(!tickerEl){tickerEl={innerHTML:"",appendChild:function(){},querySelectorAll:function(){return [];}};}
+    if(!dotEl){dotEl={style:{}};}
     var hbEl=document.getElementById("nfHeartbeat");
     var hbRing=document.getElementById("nfHeartbeatRing");
     var hbNum=document.getElementById("nfHeartbeatBpm");
@@ -1661,8 +1583,6 @@
         <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white" title="Awaiting indexer data">—</p></div>
         <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400"></p></div>
         <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white"></p></div>
-        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400" title="Awaiting indexer data">—</p></div>
-        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
         <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4">
           <p class="text-xs text-slate-500 mb-1" data-i18n="avgBlockTime">Avg Block Time</p>
           <div class="flex items-center gap-2">
@@ -1671,35 +1591,8 @@
           </div>
         </div>
       </div>
-      <!-- Network Age + DUST Explainer -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div class="bg-gradient-to-r from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/30 p-4">
-          <p class="text-xs text-green-400 mb-1" data-i18n="networkAge">Network Age</p>
-          <p id="networkAge" class="text-lg font-bold text-green-400"></p>
-        </div>
-        <div class="bg-gradient-to-r from-amber-500/5 to-orange-500/5 rounded-xl border border-amber-500/20 p-4">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0 border border-amber-500/30">
-              <span class="text-amber-400 text-lg">&#x26A1;</span>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-amber-400 mb-1" data-i18n="dustTitle">Powered by DUST</p>
-              <p class="text-xs text-slate-400 leading-relaxed" data-i18n="dustDesc">Midnight uses a unique fee token called DUST. Generated from NIGHT tokens, DUST grows in value over time and is used exclusively for transaction fees. Unlike traditional gas, DUST cannot be transferred - only spent on fees.</p>
-            </div>
-          </div>
-        </div>
-        <div class="mt-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl border border-blue-500/20 p-4">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 border border-blue-500/30">
-              <span class="text-blue-400 text-lg">&#x2744;&#xFE0F;</span>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-blue-400 mb-1" data-i18n="nightTokenTitle">NIGHT Token</p>
-              <p class="text-xs text-slate-400 leading-relaxed" data-i18n="nightTokenDesc">NIGHT is Midnight's native utility token distributed via the Glacier Drop program. NIGHT generates DUST (fee resource) over time - like solar panels generating electricity. Hold NIGHT to power transactions without volatile gas fees.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Network Age (reduced from 3-card grid to one line) -->
+      <p class="text-xs text-slate-500 mb-8"><span data-i18n="networkAge">Network Age</span>: <span id="networkAge" class="text-green-400 font-semibold">—</span></p>
       <div class="grid lg:grid-cols-3 gap-4 mb-8">
         <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
           <div class="p-4 border-b border-slate-700/50">
@@ -1746,25 +1639,6 @@
           </div>
         </div>
       </div>
-        <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden mt-4">
-          <div class="px-4 py-4 border-b border-slate-700/50 flex items-center justify-between">
-            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span data-i18n="blockCommittee">Block Committee</span></h3>
-            <div class="flex items-center gap-2">
-              <span id="committeeEpoch" class="text-xs text-slate-500 bg-slate-700/50 px-2 py-1 rounded-full"></span>
-              <span id="committeeCount" class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full"></span>
-            </div>
-          </div>
-          <div id="validatorGrid" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2"></div>
-        </div>
-        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6 mt-4">
-          <div class="px-6 py-4 border-b border-slate-700/30">
-            <h3 class="font-semibold text-white" data-i18n="blockProducers">Block Producers</h3>
-            <p class="text-xs text-slate-500">Validator block production distribution</p>
-          </div>
-          <div id="blockProducersList" class="p-4 space-y-2">
-            <p class="text-center text-slate-500 text-sm py-4"></p>
-          </div>
-        </div>
     </div>
     <div id="content-blocks" class="tab-content hidden">
       <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-4 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Blocks<button onclick="exportBlocksCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allBlocks" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
@@ -2116,23 +1990,6 @@
             </div>
           </div>
 
-          <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-yellow-500/30 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-white" data-i18n="deployedContracts">Deployed Contracts</h3>
-                  <p class="text-xs text-slate-500">On-chain smart contracts</p>
-                </div>
-              </div>
-              <span id="deployedContractsTotal" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full"></span>
-            </div>
-            <div id="deployedContractsList" class="divide-y divide-slate-700/20 max-h-[360px] overflow-y-auto">
-              <div class="px-4 py-8 text-center text-slate-500"></div>
-            </div>
-          </div>
         </div>
 
         <!-- Compare Networks -->
@@ -2181,28 +2038,6 @@
           </div>
         </div>
 
-        <!-- DUST Fee Tracker -->
-        <div class="glass rounded-2xl border border-amber-500/20 overflow-hidden mb-6 mt-6">
-          <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-amber-500/5 to-transparent">
-            <h3 class="font-semibold text-amber-400" data-i18n="dustTracker">DUST Fee Tracker</h3>
-            <p class="text-xs text-slate-500">Network fee consumption over time</p>
-          </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div class="bg-slate-900/50 rounded-xl p-4 text-center">
-                <p class="text-xs text-slate-500">Total Fee-Paying Txs</p>
-                <p id="dustTotalTxs" class="text-2xl font-bold text-amber-400"></p>
-              </div>
-              <div class="bg-slate-900/50 rounded-xl p-4 text-center">
-                <p class="text-xs text-slate-500">DUST Events</p>
-                <p id="dustEventCount" class="text-2xl font-bold text-amber-400"></p>
-              </div>
-            </div>
-            <div class="h-48">
-              <canvas id="dustChartCanvas"></canvas>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -2411,42 +2246,6 @@
               </div>
             </div>
           </div>
-          <!-- Cardano Epoch -->
-          <div class="glass rounded-2xl border border-blue-500/20 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-blue-500/5 to-transparent">
-              <h3 class="font-semibold text-blue-400">Cardano Epoch</h3>
-              <p class="text-xs text-slate-500">~5 day epochs on Cardano mainchain</p>
-            </div>
-            <div class="p-6">
-              <div class="flex items-center justify-center mb-6">
-                <div class="text-center">
-                  <p class="text-5xl font-bold text-blue-400" id="cardanoEpochBig"></p>
-                  <p class="text-sm text-slate-400 mt-1">Current Cardano Epoch</p>
-                  <p id="cardanoEpochCountdown" class="text-xs text-blue-300 mt-1"></p>
-                  <div class="w-full h-1.5 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
-                    <div id="cardanoEpochProgress" class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all" style="width:0%"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="bg-slate-900/50 rounded-xl p-4 text-center">
-                  <p class="text-xs text-slate-500">Cardano Slot</p>
-                  <p id="cardanoSlotBig" class="text-sm font-mono font-bold text-white"></p>
-                </div>
-                <div class="bg-slate-900/50 rounded-xl p-4 text-center">
-                  <p class="text-xs text-slate-500">Midnight Epochs in this Cardano Epoch</p>
-                  <p id="midnightEpochsInCardano" class="text-sm font-bold text-cyan-400"></p>
-                </div>
-              </div>
-              <div class="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                  <p class="text-xs text-blue-400 font-medium">Cross-Chain Anchor</p>
-                </div>
-                <p class="text-xs text-slate-400">Midnight checkpoints to Cardano every epoch for cross-chain security. Each Cardano epoch (~5 days) contains ~240 Midnight epochs.</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Session Changes & Epoch Info -->
@@ -2477,33 +2276,6 @@
           </div>
 
           <!-- Epoch Info Box -->
-          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-blue-500/30 flex items-center justify-center"><span class="text-sm">💡</span></div>
-              <h3 class="font-semibold text-white">About Midnight Epochs</h3>
-            </div>
-            <div class="p-6">
-              <p class="text-sm text-slate-300 leading-relaxed" data-i18n="epochExplainer">Midnight uses 30-minute epochs. Each epoch produces ~50 blocks. The validator committee is set at the start of each epoch. Midnight epochs are anchored to Cardano epochs for cross-chain security.</p>
-              <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="bg-slate-800/85 rounded-xl p-4 border border-slate-700/50 text-center">
-                  <p class="text-2xl font-bold text-cyan-400">30m</p>
-                  <p class="text-xs text-slate-500 mt-1" data-i18n="duration">Duration</p>
-                </div>
-                <div class="bg-slate-800/85 rounded-xl p-4 border border-slate-700/50 text-center">
-                  <p class="text-2xl font-bold text-purple-400">~50</p>
-                  <p class="text-xs text-slate-500 mt-1">Blocks</p>
-                </div>
-                <div class="bg-slate-800/85 rounded-xl p-4 border border-slate-700/50 text-center">
-                  <p class="text-2xl font-bold text-green-400">300</p>
-                  <p class="text-xs text-slate-500 mt-1">Slots</p>
-                </div>
-                <div class="bg-slate-800/85 rounded-xl p-4 border border-slate-700/50 text-center">
-                  <p class="text-2xl font-bold text-blue-400">6s</p>
-                  <p class="text-xs text-slate-500 mt-1">Slot Time</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -3344,11 +3116,10 @@ window.nfHealth = window.nfHealth || { lastStatsOk: 0 };
 function nfApplyHealth(){
   var now = Date.now();
   var age = window.nfHealth.lastStatsOk ? (now - window.nfHealth.lastStatsOk) : Infinity;
-  var connBadge=document.getElementById("connBadge"),connLabel=document.getElementById("connLabel");
   var liveBadge=document.getElementById("liveBadge"),liveDot=document.getElementById("liveDot"),liveLabel=document.getElementById("liveLabel");
   var liveTxsDot=document.getElementById("liveTxsDot");
   var netOvBadge=document.getElementById("netOvBadge"),netOvBars=document.getElementById("netOvBars"),netOvLabel=document.getElementById("netOvLabel");
-  if(!connBadge||!liveBadge) return;
+  if(!liveBadge) return;
   function setBadge(badge,border,bg){badge.className="flex items-center gap-2 px-4 py-1.5 rounded-full "+bg+" border "+border;}
   function setBars(active){
     if(!netOvBars) return;
@@ -3360,32 +3131,26 @@ function nfApplyHealth(){
     netOvBars.dataset.active=active;
   }
   if(age < 30000){
-    setBadge(connBadge,"border-green-500/30","bg-green-500/10");
-    connLabel.className="text-xs font-medium text-green-400";connLabel.textContent="CONNECTED";connBadge.title="Indexer responding";
     setBadge(liveBadge,"border-green-500/30","bg-green-500/10");
     liveDot.className="w-2 h-2 rounded-full bg-green-400 animate-pulse";
     liveLabel.className="text-xs font-medium text-green-400";liveLabel.textContent="LIVE";liveBadge.title="Live data within 30s";
     if(liveTxsDot){liveTxsDot.className="w-2 h-2 rounded-full bg-pink-400 animate-pulse";liveTxsDot.title="Indexer responding";}
     if(netOvBadge){netOvBadge.title="Indexer responding";netOvLabel.className="text-xs font-medium text-green-400 ml-1";netOvLabel.textContent="Live";setBars("live");}
   } else if(age < 90000){
-    setBadge(connBadge,"border-amber-500/30","bg-amber-500/10");
-    connLabel.className="text-xs font-medium text-amber-400";connLabel.textContent="STALE";connBadge.title="Indexer last responded "+Math.round(age/1000)+"s ago";
     setBadge(liveBadge,"border-amber-500/30","bg-amber-500/10");
     liveDot.className="w-2 h-2 rounded-full bg-amber-400";
     liveLabel.className="text-xs font-medium text-amber-400";liveLabel.textContent="STALE";liveBadge.title="Data older than 30s";
     if(liveTxsDot){liveTxsDot.className="w-2 h-2 rounded-full bg-amber-400";liveTxsDot.title="Data older than 30s";}
     if(netOvBadge){netOvBadge.title="Data older than 30s";netOvLabel.className="text-xs font-medium text-amber-400 ml-1";netOvLabel.textContent="Stale";setBars("stale");}
   } else {
-    setBadge(connBadge,"border-slate-500/30","bg-slate-500/10");
-    connLabel.className="text-xs font-medium text-slate-400";
-    if(window.nfHealth.lastStatsOk===0){connLabel.textContent="—";connBadge.title="Awaiting indexer data";}
-    else{connLabel.textContent="OFFLINE";connBadge.title="No response from indexer for "+Math.round(age/1000)+"s";}
+    var awaiting = window.nfHealth.lastStatsOk===0;
+    var title = awaiting?"Awaiting indexer data":"No response from indexer for "+Math.round(age/1000)+"s";
     setBadge(liveBadge,"border-slate-500/30","bg-slate-500/10");
     liveDot.className="w-2 h-2 rounded-full bg-slate-500";
     liveLabel.className="text-xs font-medium text-slate-400";
-    liveLabel.textContent=window.nfHealth.lastStatsOk===0?"—":"OFFLINE";liveBadge.title=connBadge.title;
-    if(liveTxsDot){liveTxsDot.className="w-2 h-2 rounded-full bg-slate-500";liveTxsDot.title=connBadge.title;}
-    if(netOvBadge){netOvBadge.title=connBadge.title;netOvLabel.className="text-xs font-medium text-slate-400 ml-1";netOvLabel.textContent=window.nfHealth.lastStatsOk===0?"—":"Offline";setBars("idle");}
+    liveLabel.textContent=awaiting?"—":"OFFLINE";liveBadge.title=title;
+    if(liveTxsDot){liveTxsDot.className="w-2 h-2 rounded-full bg-slate-500";liveTxsDot.title=title;}
+    if(netOvBadge){netOvBadge.title=title;netOvLabel.className="text-xs font-medium text-slate-400 ml-1";netOvLabel.textContent=awaiting?"—":"Offline";setBars("idle");}
   }
 }
 setInterval(nfApplyHealth,2000);
@@ -3395,7 +3160,7 @@ function loadStats(){
     window.nfHealth.lastStatsOk = Date.now(); nfApplyHealth();
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
     document.getElementById("indexedBlocks").textContent=s.totalBlocks?fmt(s.totalBlocks):"";document.getElementById("indexedBlocks").classList.add("loaded");
-    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;var is=document.getElementById("indexedStrip");if(is&&newVal)is.style.display="";showPriceStrip&&showPriceStrip();if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
+    var hdrEl=document.getElementById("headerIndexed");if(hdrEl){var oldVal=hdrEl.textContent;var newVal=s.totalBlocks?fmt(s.totalBlocks):"";hdrEl.textContent=newVal?("· "+newVal):"";if(oldVal!==newVal&&oldVal!==""){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}}showPriceStrip&&showPriceStrip();
     var txN=(typeof s.totalExtrinsics==="number")?s.totalExtrinsics:(typeof s.totalTransactions==="number"?s.totalTransactions:null);
     var ttEl=document.getElementById("totalTxs");if(ttEl){ttEl.textContent=txN!==null?fmt(txN):"—";if(txN===null)ttEl.title="Awaiting indexer data";ttEl.classList.add("loaded");}
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
