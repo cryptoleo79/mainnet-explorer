@@ -201,7 +201,7 @@
   
   </div>
   <canvas id="networkCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
-  <header class="bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 sticky top-0 z-50 relative">
+  <header class="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800/50 sticky top-0 z-50 relative">
     <div class="container">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-4">
@@ -210,7 +210,7 @@
             <span class="font-bold text-lg text-white hidden sm:block">NightForge</span><span class="block-pulse-dot"></span>
           </a>
           <div class="relative">
-            <button id="networkBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-orange-500/50 transition">
+            <button id="networkBtn" class="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-orange-500/50 transition">
               <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               <span id="networkLabel" class="text-sm font-medium __NETWORK_COLOR__">__NETWORK_LABEL__</span>
               <!-- No JS fallback. The deploy-all.sh sed substitution is the
@@ -224,17 +224,17 @@
 
               <svg class="w-4 h-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[100] min-w-[220px] overflow-hidden">
-              <button class="network-opt w-full px-4 py-3 text-left hover:bg-green-500/10 transition flex items-center gap-3" data-network="mainnet">
+            <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/85 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-[100] min-w-[220px] overflow-hidden">
+              <button class="network-opt w-full px-4 py-4 text-left hover:bg-green-500/10 transition flex items-center gap-3" data-network="mainnet">
                 <div class="w-2 h-2 rounded-full bg-green-400"></div>
                 <div class="flex-1"><p class="text-sm font-medium text-green-400">Mainnet</p><p class="text-xs text-green-400">mainnet.nightforge.jp</p></div>
                 <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </button>
-              <button class="network-opt w-full px-4 py-3 text-left hover:bg-orange-500/10 transition flex items-center gap-3" data-network="preprod">
+              <button class="network-opt w-full px-4 py-4 text-left hover:bg-orange-500/10 transition flex items-center gap-3" data-network="preprod">
                 <div class="w-2 h-2 rounded-full bg-orange-400"></div>
                 <div class="flex-1"><p class="text-sm font-medium text-white">Preprod Net</p><p class="text-xs text-slate-500">preprod.nightforge.jp</p></div>
               </button>
-              <button class="network-opt w-full px-4 py-3 text-left hover:bg-cyan-500/10 transition flex items-center gap-3" data-network="preview">
+              <button class="network-opt w-full px-4 py-4 text-left hover:bg-cyan-500/10 transition flex items-center gap-3" data-network="preview">
                 <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                 <div class="flex-1"><p class="text-sm font-medium text-white">Preview Net</p><p class="text-xs text-slate-500">preview.nightforge.jp</p></div>
               </button>
@@ -242,21 +242,21 @@
           </div>
         </div>
         <div class="hidden md:flex items-center gap-3">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700" id="priceStrip" style="display:none">
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/85 border border-slate-700" id="priceStrip" style="display:none">
             <img src="/night-logo.webp" alt="NIGHT" class="w-5 h-5 rounded-full"/><span class="text-sm text-slate-400">NIGHT</span>
             <span id="headerPrice" class="font-semibold text-white text-sm" style="display:none"></span>
             <span id="headerChange" class="text-xs font-medium text-slate-500" style="display:none"></span>
             <span class="text-xs text-slate-500">MCap</span>
             <span id="headerMcap" class="text-slate-300 text-xs" style="display:none"></span>
           </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700" id="indexedStrip" style="display:none">
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-slate-800/85 border border-slate-700" id="indexedStrip" style="display:none">
             <span id="headerIndexed" class="font-semibold text-white text-sm"></span>
             <span class="text-xs text-slate-500" data-i18n="indexed">INDEXED</span>
           </div>
-          <div id="connBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/30" title="Awaiting indexer data">
+          <div id="connBadge" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/30" title="Awaiting indexer data">
             <span id="connLabel" class="text-xs font-medium text-slate-400">—</span>
           </div>
-          <div id="liveBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/30" title="Awaiting indexer data">
+          <div id="liveBadge" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/30" title="Awaiting indexer data">
             <div id="liveDot" class="w-2 h-2 rounded-full bg-slate-500"></div>
             <span id="liveLabel" class="text-xs font-medium text-slate-400">—</span>
           </div>
@@ -264,8 +264,8 @@
         <div class="flex items-center gap-2">
           <a href="/yamori.html" class="px-2 py-1 text-xs font-bold rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-400 hover:bg-teal-500/20 transition" style="text-decoration:none;">YAMORI</a>
           <a href="/tools/" class="px-2 py-1 text-xs font-bold rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-400 hover:bg-orange-500/25 transition" style="text-decoration:none;">Tools</a>
-          <a href="/api/docs" class="px-2 py-1 text-xs font-bold rounded-lg bg-slate-700/50 border border-slate-600/50 text-slate-300 hover:bg-slate-600/50 transition" style="text-decoration:none;">API</a>
-          <button id="langToggle" onclick="setLanguage(currentLang==='en'?'jp':'en')" class="px-2 py-1 text-xs font-bold rounded bg-slate-700/50 border border-slate-600/50 hover:bg-slate-600/50 transition text-slate-300">EN | JP</button>
+          <a href="/api/docs" class="px-2 py-1 text-xs font-bold rounded-lg bg-slate-700/50 border border-slate-600/50 text-slate-300 hover:bg-slate-700/50 transition" style="text-decoration:none;">API</a>
+          <button id="langToggle" onclick="setLanguage(currentLang==='en'?'jp':'en')" class="px-2 py-1 text-xs font-bold rounded bg-slate-700/50 border border-slate-600/50 hover:bg-slate-700/50 transition text-slate-300">EN | JP</button>
         </div>
       </div>
     </div>
@@ -284,42 +284,42 @@
               <div class="flex items-center gap-2 flex-wrap">
                 <h2 class="text-base font-semibold text-white">CredentialGate &mdash; on-chain credential gate</h2>
                 <span id="cgStatus" class="text-sm font-semibold text-slate-400" title="Awaiting indexer data">&mdash;</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/60 text-slate-200 border border-slate-600/60 uppercase tracking-wider">Preview</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/50 text-slate-200 border border-slate-600/60 uppercase tracking-wider">Preview</span>
                 <span id="cgPing" class="relative flex h-2 w-2" style="display:none;" title="Verified by preview indexer"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span></span>
               </div>
               <p class="text-xs text-slate-400 mt-1">Reference contract on Midnight preview. Verified by the preview indexer. The FAIL&rarr;PROVE&rarr;PASS demo proves selective-disclosure access control end-to-end.</p>
             </div>
           </div>
-          <a href="/credential-gate.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/25 transition flex-shrink-0">
+          <a href="/credential-gate.html" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/25 transition flex-shrink-0">
             Run proof
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3 flex flex-col">
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-4 flex flex-col">
             <div class="flex items-center justify-between gap-2 min-h-[18px]">
               <p class="text-[10px] text-slate-500 uppercase tracking-wider">Contract</p>
-              <button onclick="copyFeatured('7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 border border-slate-600/40 transition">Copy</button>
+              <button onclick="copyFeatured('7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/50 hover:bg-slate-700/50 text-slate-300 border border-slate-600/40 transition">Copy</button>
             </div>
             <p class="mono text-xs text-cyan-300 mt-1" title="7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703">7ee02faf&hellip;fa7a3703</p>
             <p class="text-[10px] text-slate-500 mt-1">Circuits: <span class="mono text-slate-300">add_issuer &middot; prove_kyc &middot; swap &middot; can_swap</span></p>
           </div>
-          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3 flex flex-col">
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-4 flex flex-col">
             <div class="flex items-center justify-between gap-2 min-h-[18px]">
               <p class="text-[10px] text-slate-500 uppercase tracking-wider">Deploy tx</p>
-              <button onclick="copyFeatured('cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 hover:bg-slate-600/60 text-slate-300 border border-slate-600/40 transition">Copy</button>
+              <button onclick="copyFeatured('cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e', this)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/50 hover:bg-slate-700/50 text-slate-300 border border-slate-600/40 transition">Copy</button>
             </div>
             <p class="mono text-xs text-slate-300 mt-1" title="cf00cff58be5300a0d6ea6e42b46a98528de28e3d976e5141bde82f4a21d2c4e">cf00cff5&hellip;a21d2c4e</p>
             <p class="text-[10px] text-slate-500 mt-1">Block #454,958 &middot; 2026-04-25</p>
           </div>
-          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3 flex flex-col">
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-4 flex flex-col">
             <div class="flex items-center justify-between gap-2 min-h-[18px]">
               <p class="text-[10px] text-slate-500 uppercase tracking-wider">Last prove_kyc</p>
             </div>
             <p id="cgProveLine" class="text-xs text-cyan-300 mono mt-1" title="Awaiting indexer data">&mdash;</p>
             <p id="cgProveAgo" class="text-[10px] text-slate-500 mt-1">&mdash;</p>
           </div>
-          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-3 flex flex-col">
+          <div class="bg-slate-800/85 rounded-lg border border-slate-700/60 p-4 flex flex-col">
             <div class="flex items-center justify-between gap-2 min-h-[18px]">
               <p class="text-[10px] text-slate-500 uppercase tracking-wider">Last gated swap</p>
             </div>
@@ -327,7 +327,7 @@
             <p id="cgSwapAgo" class="text-[10px] text-slate-500 mt-1">&mdash;</p>
           </div>
         </div>
-        <div class="flex items-center justify-between flex-wrap gap-2 mt-3">
+        <div class="flex items-center justify-between flex-wrap gap-2 mt-4">
           <p id="cgVerifiedAt" class="text-[10px] text-slate-500">Verified at &mdash;</p>
           <a href="https://preview.nightforge.jp/tools/contracts.html?address=7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703" class="text-[11px] text-slate-400 hover:text-slate-200 underline decoration-dotted">View on preview explorer &rarr;</a>
         </div>
@@ -1526,14 +1526,14 @@
   <div class="container" style="padding-bottom:16px;">
     <div class="grid lg:grid-cols-2 gap-4">
       <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
-        <div class="px-5 py-3 border-b border-slate-700/50 flex items-center justify-between">
+        <div class="px-4 py-4 border-b border-slate-700/50 flex items-center justify-between">
           <h3 class="font-semibold text-white text-sm flex items-center gap-2"><svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span data-i18n="recentBlocks">Recent Blocks</span></h3>
           <button class="view-all-btn text-orange-400 text-xs hover:underline" data-tab="blocks" data-i18n="viewAll">View All</button>
         </div>
         <div id="recentBlocks" class="divide-y divide-slate-700/30 max-h-[320px] overflow-y-auto"></div>
       </div>
       <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden">
-        <div class="px-5 py-3 border-b border-slate-700/50 flex items-center justify-between">
+        <div class="px-4 py-4 border-b border-slate-700/50 flex items-center justify-between">
           <h3 class="font-semibold text-white text-sm flex items-center gap-2"><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-i18n="recentExtrinsics">Recent Extrinsics</span></h3>
           <button class="view-all-btn text-orange-400 text-xs hover:underline" data-tab="extrinsics" data-i18n="viewAll">View All</button>
         </div>
@@ -1544,26 +1544,26 @@
   <!-- Top Methods leaderboard remains preserved as a hidden DOM target so updateTopMethods() keeps wiring; surfaces visibly on the Extrinsics tab. -->
   <div id="topMethods" style="display:none;"></div>
 
-  <div class="bg-slate-900/85 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
+  <div class="bg-slate-900/50 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
     <div class="container">
       <nav class="flex items-center gap-1 py-2" id="tabNav">
         <button data-tab="overview" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-white" data-i18n="overview">Overview</button>
-        <button data-tab="blocks" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="blocks">Blocks</button>
-        <button data-tab="transactions" style="display:none" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">Transactions</button>
-        <button data-tab="extrinsics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="extrinsics">Extrinsics</button>
-        <button data-tab="contracts" style="display:none" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">Contracts</button>
-        <button data-tab="privacy" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="privacy">🛡 Privacy</button>
-        <button data-tab="bridge" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="bridge">🌉 Bridge</button>
-        <button data-tab="analytics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="analytics">📊 Analytics</button>
-        <button data-tab="governance" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="governance">🏛 Governance</button>
-        <button data-tab="epochs" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="epochs">⏱ Epochs</button>
+        <button data-tab="blocks" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="blocks">Blocks</button>
+        <button data-tab="transactions" style="display:none" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition">Transactions</button>
+        <button data-tab="extrinsics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="extrinsics">Extrinsics</button>
+        <button data-tab="contracts" style="display:none" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition">Contracts</button>
+        <button data-tab="privacy" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="privacy">🛡 Privacy</button>
+        <button data-tab="bridge" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="bridge">🌉 Bridge</button>
+        <button data-tab="analytics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="analytics">📊 Analytics</button>
+        <button data-tab="governance" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="governance">🏛 Governance</button>
+        <button data-tab="epochs" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="epochs">⏱ Epochs</button>
       </nav>
     </div>
   </div>
   <main class="container relative z-10" style="padding-top:24px;padding-bottom:24px;">
     <div class="mb-4 overflow-hidden rounded-xl bg-slate-800/85 border border-slate-700/60 backdrop-blur-sm">
       <div class="flex items-center">
-        <div class="px-3 py-2 bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-r border-slate-700/30 flex-shrink-0">
+        <div class="px-4 py-2 bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-r border-slate-700/30 flex-shrink-0">
           <span class="text-xs font-semibold text-pink-400 whitespace-nowrap flex items-center gap-1.5">
             <span id="liveTxsDot" class="w-2 h-2 rounded-full bg-slate-500" title="Awaiting indexer data"></span>LIVE TXS
           </span>
@@ -1577,7 +1577,7 @@
       <div class="max-w-3xl mx-auto">
         <div class="relative flex gap-2">
           <div class="relative">
-            <button id="filterBtn" class="h-12 px-4 bg-slate-800/80 border border-slate-700 rounded-xl flex items-center gap-2 hover:border-orange-500/50 transition backdrop-blur-sm">
+            <button id="filterBtn" class="h-12 px-4 bg-slate-800/85 border border-slate-700 rounded-xl flex items-center gap-2 hover:border-orange-500/50 transition backdrop-blur-sm">
               <span id="filterLabel" class="text-sm text-slate-300 capitalize">All</span>
               <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
@@ -1590,7 +1590,7 @@
           </div>
           <div class="relative flex-1">
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35"/></svg>
-            <input id="searchInput" type="text" placeholder="Search by Hash / Height / Contract Address..." data-i18n="search" class="w-full h-12 pl-12 pr-4 bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl outline-none focus:border-orange-500/50 transition backdrop-blur-sm">
+            <input id="searchInput" type="text" placeholder="Search by Hash / Height / Contract Address..." data-i18n="search" class="w-full h-12 pl-12 pr-4 bg-slate-800/85 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl outline-none focus:border-orange-500/50 transition backdrop-blur-sm">
           </div>
           <button id="searchBtn" class="h-12 px-6 bg-cyan-600 hover:bg-orange-500 rounded-xl text-white font-medium transition">Search</button>
         </div>
@@ -1600,7 +1600,7 @@
     <div id="content-overview" class="tab-content">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-white" data-i18n="networkOverview">Network Overview</h2>
-        <div id="netOvBadge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50" title="Awaiting indexer data">
+        <div id="netOvBadge" class="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-800/85 border border-slate-700/50" title="Awaiting indexer data">
           <div id="netOvBars" class="flex items-center gap-0.5" data-active="0">
             <div class="w-1 h-3 bg-slate-500 rounded-full"></div>
             <div class="w-1 h-5 bg-slate-500 rounded-full"></div>
@@ -1612,10 +1612,10 @@
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div class="relative overflow-hidden rounded-2xl glass border border-yellow-500/30 p-5 card-hover">
+        <div class="relative overflow-hidden rounded-2xl glass border border-yellow-500/30 p-4 card-hover">
           <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
           <div class="relative">
-            <div class="flex items-center gap-2 mb-3">
+            <div class="flex items-center gap-2 mb-4">
               <div class="w-10 h-10 bg-blue-500/30 rounded-xl flex items-center justify-center">
                 <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               </div>
@@ -1625,10 +1625,10 @@
             <p class="text-xs text-slate-400"><span id="currentSlot"></span></p>
           </div>
         </div>
-        <div class="relative overflow-hidden rounded-2xl glass border border-green-500/30 p-5 card-hover">
+        <div class="relative overflow-hidden rounded-2xl glass border border-green-500/30 p-4 card-hover">
           <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl"></div>
           <div class="relative">
-            <div class="flex items-center gap-2 mb-3">
+            <div class="flex items-center gap-2 mb-4">
               <div class="w-10 h-10 bg-green-500/30 rounded-xl flex items-center justify-center">
                 <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
@@ -1638,10 +1638,10 @@
             <p class="text-xs text-slate-400">Blocks: <span id="totalBlocksSub"></span></p>
           </div>
         </div>
-        <div class="relative overflow-hidden rounded-2xl glass border border-orange-500/30 p-5 card-hover">
+        <div class="relative overflow-hidden rounded-2xl glass border border-orange-500/30 p-4 card-hover">
           <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl"></div>
           <div class="relative">
-            <div class="flex items-center gap-2 mb-3">
+            <div class="flex items-center gap-2 mb-4">
               <div class="w-10 h-10 bg-orange-500/30 rounded-xl flex items-center justify-center">
                 <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
               </div>
@@ -1658,12 +1658,12 @@
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white" title="Awaiting indexer data">—</p></div>
-        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400"></p></div>
-        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white"></p></div>
-        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400" title="Awaiting indexer data">—</p></div>
-        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
-        <div class="bg-slate-800/70 rounded-xl border border-slate-700/40 p-3">
+        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white" title="Awaiting indexer data">—</p></div>
+        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400"></p></div>
+        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white"></p></div>
+        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400" title="Awaiting indexer data">—</p></div>
+        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
+        <div class="bg-slate-800/85 rounded-xl border border-slate-700/40 p-4">
           <p class="text-xs text-slate-500 mb-1" data-i18n="avgBlockTime">Avg Block Time</p>
           <div class="flex items-center gap-2">
             <p id="avgBlockTime" class="text-lg font-semibold text-white" title="Awaiting indexer data">—</p>
@@ -1673,7 +1673,7 @@
       </div>
       <!-- Network Age + DUST Explainer -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div class="bg-gradient-to-r from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/30 p-3">
+        <div class="bg-gradient-to-r from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/30 p-4">
           <p class="text-xs text-green-400 mb-1" data-i18n="networkAge">Network Age</p>
           <p id="networkAge" class="text-lg font-bold text-green-400"></p>
         </div>
@@ -1730,16 +1730,16 @@
             </div>
             </div>
           <div class="p-4">
-            <div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span class="font-medium text-white" data-i18n="networkStatus">Network Status</span></div>
+            <div class="flex items-center gap-2 mb-4"><svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span class="font-medium text-white" data-i18n="networkStatus">Network Status</span></div>
             <div class="flex items-center justify-between mb-2"><span class="text-slate-500 text-sm" data-i18n="health">Health</span><span id="netHealthLabel" class="text-slate-400 font-medium" title="Awaiting indexer data">—</span></div>
             <div class="h-1.5 bg-slate-700 rounded-full mb-4"><div id="netHealthBar" class="h-full bg-slate-600 rounded-full" style="width:0%"></div></div>
             <div class="grid grid-cols-2 gap-3">
-              <div class="bg-slate-900/85 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="finality">Finality</p><p id="finalityValue" class="font-semibold text-white" title="Awaiting indexer data">—</p></div>
-              <div class="bg-slate-900/85 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="validators">Validators</p><p id="validatorsCard" class="font-semibold text-slate-300" title="Awaiting indexer data">—</p></div>
-              <div class="bg-slate-900/85 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">MCAP</p><p id="mcapWidget" class="font-semibold text-white" title="Awaiting indexer data">—</p></div>
-              <div class="bg-slate-900/85 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">VOL 24H</p><p id="volWidget" class="font-semibold text-white" title="Awaiting indexer data">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="finality">Finality</p><p id="finalityValue" class="font-semibold text-white" title="Awaiting indexer data">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="validators">Validators</p><p id="validatorsCard" class="font-semibold text-slate-300" title="Awaiting indexer data">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">MCAP</p><p id="mcapWidget" class="font-semibold text-white" title="Awaiting indexer data">—</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">VOL 24H</p><p id="volWidget" class="font-semibold text-white" title="Awaiting indexer data">—</p></div>
             </div>
-            <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-700/50">
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-700/50">
               <div class="flex items-center gap-2"><span id="syncedDot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="syncedLabel" class="text-sm text-slate-400" title="Awaiting indexer data">—</span></div>
               <span id="syncedPct" class="text-slate-400 font-medium" title="Awaiting indexer data">—</span>
             </div>
@@ -1747,14 +1747,14 @@
         </div>
       </div>
         <div class="bg-slate-800/85 rounded-2xl border border-slate-700/60 overflow-hidden mt-4">
-          <div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between">
+          <div class="px-4 py-4 border-b border-slate-700/50 flex items-center justify-between">
             <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span data-i18n="blockCommittee">Block Committee</span></h3>
             <div class="flex items-center gap-2">
               <span id="committeeEpoch" class="text-xs text-slate-500 bg-slate-700/50 px-2 py-1 rounded-full"></span>
               <span id="committeeCount" class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full"></span>
             </div>
           </div>
-          <div id="validatorGrid" class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2"></div>
+          <div id="validatorGrid" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2"></div>
         </div>
         <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6 mt-4">
           <div class="px-6 py-4 border-b border-slate-700/30">
@@ -1767,16 +1767,16 @@
         </div>
     </div>
     <div id="content-blocks" class="tab-content hidden">
-      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Blocks<button onclick="exportBlocksCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allBlocks" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
+      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-4 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Blocks<button onclick="exportBlocksCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allBlocks" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
     <div id="content-transactions" class="tab-content hidden">
-      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">All Transactions (<span id="txCount">50</span>)</h3><span class="text-xs text-slate-500">Real transactions</span></div><div id="allTxs" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
+      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-4 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">All Transactions (<span id="txCount">50</span>)</h3><span class="text-xs text-slate-500">Real transactions</span></div><div id="allTxs" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
     <div id="content-extrinsics" class="tab-content hidden">
-      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Extrinsics<button onclick="exportExtrinsicsCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allExts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
+      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-4 border-b border-slate-700/50"><h3 class="font-semibold text-sm flex items-center gap-2">All Extrinsics<button onclick="exportExtrinsicsCSV()" class="ml-2 px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded hover:bg-orange-500/30 transition" title="Export to CSV">📥 CSV</button</h3></div><div id="allExts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
     <div id="content-contracts" class="tab-content hidden">
-      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">Smart Contracts<span id="contractCount" style="margin-left:4px"></span></h3><span class="text-xs text-slate-500">Deployed contracts</span></div><div id="allContracts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
+      <div class="bg-slate-800/85 rounded-xl border border-slate-700/60 overflow-hidden"><div class="px-4 py-4 border-b border-slate-700/50 flex items-center justify-between"><h3 class="font-semibold text-sm">Smart Contracts<span id="contractCount" style="margin-left:4px"></span></h3><span class="text-xs text-slate-500">Deployed contracts</span></div><div id="allContracts" class="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto"></div></div>
     </div>
 
     <!-- Privacy Dashboard Tab -->
@@ -1789,8 +1789,8 @@
             </div>
             <span data-i18n="privacyDashboard">Privacy Dashboard</span>
           </h2>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30">
-            <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
             <span class="text-xs font-medium text-cyan-400">Live • 7 Day Window</span>
           </div>
         </div>
@@ -1805,12 +1805,12 @@
                 <span class="text-xs text-slate-500 mt-1">SHIELDED</span>
               </div>
             </div>
-            <p class="text-xs text-slate-500 mt-3">Higher is better for privacy</p>
+            <p class="text-xs text-slate-500 mt-4">Higher is better for privacy</p>
           </div>
 
           <!-- Privacy Stats -->
           <div class="lg:col-span-2 grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="glass rounded-2xl border border-cyan-500/20 p-4 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalMidnightTxs">Total Midnight Txs</p>
@@ -1818,7 +1818,7 @@
                 <p class="text-xs text-slate-500 mt-1">Last 7 days</p>
               </div>
             </div>
-            <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="glass rounded-2xl border border-green-500/20 p-4 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="shielded">Shielded</p>
@@ -1826,7 +1826,7 @@
                 <p class="text-xs text-cyan-400/60 mt-1">Private transactions</p>
               </div>
             </div>
-            <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="glass rounded-2xl border border-orange-500/20 p-4 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="unshielded">Unshielded</p>
@@ -1834,7 +1834,7 @@
                 <p class="text-xs text-orange-400/60 mt-1">Public transactions</p>
               </div>
             </div>
-            <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="glass rounded-2xl border border-purple-500/20 p-4 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="contractCalls">Contract Calls</p>
@@ -1842,7 +1842,7 @@
                 <p class="text-xs text-purple-400/60 mt-1">Smart contract interactions</p>
               </div>
             </div>
-            <div class="glass rounded-2xl border border-pink-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="glass rounded-2xl border border-pink-500/20 p-4 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
                 <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="contractDeploys">Contract Deploys</p>
@@ -1887,8 +1887,8 @@
             </div>
             <span data-i18n="bridgeMonitor">Bridge Monitor</span>
           </h2>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30">
-            <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30">
+            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
             <span class="text-xs font-medium text-purple-400">Live • Cardano ↔ Midnight</span>
           </div>
         </div>
@@ -1908,7 +1908,7 @@
               <div class="bridge-dot bg-blue-400" style="animation-delay:0s"></div>
               <div class="bridge-dot bg-purple-400" style="animation-delay:0.7s"></div>
               <div class="bridge-dot bg-cyan-400" style="animation-delay:1.4s"></div>
-              <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30">
+              <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-purple-500/20 border border-purple-500/30">
                 <span class="text-xs font-bold text-purple-400">BRIDGE</span>
               </div>
             </div>
@@ -1924,7 +1924,7 @@
 
         <!-- Bridge Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-purple-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalBridgeOps">Total Bridge Ops</p>
@@ -1932,7 +1932,7 @@
               <p class="text-xs text-slate-500 mt-1">Last 7 days</p>
             </div>
           </div>
-          <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-cyan-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="last24h">Last 24h</p>
@@ -1940,7 +1940,7 @@
               <p class="text-xs text-cyan-400/60 mt-1">Bridge operations</p>
             </div>
           </div>
-          <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-orange-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="opsPerHour">Ops / Hour</p>
@@ -1981,10 +1981,10 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-700/30">
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="hash">Hash</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="block">Block</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoBlock">Cardano Block</th>
-                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
+                  <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="hash">Hash</th>
+                  <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="block">Block</th>
+                  <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="cardanoBlock">Cardano Block</th>
+                  <th class="text-right px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
                 </tr>
               </thead>
               <tbody id="bridgeOpsTable" class="divide-y divide-slate-700/20">
@@ -2006,36 +2006,36 @@
             </div>
             <span data-i18n="networkAnalytics">Network Analytics</span>
           </h2>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30">
-            <div class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30">
+            <div class="w-2 h-2 rounded-full bg-orange-400"></div>
             <span class="text-xs font-medium text-orange-400">Live Analytics</span>
           </div>
         </div>
 
         <!-- Network Overview Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-blue-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalBlocks">Total Blocks</p>
               <p id="anTotalBlocks" class="text-2xl font-bold text-white count-up"></p>
             </div>
           </div>
-          <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-green-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalExtrinsics">Total Extrinsics</p>
               <p id="anTotalExts" class="text-2xl font-bold text-green-400 count-up"></p>
             </div>
           </div>
-          <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-cyan-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgBlockTime">Avg Block Time</p>
               <p id="anAvgBlock" class="text-2xl font-bold text-cyan-400 count-up"></p>
             </div>
           </div>
-          <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-orange-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="networkTps">Network TPS</p>
@@ -2080,10 +2080,10 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="border-b border-slate-700/30">
-                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">#</th>
-                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Address</th>
-                    <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase">Calls</th>
-                    <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase">Last Seen</th>
+                    <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase">#</th>
+                    <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase">Address</th>
+                    <th class="text-right px-4 py-4 text-xs text-slate-500 uppercase">Calls</th>
+                    <th class="text-right px-4 py-4 text-xs text-slate-500 uppercase">Last Seen</th>
                   </tr>
                 </thead>
                 <tbody id="contractLeaderboard" class="divide-y divide-slate-700/20">
@@ -2110,9 +2110,9 @@
               <span id="eventTypesTotal" class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full"></span>
             </div>
             <div id="eventTypesList" class="p-4 space-y-2 max-h-[360px] overflow-y-auto">
-              <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
-              <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
-              <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
             </div>
           </div>
 
@@ -2144,7 +2144,7 @@
             </h3>
           </div>
           <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="rounded-2xl border-2 border-green-500/30 bg-green-500/5 p-5 relative">
+            <div class="rounded-2xl border-2 border-green-500/30 bg-green-500/5 p-4 relative">
               <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-green-500/20 text-xs text-green-400 font-medium">CURRENT</div>
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-green-400"></div>
@@ -2156,7 +2156,7 @@
                 <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpMainTPS" class="text-sm font-medium text-white"></span></div>
               </div>
             </div>
-            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
+            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-orange-400"></div>
                 <a href="https://preprod.nightforge.jp" class="font-bold text-orange-400 hover:underline">Preprod</a>
@@ -2167,7 +2167,7 @@
                 <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreprodTPS" class="text-sm font-medium text-white"></span></div>
               </div>
             </div>
-            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
                 <a href="https://preview.nightforge.jp" class="font-bold text-cyan-400 hover:underline">Preview</a>
@@ -2189,11 +2189,11 @@
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div class="bg-slate-900/85 rounded-xl p-3 text-center">
+              <div class="bg-slate-900/50 rounded-xl p-4 text-center">
                 <p class="text-xs text-slate-500">Total Fee-Paying Txs</p>
                 <p id="dustTotalTxs" class="text-2xl font-bold text-amber-400"></p>
               </div>
-              <div class="bg-slate-900/85 rounded-xl p-3 text-center">
+              <div class="bg-slate-900/50 rounded-xl p-4 text-center">
                 <p class="text-xs text-slate-500">DUST Events</p>
                 <p id="dustEventCount" class="text-2xl font-bold text-amber-400"></p>
               </div>
@@ -2216,34 +2216,34 @@
             </div>
             <span data-i18n="onChainGovernance">On-Chain Governance</span>
           </h2>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30">
-            <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30">
+            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
             <span class="text-xs font-medium text-blue-400" data-i18n="councilTechCommittee">Council & Technical Committee Activity</span>
           </div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-blue-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalActions">Total Actions</p><p id="govTotal" class="text-2xl font-bold text-white count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-blue-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilProposals">Council Proposals</p><p id="govCouncilProposals" class="text-2xl font-bold text-blue-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-blue-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilVotes">Council Votes</p><p id="govCouncilVotes" class="text-2xl font-bold text-blue-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-purple-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techProposals">Tech Proposals</p><p id="govTechProposals" class="text-2xl font-bold text-purple-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-purple-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techVotes">Tech Votes</p><p id="govTechVotes" class="text-2xl font-bold text-purple-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-amber-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-amber-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityResets">Authority Resets</p><p id="govAuthorityResets" class="text-2xl font-bold text-amber-400 count-up"></p></div>
           </div>
@@ -2331,8 +2331,8 @@
             </div>
             <span data-i18n="epochTimeline">Epoch Explorer</span>
           </h2>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30">
-            <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
             <span class="text-xs font-medium text-cyan-400">Live Epoch Tracking</span>
           </div>
         </div>
@@ -2344,7 +2344,7 @@
             <div class="text-center md:text-left">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="currentEpochInfo">Current Epoch</p>
               <p id="epochCurrentNum" class="text-5xl font-black text-cyan-400"></p>
-              <div class="flex flex-wrap gap-2 mt-3">
+              <div class="flex flex-wrap gap-2 mt-4">
                 <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300" data-i18n="thirtyMinEpochs">30 min epochs</span>
                 <span class="text-xs px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300" data-i18n="blocksPerEpochValue">~50 blocks/epoch</span>
               </div>
@@ -2352,7 +2352,7 @@
             <div class="text-center">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="nextEpochIn">Next Epoch In</p>
               <p id="epochCountdown" class="text-4xl font-bold text-white"></p>
-              <div class="w-full h-2 bg-slate-700 rounded-full mt-3 overflow-hidden">
+              <div class="w-full h-2 bg-slate-700 rounded-full mt-4 overflow-hidden">
                 <div id="epochProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-green-500 rounded-full transition-all duration-1000" style="width:0%"></div>
               </div>
             </div>
@@ -2369,19 +2369,19 @@
 
         <!-- Session Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-green-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalSessions">Total Sessions</p><p id="epochTotalSessions" class="text-2xl font-bold text-green-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-orange-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityChanges">Authority Changes</p><p id="epochAuthorityChanges" class="text-2xl font-bold text-orange-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-cyan-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgEpochDuration">Avg Epoch Duration</p><p id="epochAvgDuration" class="text-2xl font-bold text-cyan-400 count-up"></p></div>
           </div>
-          <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+          <div class="glass rounded-2xl border border-purple-500/20 p-4 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="blocksPerEpoch">Blocks/Epoch</p><p id="epochBlocksPerEpoch" class="text-2xl font-bold text-purple-400 count-up">~50</p></div>
           </div>
@@ -2397,11 +2397,11 @@
             </div>
             <div class="p-6">
               <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="bg-slate-900/85 rounded-xl p-3 text-center">
+                <div class="bg-slate-900/50 rounded-xl p-4 text-center">
                   <p class="text-xs text-slate-500">Epochs Today</p>
                   <p id="epochsToday" class="text-2xl font-bold text-cyan-400"></p>
                 </div>
-                <div class="bg-slate-900/85 rounded-xl p-3 text-center">
+                <div class="bg-slate-900/50 rounded-xl p-4 text-center">
                   <p class="text-xs text-slate-500">Blocks Today</p>
                   <p id="blocksToday" class="text-2xl font-bold text-white"></p>
                 </div>
@@ -2429,11 +2429,11 @@
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="bg-slate-900/85 rounded-xl p-3 text-center">
+                <div class="bg-slate-900/50 rounded-xl p-4 text-center">
                   <p class="text-xs text-slate-500">Cardano Slot</p>
                   <p id="cardanoSlotBig" class="text-sm font-mono font-bold text-white"></p>
                 </div>
-                <div class="bg-slate-900/85 rounded-xl p-3 text-center">
+                <div class="bg-slate-900/50 rounded-xl p-4 text-center">
                   <p class="text-xs text-slate-500">Midnight Epochs in this Cardano Epoch</p>
                   <p id="midnightEpochsInCardano" class="text-sm font-bold text-cyan-400"></p>
                 </div>
@@ -2464,9 +2464,9 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="border-b border-slate-700/30">
-                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="epochs">Epoch</th>
-                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="block">Block</th>
-                    <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
+                    <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="epochs">Epoch</th>
+                    <th class="text-left px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="block">Block</th>
+                    <th class="text-right px-4 py-4 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
                   </tr>
                 </thead>
                 <tbody id="epochSessionTable" class="divide-y divide-slate-700/20">
@@ -2519,7 +2519,7 @@
         </div>
         <p class="text-xs text-slate-500">© 2026 NightForge • Powered by Midnight Network</p>
         <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30">
+          <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30">
             <span class="text-lg">🇯🇵</span>
             <span class="text-xs font-medium text-pink-300">Made in Japan</span>
           </div>
@@ -2968,12 +2968,12 @@ function doSearch(){
 }
 
 function renderBlock(b){
-  return '<div class="flex items-center justify-between p-3 hover:bg-slate-800/30 cursor-pointer transition block-row" data-height="'+b.height+'"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div><div><p class="font-mono text-white font-medium">#'+fmt(b.height)+'</p><p class="text-xs text-slate-500">'+timeAgo(b.timestamp)+'</p></div></div><div class="flex items-center gap-4"><div class="hidden md:block text-right"><p class="text-xs text-slate-500">Hash</p><p class="font-mono text-xs text-slate-300">'+truncHash(b.hash,8)+'</p></div><div class="text-right"><p class="text-xs text-slate-500">Txs</p><p class="text-white text-sm font-medium">'+(b.txCount||b.extrinsics_count||0)+'</p></div><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+  return '<div class="flex items-center justify-between p-4 hover:bg-slate-800/85 cursor-pointer transition block-row" data-height="'+b.height+'"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div><div><p class="font-mono text-white font-medium">#'+fmt(b.height)+'</p><p class="text-xs text-slate-500">'+timeAgo(b.timestamp)+'</p></div></div><div class="flex items-center gap-4"><div class="hidden md:block text-right"><p class="text-xs text-slate-500">Hash</p><p class="font-mono text-xs text-slate-300">'+truncHash(b.hash,8)+'</p></div><div class="text-right"><p class="text-xs text-slate-500">Txs</p><p class="text-white text-sm font-medium">'+(b.txCount||b.extrinsics_count||0)+'</p></div><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
 }
 
 function renderTx(tx){
   var st=tx.status==="SUCCESS"||tx.success===1||tx.success===true;
-  return '<div class="flex items-center justify-between p-3 hover:bg-slate-800/30 cursor-pointer transition tx-row" data-hash="'+tx.hash+'"><div class="flex items-center gap-3"><div class="w-10 h-10 '+(st?"bg-green-500/20":"bg-red-500/20")+' rounded-lg flex items-center justify-center"><svg class="w-5 h-5 '+(st?"text-green-400":"text-red-400")+'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="font-mono text-white text-sm">'+tx.hash.slice(0,12)+"..."+tx.hash.slice(-8)+'</p><p class="text-xs text-slate-500">'+timeAgo(tx.timestamp)+'</p></div></div><div class="flex items-center gap-4"><span class="px-2 py-1 text-xs rounded '+(st?"bg-green-500/20 text-green-400 border-green-500/30":"bg-red-500/20 text-red-400 border-red-500/30")+' border font-medium min-w-[70px] text-center">'+(st?"SUCCESS":"FAILED")+'</span><span class="px-2 py-1 text-xs rounded '+(tx.is_shielded?"bg-purple-500/20 text-purple-400 border-purple-500/30":"bg-slate-500/20 text-slate-400 border-slate-500/30")+' border">'+(tx.is_shielded?"S":"P")+'</span><div class="hidden md:block text-right"><p class="text-xs text-slate-500">Block</p><p class="text-white text-sm font-mono">#'+(tx.block_height||0).toLocaleString()+'</p></div><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+  return '<div class="flex items-center justify-between p-4 hover:bg-slate-800/85 cursor-pointer transition tx-row" data-hash="'+tx.hash+'"><div class="flex items-center gap-3"><div class="w-10 h-10 '+(st?"bg-green-500/20":"bg-red-500/20")+' rounded-lg flex items-center justify-center"><svg class="w-5 h-5 '+(st?"text-green-400":"text-red-400")+'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="font-mono text-white text-sm">'+tx.hash.slice(0,12)+"..."+tx.hash.slice(-8)+'</p><p class="text-xs text-slate-500">'+timeAgo(tx.timestamp)+'</p></div></div><div class="flex items-center gap-4"><span class="px-2 py-1 text-xs rounded '+(st?"bg-green-500/20 text-green-400 border-green-500/30":"bg-red-500/20 text-red-400 border-red-500/30")+' border font-medium min-w-[70px] text-center">'+(st?"SUCCESS":"FAILED")+'</span><span class="px-2 py-1 text-xs rounded '+(tx.is_shielded?"bg-purple-500/20 text-purple-400 border-purple-500/30":"bg-slate-500/20 text-slate-400 border-slate-500/30")+' border">'+(tx.is_shielded?"S":"P")+'</span><div class="hidden md:block text-right"><p class="text-xs text-slate-500">Block</p><p class="text-white text-sm font-mono">#'+(tx.block_height||0).toLocaleString()+'</p></div><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
 }
 
 
@@ -3009,11 +3009,11 @@ function renderMethodBadge(sec,meth){
 function renderExt(tx){
   var c=getColor(tx.section);
   var shieldIcon=tx.section==='midnight'?' <span title="Shielded transaction" style="font-size:14px;vertical-align:middle">&#x1F512;</span>':'';
-  return '<div class="flex items-center justify-between p-3 hover:bg-slate-800/30 cursor-pointer transition ext-row" data-hash="'+tx.hash+'" data-bh="'+tx.block_height+'" data-sec="'+tx.section+'" data-meth="'+tx.method+'" data-ts="'+tx.timestamp+'"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><p class="font-mono text-white text-sm">'+truncHash(tx.hash,8)+shieldIcon+'</p><p class="text-xs text-slate-500">'+timeAgo(tx.timestamp)+'</p></div></div><div class="flex items-center gap-4"><span class="px-2 py-1 text-xs rounded '+c.bg+" "+c.t+" border "+c.b+'">'+(methodLabels[tx.section+'.'+tx.method]||tx.section+'.'+tx.method)+'</span><div class="hidden md:block text-right"><p class="text-xs text-slate-500">Block</p><p class="text-white text-sm font-mono">#'+(tx.block_height||0).toLocaleString()+'</p></div><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+  return '<div class="flex items-center justify-between p-4 hover:bg-slate-800/85 cursor-pointer transition ext-row" data-hash="'+tx.hash+'" data-bh="'+tx.block_height+'" data-sec="'+tx.section+'" data-meth="'+tx.method+'" data-ts="'+tx.timestamp+'"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><p class="font-mono text-white text-sm">'+truncHash(tx.hash,8)+shieldIcon+'</p><p class="text-xs text-slate-500">'+timeAgo(tx.timestamp)+'</p></div></div><div class="flex items-center gap-4"><span class="px-2 py-1 text-xs rounded '+c.bg+" "+c.t+" border "+c.b+'">'+(methodLabels[tx.section+'.'+tx.method]||tx.section+'.'+tx.method)+'</span><div class="hidden md:block text-right"><p class="text-xs text-slate-500">Block</p><p class="text-white text-sm font-mono">#'+(tx.block_height||0).toLocaleString()+'</p></div><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
 }
 
 function renderContract(ct){
-  return '<div class="flex items-center justify-between p-3 hover:bg-slate-800/30 cursor-pointer transition contract-row" data-addr="'+ct.address+'" data-entry="'+ct.entry_point+'" data-type="'+(ct.type_name||"ContractCall")+'"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div><p class="font-mono text-cyan-300 text-sm">'+ct.address.slice(0,16)+"..."+ct.address.slice(-8)+'</p><p class="text-xs text-slate-500">Entry: <span class="text-purple-400">'+ct.entry_point+'</span></p></div></div><div class="flex items-center gap-4"><span class="px-2 py-1 text-xs rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">'+(ct.type_name||"ContractCall")+'</span><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+  return '<div class="flex items-center justify-between p-4 hover:bg-slate-800/85 cursor-pointer transition contract-row" data-addr="'+ct.address+'" data-entry="'+ct.entry_point+'" data-type="'+(ct.type_name||"ContractCall")+'"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div><p class="font-mono text-cyan-300 text-sm">'+ct.address.slice(0,16)+"..."+ct.address.slice(-8)+'</p><p class="text-xs text-slate-500">Entry: <span class="text-purple-400">'+ct.entry_point+'</span></p></div></div><div class="flex items-center gap-4"><span class="px-2 py-1 text-xs rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">'+(ct.type_name||"ContractCall")+'</span><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
 }
 
 function clickBlock(h){fetch(API+"/block/"+h).then(function(r){return r.json()}).then(function(b){if(b){viewBlock(b);(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";}}).catch(function(){(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";})}
@@ -3027,7 +3027,7 @@ function viewAddressDetail(data){
     for(var i=0;i<data.transactions.length;i++){
       var tx=data.transactions[i];
       var c=getColor(tx.section);
-      txsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl hover:bg-purple-500/10 cursor-pointer border border-slate-700/20 ext-row" data-hash="'+tx.hash+'" data-bh="'+tx.block_height+'" data-sec="'+tx.section+'" data-meth="'+tx.method+'" data-ts="'+tx.timestamp+'">'
+      txsHtml+='<div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl hover:bg-purple-500/10 cursor-pointer border border-slate-700/20 ext-row" data-hash="'+tx.hash+'" data-bh="'+tx.block_height+'" data-sec="'+tx.section+'" data-meth="'+tx.method+'" data-ts="'+tx.timestamp+'">'
         +'<div class="flex items-center gap-3">'
         +'<div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>'
         +'<div><p class="font-mono text-white text-sm">'+truncHash(tx.hash,8)+'</p>'
@@ -3047,7 +3047,7 @@ function viewAddressDetail(data){
     evtsHtml='<div class="space-y-2">';
     for(var i=0;i<data.events.length;i++){
       var ev=data.events[i];
-      evtsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-700/20">'
+      evtsHtml+='<div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700/20">'
         +'<div class="flex items-center gap-3">'
         +'<div class="w-8 h-8 bg-cyan-500/20 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></div>'
         +'<div><p class="text-sm text-white">'+ev.section+'.'+ev.method+'</p>'
@@ -3062,19 +3062,19 @@ function viewAddressDetail(data){
 
   var html='<div class="space-y-6">'
     +'<div class="flex items-center gap-4 mb-2">'
-    +'<button onclick="goBackSmart()" class="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>'
+    +'<button onclick="goBackSmart()" class="p-2 rounded-lg bg-slate-800/85 hover:bg-slate-700/50 border border-slate-700 transition"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>'
     +'<h2 class="text-xl font-bold text-white">'+t("addressLookup")+'</h2>'
     +'</div>'
     +'<div class="bg-gradient-to-br from-orange-500/5 to-slate-900/60 rounded-2xl border border-orange-500/20 p-6">'
     +'<div class="flex items-center justify-between mb-4">'
     +'<h3 class="font-semibold text-orange-400">'+t("address")+'</h3>'
-    +'<button onclick="navigator.clipboard.writeText(\''+data.address+'\')" class="px-3 py-1 text-xs rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600 text-slate-300 transition flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+t("copy")+'</button>'
+    +'<button onclick="navigator.clipboard.writeText(\''+data.address+'\')" class="px-4 py-1 text-xs rounded-lg bg-slate-700/50 hover:bg-slate-700/50 border border-slate-600 text-slate-300 transition flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+t("copy")+'</button>'
     +'</div>'
-    +'<p class="font-mono text-sm text-orange-300 break-all bg-slate-900/50 p-3 rounded-xl border border-orange-500/10">'+data.address+'</p>'
+    +'<p class="font-mono text-sm text-orange-300 break-all bg-slate-900/50 p-4 rounded-xl border border-orange-500/10">'+data.address+'</p>'
     +'<div class="grid grid-cols-3 gap-4 mt-4">'
-    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("transactionCount")+'</p><p class="text-lg font-bold text-white">'+fmt(data.transactionCount)+'</p></div>'
-    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("firstSeen")+'</p><p class="text-sm font-mono text-white">'+(data.firstSeen?"#"+fmt(data.firstSeen):"--")+'</p></div>'
-    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("lastSeen")+'</p><p class="text-sm font-mono text-white">'+(data.lastSeen?"#"+fmt(data.lastSeen):"--")+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("transactionCount")+'</p><p class="text-lg font-bold text-white">'+fmt(data.transactionCount)+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("firstSeen")+'</p><p class="text-sm font-mono text-white">'+(data.firstSeen?"#"+fmt(data.firstSeen):"--")+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("lastSeen")+'</p><p class="text-sm font-mono text-white">'+(data.lastSeen?"#"+fmt(data.lastSeen):"--")+'</p></div>'
     +'</div></div>'
     +'<div class="bg-gradient-to-br from-purple-500/5 to-slate-900/60 rounded-2xl border border-purple-500/20 p-6">'
     +'<h3 class="font-semibold text-white mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'+t("addressTransactions")+' ('+data.transactions.length+')</h3>'
@@ -3110,12 +3110,12 @@ function viewBlock(b){
     for(var i=0;i<exts.length;i++){
       var e=exts[i];
       var c=getColor(e.section);
-      extsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl hover:bg-purple-500/10 cursor-pointer border border-purple-500/10 ext-row" data-hash="'+e.hash+'" data-bh="'+b.height+'" data-sec="'+e.section+'" data-meth="'+e.method+'" data-ts="'+b.timestamp+'"><div class="flex items-center gap-3"><span class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-400 text-sm font-mono">'+(e.index||i)+'</span><p class="font-mono text-sm text-white">'+truncHash(e.hash,12)+'</p></div><span class="px-2 py-1 text-xs rounded-full '+c.bg+' '+c.t+' border '+c.b+'">'+e.section+'.'+e.method+'</span></div>';
+      extsHtml+='<div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl hover:bg-purple-500/10 cursor-pointer border border-purple-500/10 ext-row" data-hash="'+e.hash+'" data-bh="'+b.height+'" data-sec="'+e.section+'" data-meth="'+e.method+'" data-ts="'+b.timestamp+'"><div class="flex items-center gap-3"><span class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-400 text-sm font-mono">'+(e.index||i)+'</span><p class="font-mono text-sm text-white">'+truncHash(e.hash,12)+'</p></div><span class="px-2 py-1 text-xs rounded-full '+c.bg+' '+c.t+' border '+c.b+'">'+e.section+'.'+e.method+'</span></div>';
     }
     extsHtml+="</div></div>";
   }
   
-  showDetail('<div class="space-y-6"><div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center gap-3 bg-slate-800/30"><button id="backBtn" class="text-slate-400 hover:text-white flex items-center gap-2 transition cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><div class="w-px h-6 bg-slate-700"></div><h3 class="text-lg font-semibold text-white">Block #'+fmt(b.height)+'</h3><div class="ml-auto flex items-center gap-2"><button class="nav-block p-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 hover:text-white transition" data-h="'+(b.height-1)+'" '+(b.height<=1?"disabled":"")+'><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button><button class="nav-block p-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 hover:text-white transition" data-h="'+(b.height+1)+'"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div></div><div class="p-6"><div class="grid md:grid-cols-2 gap-4 mb-6"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Block Hash</p><div class="flex items-center gap-2"><p class="font-mono text-orange-400 text-sm break-all">'+b.hash+'</p><button onclick="copyHash(\''+b.hash+'\')" class="text-slate-500 cursor-pointer hover:text-orange-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Parent Hash</p><p class="font-mono text-slate-300 text-sm break-all">'+(b.parentHash||b.parent_hash||"---")+'</p></div></div><div class="grid grid-cols-3 gap-4 mb-6"><div class="bg-slate-900/50 rounded-xl p-4 text-center border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Height</p><p class="text-2xl font-bold text-white">'+fmt(b.height)+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 text-center border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Transactions</p><p class="text-2xl font-bold text-orange-400">'+txCount+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 text-center border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Time</p><p class="text-xl font-semibold text-white">'+tsAgo+'</p><p class="text-xs text-slate-500">'+tsFull+'</p></div></div><div class="bg-gradient-to-br from-blue-500/5 to-slate-900/60 rounded-2xl border border-blue-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><h4 class="font-semibold text-blue-400 uppercase tracking-wide">Block Information</h4></div><div class="space-y-3"><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Height</span><span class="text-orange-400 font-mono font-bold">#'+fmt(b.height)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Hash</span><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-xs">'+truncHash(b.hash,14)+'</code><svg onclick="copyHash(\''+b.hash+'\')" class="w-4 h-4 text-slate-500 cursor-pointer hover:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Parent Hash</span><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-xs">'+truncHash(b.parentHash||b.parent_hash||"",14)+'</code><svg onclick="copyHash(\''+(b.parentHash||b.parent_hash)+'\')" class="w-4 h-4 text-slate-500 cursor-pointer hover:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Timestamp</span><span class="text-white">'+tsFull+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Protocol Version</span><span class="text-white font-mono">v'+(b.protocol_version||20000)+'</span></div><div class="flex justify-between items-center py-3"><span class="text-slate-400">Transaction Count</span><span class="text-orange-400 font-bold">'+txCount+'</span></div></div></div>'+extsHtml+'</div></div></div>');
+  showDetail('<div class="space-y-6"><div class="bg-slate-800/85 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center gap-3 bg-slate-800/85"><button id="backBtn" class="text-slate-400 hover:text-white flex items-center gap-2 transition cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><div class="w-px h-6 bg-slate-700"></div><h3 class="text-lg font-semibold text-white">Block #'+fmt(b.height)+'</h3><div class="ml-auto flex items-center gap-2"><button class="nav-block p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700/50 text-slate-400 hover:text-white transition" data-h="'+(b.height-1)+'" '+(b.height<=1?"disabled":"")+'><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button><button class="nav-block p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700/50 text-slate-400 hover:text-white transition" data-h="'+(b.height+1)+'"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button></div></div><div class="p-6"><div class="grid md:grid-cols-2 gap-4 mb-6"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Block Hash</p><div class="flex items-center gap-2"><p class="font-mono text-orange-400 text-sm break-all">'+b.hash+'</p><button onclick="copyHash(\''+b.hash+'\')" class="text-slate-500 cursor-pointer hover:text-orange-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Parent Hash</p><p class="font-mono text-slate-300 text-sm break-all">'+(b.parentHash||b.parent_hash||"---")+'</p></div></div><div class="grid grid-cols-3 gap-4 mb-6"><div class="bg-slate-900/50 rounded-xl p-4 text-center border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Height</p><p class="text-2xl font-bold text-white">'+fmt(b.height)+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 text-center border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Transactions</p><p class="text-2xl font-bold text-orange-400">'+txCount+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 text-center border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Time</p><p class="text-xl font-semibold text-white">'+tsAgo+'</p><p class="text-xs text-slate-500">'+tsFull+'</p></div></div><div class="bg-gradient-to-br from-blue-500/5 to-slate-900/60 rounded-2xl border border-blue-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><h4 class="font-semibold text-blue-400 uppercase tracking-wide">Block Information</h4></div><div class="space-y-3"><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Height</span><span class="text-orange-400 font-mono font-bold">#'+fmt(b.height)+'</span></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Hash</span><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-xs">'+truncHash(b.hash,14)+'</code><svg onclick="copyHash(\''+b.hash+'\')" class="w-4 h-4 text-slate-500 cursor-pointer hover:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Parent Hash</span><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-xs">'+truncHash(b.parentHash||b.parent_hash||"",14)+'</code><svg onclick="copyHash(\''+(b.parentHash||b.parent_hash)+'\')" class="w-4 h-4 text-slate-500 cursor-pointer hover:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Timestamp</span><span class="text-white">'+tsFull+'</span></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Protocol Version</span><span class="text-white font-mono">v'+(b.protocol_version||20000)+'</span></div><div class="flex justify-between items-center py-4"><span class="text-slate-400">Transaction Count</span><span class="text-orange-400 font-bold">'+txCount+'</span></div></div></div>'+extsHtml+'</div></div></div>');
   document.getElementById("backBtn").addEventListener("click",goHome);
   document.querySelectorAll(".nav-block").forEach(function(btn){btn.addEventListener("click",function(){clickBlock(parseInt(btn.dataset.h))})});
   attachExtListeners();
@@ -3148,7 +3148,7 @@ function viewTxDetail(tx){
   
   var inputsHtml="";
   if(inputs.length>0){
-    inputsHtml='<div class="bg-slate-800/60 rounded-2xl border border-pink-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg><h3 class="font-semibold text-white">Inputs ('+inputs.length+')</h3></div><div class="space-y-3">';
+    inputsHtml='<div class="bg-slate-800/85 rounded-2xl border border-pink-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg><h3 class="font-semibold text-white">Inputs ('+inputs.length+')</h3></div><div class="space-y-3">';
     for(var i=0;i<inputs.length;i++){
       var inp=inputs[i];
       var addr=inp.account_addr||inp.unshielded_address||"";
@@ -3161,7 +3161,7 @@ function viewTxDetail(tx){
   
   var outputsHtml="";
   if(outputs.length>0){
-    outputsHtml='<div class="bg-slate-800/60 rounded-2xl border border-green-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg><h3 class="font-semibold text-white">Outputs ('+outputs.length+')</h3></div><div class="space-y-3">';
+    outputsHtml='<div class="bg-slate-800/85 rounded-2xl border border-green-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg><h3 class="font-semibold text-white">Outputs ('+outputs.length+')</h3></div><div class="space-y-3">';
     for(var i=0;i<outputs.length;i++){
       var out=outputs[i];
       var addr=out.account_addr||"";
@@ -3174,19 +3174,19 @@ function viewTxDetail(tx){
   
   var dustHtml="";
   if(dustEvents.length>0){
-    dustHtml='<div class="bg-slate-800/60 rounded-2xl border border-yellow-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3 class="font-semibold text-white">Dust Ledger Events ('+dustEvents.length+')</h3></div><div class="space-y-2">';
+    dustHtml='<div class="bg-slate-800/85 rounded-2xl border border-yellow-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3 class="font-semibold text-white">Dust Ledger Events ('+dustEvents.length+')</h3></div><div class="space-y-2">';
     for(var i=0;i<dustEvents.length;i++){
       var ev=dustEvents[i];
       var evType=ev.type||ev.__typename||ev.event_type||"Event";
-      dustHtml+='<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30 flex items-center justify-between"><span class="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">#'+i+'</span><span class="text-yellow-400 text-sm font-medium">'+evType+'</span></div>';
+      dustHtml+='<div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 flex items-center justify-between"><span class="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">#'+i+'</span><span class="text-yellow-400 text-sm font-medium">'+evType+'</span></div>';
     }
     dustHtml+="</div></div>";
   }
   
   var st=tx.status==="SUCCESS"||tx.success===1||tx.success===true;
   var fromToHtml="";
-  if(fromAddr){fromToHtml+='<div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">From</span><code class="text-orange-400 font-mono text-xs">'+truncHash(fromAddr,14)+'</code></div>';}
-  if(toAddr){fromToHtml+='<div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">To</span><code class="text-orange-400 font-mono text-xs">'+truncHash(toAddr,14)+'</code></div>';}
+  if(fromAddr){fromToHtml+='<div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">From</span><code class="text-orange-400 font-mono text-xs">'+truncHash(fromAddr,14)+'</code></div>';}
+  if(toAddr){fromToHtml+='<div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">To</span><code class="text-orange-400 font-mono text-xs">'+truncHash(toAddr,14)+'</code></div>';}
 
   // ZK Verified Badge
   var zkBadgeHtml="";
@@ -3199,13 +3199,13 @@ function viewTxDetail(tx){
   }
   if(tx.section==="midnight"||tx.is_midnight_tx||hasTxApplied){
     if(!hasUnshielded&&(parseFloat(totalIn)===0||totalIn==="0")){
-      zkBadgeHtml='<div class="zk-badge bg-gradient-to-r from-cyan-500/20 to-green-500/20 border border-cyan-500/40 rounded-xl px-5 py-3 flex items-center gap-3 mb-4"><span class="text-2xl">🔒</span><div><p class="text-sm font-bold text-cyan-400">Shielded transaction</p><p class="text-xs text-slate-400">No NIGHT amounts disclosed on chain</p></div></div>';
+      zkBadgeHtml='<div class="zk-badge bg-gradient-to-r from-cyan-500/20 to-green-500/20 border border-cyan-500/40 rounded-xl px-4 py-4 flex items-center gap-3 mb-4"><span class="text-2xl">🔒</span><div><p class="text-sm font-bold text-cyan-400">Shielded transaction</p><p class="text-xs text-slate-400">No NIGHT amounts disclosed on chain</p></div></div>';
     }else if(hasUnshielded){
-      zkBadgeHtml='<div class="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 rounded-xl px-5 py-3 flex items-center gap-3 mb-4"><span class="text-2xl">🔓</span><div><p class="text-sm font-bold text-orange-400">Partially Unshielded</p><p class="text-xs text-slate-400">Some transaction data is publicly visible</p></div></div>';
+      zkBadgeHtml='<div class="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 rounded-xl px-4 py-4 flex items-center gap-3 mb-4"><span class="text-2xl">🔓</span><div><p class="text-sm font-bold text-orange-400">Partially Unshielded</p><p class="text-xs text-slate-400">Some transaction data is publicly visible</p></div></div>';
     }
   }
 
-  showDetail('<div class="space-y-6">'+zkBadgeHtml+'<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backToBlock" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer" data-bh="'+tx.block_height+'"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back to Block</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Detail</h3></div></div><span class="px-3 py-1 text-sm rounded-full '+(st?"bg-green-500/20 text-green-400 border-green-500/30":"bg-red-500/20 text-red-400 border-red-500/30")+' border font-bold">'+tx.status+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Hash</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+tx.hash+'</code><button onclick="copyHash(\''+tx.hash+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div>'+idsHtml+'</div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-slate-800/60 rounded-2xl border border-slate-700/50 p-6"><div class="flex items-center gap-2 mb-6"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><h3 class="text-lg font-bold text-white">Transaction Overview</h3></div><div class="space-y-0"><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Block Hash</span><code class="text-orange-400 font-mono text-xs">'+truncHash(tx.block_hash||"",14)+'</code></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Block Height</span><span class="text-white font-bold block-link cursor-pointer hover:text-orange-400" data-bh="'+tx.block_height+'">#'+fmt(tx.block_height)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Timestamp</span><span class="text-white">'+formatTime(tx.timestamp)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Protocol Version</span><span class="text-white font-mono">v'+(tx.protocol_version||20000)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Transaction ID</span><span class="text-white font-bold">#'+(tx.transaction_id||tx.id)+'</span></div>'+fromToHtml+'</div></div><div class="bg-gradient-to-br from-slate-800/60 to-slate-900/80 rounded-2xl border border-orange-500/20 p-6 relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div><div class="relative"><div class="flex items-center gap-2 mb-6"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Summary</h3></div><div class="space-y-6"><div><p class="text-slate-400 text-sm mb-2">Total Input</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center border border-pink-500/30"><svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-white">'+formatNight(totalIn)+'</p></div></div></div><div class="w-full h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div><div><p class="text-slate-400 text-sm mb-2">Total Output</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30"><svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-green-400">'+formatNight(totalOut)+'</p></div></div></div></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">'+inputsHtml+outputsHtml+'</div>'+dustHtml+'<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><span class="font-semibold text-white">Raw Transaction Data</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/80 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.raw||"No raw data available")+'</pre></div></div></div><div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="font-semibold text-white">Block Ledger Parameters</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/80 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.block_ledger_parameters||"No parameters available")+'</pre></div></div></div></div>');
+  showDetail('<div class="space-y-6">'+zkBadgeHtml+'<div class="bg-slate-800/85 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backToBlock" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer" data-bh="'+tx.block_height+'"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back to Block</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Detail</h3></div></div><span class="px-4 py-1 text-sm rounded-full '+(st?"bg-green-500/20 text-green-400 border-green-500/30":"bg-red-500/20 text-red-400 border-red-500/30")+' border font-bold">'+tx.status+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Hash</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+tx.hash+'</code><button onclick="copyHash(\''+tx.hash+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div>'+idsHtml+'</div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-slate-800/85 rounded-2xl border border-slate-700/50 p-6"><div class="flex items-center gap-2 mb-6"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><h3 class="text-lg font-bold text-white">Transaction Overview</h3></div><div class="space-y-0"><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Block Hash</span><code class="text-orange-400 font-mono text-xs">'+truncHash(tx.block_hash||"",14)+'</code></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Block Height</span><span class="text-white font-bold block-link cursor-pointer hover:text-orange-400" data-bh="'+tx.block_height+'">#'+fmt(tx.block_height)+'</span></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Timestamp</span><span class="text-white">'+formatTime(tx.timestamp)+'</span></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Protocol Version</span><span class="text-white font-mono">v'+(tx.protocol_version||20000)+'</span></div><div class="flex justify-between items-center py-4 border-b border-slate-700/30"><span class="text-slate-400">Transaction ID</span><span class="text-white font-bold">#'+(tx.transaction_id||tx.id)+'</span></div>'+fromToHtml+'</div></div><div class="bg-gradient-to-br from-slate-800/60 to-slate-900/80 rounded-2xl border border-orange-500/20 p-6 relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div><div class="relative"><div class="flex items-center gap-2 mb-6"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Summary</h3></div><div class="space-y-6"><div><p class="text-slate-400 text-sm mb-2">Total Input</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center border border-pink-500/30"><svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-white">'+formatNight(totalIn)+'</p></div></div></div><div class="w-full h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div><div><p class="text-slate-400 text-sm mb-2">Total Output</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30"><svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-green-400">'+formatNight(totalOut)+'</p></div></div></div></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">'+inputsHtml+outputsHtml+'</div>'+dustHtml+'<div class="bg-slate-800/85 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/50 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><span class="font-semibold text-white">Raw Transaction Data</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/50 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.raw||"No raw data available")+'</pre></div></div></div><div class="bg-slate-800/85 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/50 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="font-semibold text-white">Block Ledger Parameters</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/50 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.block_ledger_parameters||"No parameters available")+'</pre></div></div></div></div>');
   document.getElementById("backToBlock").addEventListener("click",function(){clickBlock(parseInt(this.dataset.bh))});
   document.querySelectorAll(".block-link").forEach(function(el){el.addEventListener("click",function(){clickBlock(parseInt(el.dataset.bh))})});
   document.querySelectorAll(".raw-toggle").forEach(function(btn){btn.addEventListener("click",function(){var content=this.nextElementSibling;var arrow=this.querySelector(".toggle-arrow");content.classList.toggle("hidden");arrow.classList.toggle("rotate-180")})});
@@ -3214,13 +3214,13 @@ function viewTxDetail(tx){
   if(tx.section==="midnight"||tx.is_midnight_tx){
     var enrichedContainer=document.createElement("div");
     enrichedContainer.id="enrichedTxData";
-    enrichedContainer.innerHTML='<div class="bg-slate-800/60 rounded-2xl border border-cyan-500/20 p-6 mt-6"><div class="flex items-center gap-2 mb-4"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><span class="text-sm text-cyan-400">'+t("enrichedLoading")+'</span></div></div>';
+    enrichedContainer.innerHTML='<div class="bg-slate-800/85 rounded-2xl border border-cyan-500/20 p-6 mt-6"><div class="flex items-center gap-2 mb-4"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><span class="text-sm text-cyan-400">'+t("enrichedLoading")+'</span></div></div>';
     var detailEl=document.getElementById("detail");
     if(detailEl){var innerDiv=detailEl.querySelector(".space-y-6");if(innerDiv)innerDiv.appendChild(enrichedContainer);}
     fetch(API+"/tx-enriched/"+tx.hash).then(function(r){return r.json()}).then(function(ed){
       if(!ed||!ed.enriched){enrichedContainer.innerHTML='';return;}
       var e=ed.enriched;
-      var html='<div class="bg-slate-800/60 rounded-2xl border border-cyan-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3 class="text-lg font-bold text-white">'+t("enrichedData")+'</h3></div>';
+      var html='<div class="bg-slate-800/85 rounded-2xl border border-cyan-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3 class="text-lg font-bold text-white">'+t("enrichedData")+'</h3></div>';
       // Block author
       if(e.block&&e.block.author){
         var authorLabel=ed.authorName||truncHash(e.block.author,14);
@@ -3272,7 +3272,7 @@ function viewExtDetail(hash,bh,sec,meth,ts){
   prevPage=location.pathname;if(!isPopState)history.pushState(null,"","/ext/"+hash);
   var c=getColor(sec);
   var tsFormatted=ts&&ts!=="undefined"?timeAgo(parseInt(ts)):"N/A";var extTsFull=ts&&ts!=="undefined"?formatTime(parseInt(ts)):"";var tsFull=ts&&ts!=="undefined"?formatTime(parseInt(ts)):"";
-  showDetail('<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backBtn" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Extrinsic Detail</h3></div></div><span class="px-3 py-1 text-sm rounded-full '+c.bg+' '+c.t+' border '+c.b+'">'+sec+'.'+meth+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Hash</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+hash+'</code><button onclick="copyHash(\''+hash+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Block Height</p><p class="text-white font-bold cursor-pointer hover:text-orange-400 block-link" data-bh="'+bh+'">#'+fmt(bh)+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Timestamp</p><p class="text-white">'+tsFormatted+'</p><p class="text-xs text-slate-500">'+tsFull+'</p></div></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Method</p><span class="px-2 py-1 rounded '+c.bg+' '+c.t+' font-mono text-sm border '+c.b+'">'+sec+'.'+meth+'</span></div></div></div>');
+  showDetail('<div class="bg-slate-800/85 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backBtn" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Extrinsic Detail</h3></div></div><span class="px-4 py-1 text-sm rounded-full '+c.bg+' '+c.t+' border '+c.b+'">'+sec+'.'+meth+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Hash</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+hash+'</code><button onclick="copyHash(\''+hash+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Block Height</p><p class="text-white font-bold cursor-pointer hover:text-orange-400 block-link" data-bh="'+bh+'">#'+fmt(bh)+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Timestamp</p><p class="text-white">'+tsFormatted+'</p><p class="text-xs text-slate-500">'+tsFull+'</p></div></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Method</p><span class="px-2 py-1 rounded '+c.bg+' '+c.t+' font-mono text-sm border '+c.b+'">'+sec+'.'+meth+'</span></div></div></div>');
   document.getElementById("backBtn").addEventListener("click",function(){if(cameFromBlock){clickBlock(parseInt(cameFromBlock));cameFromBlock=null;}else{goHome();}});
   document.querySelectorAll(".block-link").forEach(function(el){el.addEventListener("click",function(){clickBlock(parseInt(el.dataset.bh))})});
 }
@@ -3285,7 +3285,7 @@ function attachContractListeners(){document.querySelectorAll(".contract-row").fo
 
 function viewContractDetail(addr,entry,type){
   history.pushState(null,"","/contract/"+addr);
-  showDetail('<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backBtn" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Contract Detail</h3></div></div><span class="px-3 py-1 text-sm rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">'+type+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Contract Address</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+addr+'</code><button onclick="copyHash(\''+addr+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Entry Point</p><p class="text-purple-400 font-mono">'+entry+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Type</p><p class="text-orange-400 font-medium">'+type+'</p></div></div></div></div>');
+  showDetail('<div class="bg-slate-800/85 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backBtn" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Contract Detail</h3></div></div><span class="px-4 py-1 text-sm rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">'+type+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Contract Address</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+addr+'</code><button onclick="copyHash(\''+addr+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Entry Point</p><p class="text-purple-400 font-mono">'+entry+'</p></div><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Type</p><p class="text-orange-400 font-medium">'+type+'</p></div></div></div></div>');
   document.getElementById("backBtn").addEventListener("click",function(){showTab("contracts")});
 }
 
@@ -3349,7 +3349,7 @@ function nfApplyHealth(){
   var liveTxsDot=document.getElementById("liveTxsDot");
   var netOvBadge=document.getElementById("netOvBadge"),netOvBars=document.getElementById("netOvBars"),netOvLabel=document.getElementById("netOvLabel");
   if(!connBadge||!liveBadge) return;
-  function setBadge(badge,border,bg){badge.className="flex items-center gap-2 px-3 py-1.5 rounded-full "+bg+" border "+border;}
+  function setBadge(badge,border,bg){badge.className="flex items-center gap-2 px-4 py-1.5 rounded-full "+bg+" border "+border;}
   function setBars(active){
     if(!netOvBars) return;
     var heights=[3,5,4,6,3];
@@ -3953,7 +3953,7 @@ window.addEventListener("load",function(){
   
   // Show shortcut hint toast
   var toast=document.createElement("div");
-  toast.className="fixed bottom-6 right-6 bg-slate-800/95 backdrop-blur-xl border border-orange-500/30 rounded-xl px-4 py-3 shadow-2xl z-[100] flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-500";
+  toast.className="fixed bottom-6 right-6 bg-slate-800/85 backdrop-blur-xl border border-orange-500/30 rounded-xl px-4 py-4 shadow-2xl z-[100] flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-500";
   toast.innerHTML='<div class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><div><p class="text-sm font-medium text-white">Keyboard shortcuts available</p><p class="text-xs text-slate-400">Press <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-orange-400 font-mono">Shift</kbd> + <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-orange-400 font-mono">?</kbd> to view all</p></div><button class="ml-2 text-slate-500 hover:text-white" onclick="this.parentElement.remove()"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>';
   document.body.appendChild(toast);
   setTimeout(function(){toast.style.transform="translateY(0)";toast.style.opacity="1"},500);
@@ -4295,7 +4295,7 @@ function renderCommitteeCards(members, epoch){
     var color=validatorColors[i%validatorColors.length];
     var label=v.validatorLabel||("Validator #"+(i+1));
     var blockStats=(v.blocksProduced!=null&&v.blocksProduced>0)?' <span class="text-[10px] text-slate-500 ml-1">('+v.blocksProduced+' '+t("blocksProducedShort")+')</span>':"";
-    html+='<div onclick="copyValidator(\''+pk+'\',this)" class="group flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/50 hover:bg-slate-700/50 transition cursor-pointer border border-slate-700/30 hover:border-green-500/30 card-hover" title="Click to copy: '+pk+'">';
+    html+='<div onclick="copyValidator(\''+pk+'\',this)" class="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/50 hover:bg-slate-700/50 transition cursor-pointer border border-slate-700/30 hover:border-green-500/30 card-hover" title="Click to copy: '+pk+'">';
     html+='<div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:'+color+'"></div>';
     html+='<div class="flex-1 min-w-0">';
     html+='<p class="text-[11px] font-semibold text-green-400">'+label+'</p>';
@@ -4318,7 +4318,7 @@ function loadBlockProducers(){
       el.innerHTML='<p class="text-center text-slate-500 text-sm py-4">No block producer data available</p>';
       return;
     }
-    var html='<div class="flex items-center justify-between mb-3"><span class="text-xs text-slate-500">Sampled '+fmt(data.sampled)+' of '+fmt(data.totalBlocks)+' blocks</span></div>';
+    var html='<div class="flex items-center justify-between mb-4"><span class="text-xs text-slate-500">Sampled '+fmt(data.sampled)+' of '+fmt(data.totalBlocks)+' blocks</span></div>';
     var rankColors=["#eab308","#94a3b8","#cd7f32"];
     var rankLabels=["1st","2nd","3rd"];
     producers.forEach(function(p,i){
@@ -4330,7 +4330,7 @@ function loadBlockProducers(){
         var bgColors=["bg-yellow-500/20 text-yellow-400 border-yellow-500/30","bg-slate-400/20 text-slate-300 border-slate-400/30","bg-amber-700/20 text-amber-600 border-amber-700/30"];
         badge='<span class="text-[10px] px-1.5 py-0.5 rounded-full border '+bgColors[i]+' font-bold flex-shrink-0">'+rankLabels[i]+'</span>';
       }
-      html+='<div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-800/30 hover:bg-slate-700/30 transition">';
+      html+='<div class="flex items-center gap-3 py-2 px-4 rounded-lg bg-slate-800/85 hover:bg-slate-700/50 transition">';
       html+='<span class="text-xs text-slate-500 w-6 text-right flex-shrink-0">#'+(i+1)+'</span>';
       html+=badge;
       html+='<div class="flex-1 min-w-0">';
@@ -4539,11 +4539,11 @@ function loadBridge(){
       }else{
         var html="";
         ops.slice(0,20).forEach(function(op){
-          html+='<tr class="hover:bg-slate-800/30 transition">';
-          html+='<td class="px-4 py-3"><span class="font-mono text-cyan-400 text-xs cursor-pointer hover:text-orange-400" onclick="copyHash(\''+op.hash+'\')">'+truncHash(op.hash||"",8)+'</span></td>';
-          html+='<td class="px-4 py-3 text-sm text-white font-mono">#'+fmt(op.block_height||op.block||0)+'</td>';
-          html+='<td class="px-4 py-3 text-sm text-blue-400 font-mono text-xs">'+(op.args_summary||op.cardano_block||"")+'</td>';
-          html+='<td class="px-4 py-3 text-right text-xs text-slate-500">'+timeAgo(op.timestamp)+'</td>';
+          html+='<tr class="hover:bg-slate-800/85 transition">';
+          html+='<td class="px-4 py-4"><span class="font-mono text-cyan-400 text-xs cursor-pointer hover:text-orange-400" onclick="copyHash(\''+op.hash+'\')">'+truncHash(op.hash||"",8)+'</span></td>';
+          html+='<td class="px-4 py-4 text-sm text-white font-mono">#'+fmt(op.block_height||op.block||0)+'</td>';
+          html+='<td class="px-4 py-4 text-sm text-blue-400 font-mono text-xs">'+(op.args_summary||op.cardano_block||"")+'</td>';
+          html+='<td class="px-4 py-4 text-right text-xs text-slate-500">'+timeAgo(op.timestamp)+'</td>';
           html+='</tr>';
         });
         tbody.innerHTML=html;
@@ -4626,11 +4626,11 @@ function loadAnalyticsDash(){
     var medals=["🥇","🥈","🥉"];
     var html="";
     data.slice(0,10).forEach(function(c,i){
-      html+='<tr class="hover:bg-slate-800/30 transition">';
-      html+='<td class="px-4 py-3 text-sm">'+(medals[i]||"<span class='text-slate-500'>"+(i+1)+"</span>")+'</td>';
-      html+='<td class="px-4 py-3"><span class="font-mono text-cyan-400 text-xs cursor-pointer hover:text-orange-400" onclick="copyHash(\''+c.address+'\')">'+truncHash(c.address||"",10)+'</span></td>';
-      html+='<td class="px-4 py-3 text-right text-sm font-bold text-white">'+fmt(c.count||c.interactions||0)+'</td>';
-      html+='<td class="px-4 py-3 text-right text-xs text-slate-500">'+timeAgo(c.last_seen||c.lastSeen)+'</td>';
+      html+='<tr class="hover:bg-slate-800/85 transition">';
+      html+='<td class="px-4 py-4 text-sm">'+(medals[i]||"<span class='text-slate-500'>"+(i+1)+"</span>")+'</td>';
+      html+='<td class="px-4 py-4"><span class="font-mono text-cyan-400 text-xs cursor-pointer hover:text-orange-400" onclick="copyHash(\''+c.address+'\')">'+truncHash(c.address||"",10)+'</span></td>';
+      html+='<td class="px-4 py-4 text-right text-sm font-bold text-white">'+fmt(c.count||c.interactions||0)+'</td>';
+      html+='<td class="px-4 py-4 text-right text-xs text-slate-500">'+timeAgo(c.last_seen||c.lastSeen)+'</td>';
       html+='</tr>';
     });
     tbody.innerHTML=html;
@@ -4659,7 +4659,7 @@ function loadAnalyticsDash(){
     events.forEach(function(ev,i){
       var pct=maxCount>0?((ev.count||0)/maxCount*100):0;
       var color=eventColors[i%eventColors.length];
-      html+='<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 transition">';
+      html+='<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/85 transition">';
       html+='<div class="w-2 h-2 rounded-full flex-shrink-0" style="background:'+color+'"></div>';
       html+='<div class="flex-1 min-w-0">';
       html+='<div class="flex items-center justify-between mb-1">';
@@ -4698,7 +4698,7 @@ function loadAnalyticsDash(){
       }catch(e){}
       var blockNum=c.block||0;
       var ts=c.timestamp||0;
-      html+='<div class="flex items-center justify-between px-4 py-3 hover:bg-slate-800/30 transition">';
+      html+='<div class="flex items-center justify-between px-4 py-4 hover:bg-slate-800/85 transition">';
       html+='<div class="flex items-center gap-3 min-w-0 flex-1">';
       html+='<div class="w-9 h-9 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div>';
       html+='<div class="min-w-0">';
@@ -4859,7 +4859,7 @@ function loadGovernance(){
         var html="";
         councilProposals.slice(0,20).forEach(function(p){
           var parsedData="";try{if(p.data&&typeof p.data==="string")parsedData=p.data.length>80?p.data.slice(0,80)+"...":p.data;else if(p.data)parsedData=JSON.stringify(p.data).slice(0,80);}catch(e){}
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between mb-1"><span class="font-mono text-sm text-white">#'+fmt(p.block_height||p.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(p.timestamp)+'</span></div>';
           if(parsedData)html+='<p class="text-xs text-blue-400/70 font-mono truncate">'+parsedData+'</p>';
           html+='</div>';
@@ -4877,7 +4877,7 @@ function loadGovernance(){
       else{
         var html="";
         councilVotes.slice(0,20).forEach(function(v){
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between"><span class="font-mono text-sm text-white">#'+fmt(v.block_height||v.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(v.timestamp)+'</span></div>';
           html+='</div>';
         });
@@ -4895,7 +4895,7 @@ function loadGovernance(){
         var html="";
         techProposals.slice(0,20).forEach(function(p){
           var parsedData="";try{if(p.data&&typeof p.data==="string")parsedData=p.data.length>80?p.data.slice(0,80)+"...":p.data;else if(p.data)parsedData=JSON.stringify(p.data).slice(0,80);}catch(e){}
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between mb-1"><span class="font-mono text-sm text-white">#'+fmt(p.block_height||p.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(p.timestamp)+'</span></div>';
           if(parsedData)html+='<p class="text-xs text-purple-400/70 font-mono truncate">'+parsedData+'</p>';
           html+='</div>';
@@ -4913,7 +4913,7 @@ function loadGovernance(){
       else{
         var html="";
         techVotes.slice(0,20).forEach(function(v){
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between"><span class="font-mono text-sm text-white">#'+fmt(v.block_height||v.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(v.timestamp)+'</span></div>';
           html+='</div>';
         });
@@ -4930,7 +4930,7 @@ function loadGovernance(){
       else{
         var html="";
         authorityResets.slice(0,20).forEach(function(a){
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition flex items-center justify-between">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition flex items-center justify-between">';
           html+='<div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full bg-amber-400"></div><span class="font-mono text-sm text-white">#'+fmt(a.block_height||a.block||0)+'</span></div>';
           html+='<span class="text-xs text-slate-500">'+timeAgo(a.timestamp)+'</span>';
           html+='</div>';
@@ -5052,7 +5052,7 @@ function loadEpochs(){
         epochs.slice(0,10).forEach(function(ep,i){
           var isFirst=(i===0);
           var ts=ep.recorded_at||0;
-          html+='<div class="flex items-center justify-between px-3 py-2 rounded-lg '+(isFirst?'bg-cyan-500/10 border border-cyan-500/20':'hover:bg-slate-800/30')+' transition">';
+          html+='<div class="flex items-center justify-between px-4 py-2 rounded-lg '+(isFirst?'bg-cyan-500/10 border border-cyan-500/20':'hover:bg-slate-800/85')+' transition">';
           html+='<div class="flex items-center gap-3">';
           html+='<span class="text-cyan-400 font-bold text-sm w-20">'+fmt(ep.epoch)+'</span>';
           if(isFirst){html+='<span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>';}
@@ -5074,10 +5074,10 @@ function loadEpochs(){
       }else{
         var html="";
         sessions.slice(0,30).forEach(function(s){
-          html+='<tr class="hover:bg-slate-800/30 transition">';
-          html+='<td class="px-4 py-3 text-sm text-cyan-400 font-bold">'+fmt(s.epoch||s.epoch_number||0)+'</td>';
-          html+='<td class="px-4 py-3 text-sm text-white font-mono">#'+fmt(s.block_height||s.block||0)+'</td>';
-          html+='<td class="px-4 py-3 text-right text-xs text-slate-500">'+timeAgo(s.timestamp)+'</td>';
+          html+='<tr class="hover:bg-slate-800/85 transition">';
+          html+='<td class="px-4 py-4 text-sm text-cyan-400 font-bold">'+fmt(s.epoch||s.epoch_number||0)+'</td>';
+          html+='<td class="px-4 py-4 text-sm text-white font-mono">#'+fmt(s.block_height||s.block||0)+'</td>';
+          html+='<td class="px-4 py-4 text-right text-xs text-slate-500">'+timeAgo(s.timestamp)+'</td>';
           html+='</tr>';
         });
         stEl.innerHTML=html;
@@ -5130,13 +5130,13 @@ function loadCardano(){
           var midSlot=a.midnightSlot||a.sidechain_slot||"";
           var cardEp=a.cardanoEpoch||a.mainchain_epoch||"";
           var cardSlot=a.cardanoSlot||a.mainchain_slot||"";
-          html+='<tr class="hover:bg-slate-800/30 transition">';
-          html+='<td class="px-4 py-3"><span class="text-cyan-400 font-bold">'+fmt(midEp)+'</span></td>';
-          html+='<td class="px-4 py-3 font-mono text-sm text-white">'+fmt(midSlot)+'</td>';
-          html+='<td class="px-4 py-3 text-center text-slate-600">→</td>';
-          html+='<td class="px-4 py-3"><span class="text-blue-400 font-bold">'+fmt(cardEp)+'</span></td>';
-          html+='<td class="px-4 py-3 font-mono text-sm text-white">'+fmt(cardSlot)+'</td>';
-          html+='<td class="px-4 py-3 text-right text-xs text-slate-500">'+timeAgo(a.timestamp)+'</td>';
+          html+='<tr class="hover:bg-slate-800/85 transition">';
+          html+='<td class="px-4 py-4"><span class="text-cyan-400 font-bold">'+fmt(midEp)+'</span></td>';
+          html+='<td class="px-4 py-4 font-mono text-sm text-white">'+fmt(midSlot)+'</td>';
+          html+='<td class="px-4 py-4 text-center text-slate-600">→</td>';
+          html+='<td class="px-4 py-4"><span class="text-blue-400 font-bold">'+fmt(cardEp)+'</span></td>';
+          html+='<td class="px-4 py-4 font-mono text-sm text-white">'+fmt(cardSlot)+'</td>';
+          html+='<td class="px-4 py-4 text-right text-xs text-slate-500">'+timeAgo(a.timestamp)+'</td>';
           html+='</tr>';
         });
         tbody.innerHTML=html;
@@ -5151,7 +5151,7 @@ function loadCardano(){
         var html="";
         registrations.slice(0,15).forEach(function(r){
           var parsedData="";try{if(r.data&&typeof r.data==="string")parsedData=r.data.length>60?r.data.slice(0,60)+"...":r.data;else if(r.data)parsedData=JSON.stringify(r.data).slice(0,60);}catch(e){}
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between mb-1"><span class="font-mono text-xs text-white">#'+fmt(r.block_height||r.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(r.timestamp)+'</span></div>';
           if(parsedData)html+='<p class="text-[10px] text-green-400/70 font-mono truncate">'+parsedData+'</p>';
           html+='</div>';
@@ -5167,7 +5167,7 @@ function loadCardano(){
       else{
         var html="";
         deregistrations.slice(0,15).forEach(function(r){
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between"><span class="font-mono text-xs text-white">#'+fmt(r.block_height||r.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(r.timestamp)+'</span></div>';
           html+='</div>';
         });
@@ -5182,7 +5182,7 @@ function loadCardano(){
       else{
         var html="";
         mappings.slice(0,15).forEach(function(m){
-          html+='<div class="px-4 py-3 hover:bg-slate-800/30 transition">';
+          html+='<div class="px-4 py-4 hover:bg-slate-800/85 transition">';
           html+='<div class="flex items-center justify-between"><span class="font-mono text-xs text-white">#'+fmt(m.block_height||m.block||0)+'</span><span class="text-xs text-slate-500">'+timeAgo(m.timestamp)+'</span></div>';
           html+='</div>';
         });
