@@ -1288,10 +1288,10 @@
       var wrap=document.getElementById("nfDecentDial");
       if(!wrap)return;
       Promise.all([
-        fetch("/api/governance/d-parameter").then(function(r){return r.json()}).catch(function(){return null;}),
-        fetch("/api/committee").then(function(r){return r.json()}).catch(function(){return null;}),
-        fetch("/api/block-producers").then(function(r){return r.json()}).catch(function(){return null;}),
-        fetch("/api/epoch/current").then(function(r){return r.json()}).catch(function(){return null;})
+        fetch(window.__NF_API+"/governance/d-parameter").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch(window.__NF_API+"/committee").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch(window.__NF_API+"/block-producers").then(function(r){return r.json()}).catch(function(){return null;}),
+        fetch(window.__NF_API+"/epoch/current").then(function(r){return r.json()}).catch(function(){return null;})
       ]).then(function(res){
         var dparam=res[0],committee=res[1],producers=res[2],epoch=res[3];
         // Nakamoto card — depends only on committee, populate independently of the dial gate.
