@@ -75,6 +75,9 @@
 #tabNav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 #tabNav::-webkit-scrollbar { display: none; }
 .tab-btn { white-space: nowrap; flex-shrink: 0; }
+#topNav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#topNav::-webkit-scrollbar { display: none; }
+.topnav-btn { white-space: nowrap; flex-shrink: 0; }
 
 @media (max-width: 640px) {
   .text-3xl { font-size: 1.5rem; }
@@ -264,6 +267,27 @@
       </div>
     </div>
   </header>
+
+  <!-- Top section nav: discoverability shortcut. The authoritative tab
+       switcher lives deeper in the page at <nav id="tabNav">; this row
+       makes the same destinations reachable from first paint and stays
+       sticky below the header on scroll. Click handler bound at the
+       bottom of the page calls showTab(name) + scrolls to the deeper
+       nav so the user lands on the correct tab content. -->
+  <div class="bg-slate-900/50 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
+    <div class="container">
+      <nav class="flex items-center gap-1 py-2" id="topNav" aria-label="Section navigation">
+        <button data-jump="blocks" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="blocks">Blocks</button>
+        <button data-jump="extrinsics" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="extrinsics">Extrinsics</button>
+        <button data-jump="privacy" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="privacy">🛡 Privacy</button>
+        <button data-jump="bridge" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="bridge">🌉 Bridge</button>
+        <button data-jump="analytics" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="analytics">📊 Analytics</button>
+        <button data-jump="governance" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="governance">🏛 Governance</button>
+        <button data-jump="epochs" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/85 transition" data-i18n="epochs">⏱ Epochs</button>
+        <a href="/tools/" class="topnav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition" data-i18n="tools" style="text-decoration:none;">Tools</a>
+      </nav>
+    </div>
+  </div>
   <!-- HERO — CredentialGate (preview, on-chain, indexer-verified). Promoted from old Featured Contract + credGateLiveness blocks.
        IDs cgStatus / cgProveLine / cgProveAgo / cgSwapLine / cgSwapAgo / cgVerifiedAt are preserved verbatim so loadCredentialGateLiveness() wires unchanged. -->
   <section class="container relative pt-6 pb-4" style="z-index:2;">
@@ -1466,7 +1490,7 @@
   <!-- Top Methods leaderboard remains preserved as a hidden DOM target so updateTopMethods() keeps wiring; surfaces visibly on the Extrinsics tab. -->
   <div id="topMethods" style="display:none;"></div>
 
-  <div class="bg-slate-900/50 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
+  <div class="bg-slate-900/50 backdrop-blur-sm border-b border-slate-800/30 relative">
     <div class="container">
       <nav class="flex items-center gap-1 py-2" id="tabNav">
         <button data-tab="overview" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-white" data-i18n="overview">Overview</button>
@@ -2714,6 +2738,7 @@ function goHome(){
 
 document.getElementById("homeLink").addEventListener("click",function(e){e.preventDefault();goHome()});
 document.getElementById("tabNav").addEventListener("click",function(e){if(e.target.classList.contains("tab-btn")){showTab(e.target.dataset.tab)}});
+(function(){var n=document.getElementById("topNav");if(!n)return;n.addEventListener("click",function(e){var t=e.target;if(t&&t.dataset&&t.dataset.jump){e.preventDefault();showTab(t.dataset.jump);var dest=document.getElementById("content-"+t.dataset.jump)||document.getElementById("tabNav");if(dest&&dest.scrollIntoView)dest.scrollIntoView({behavior:"smooth",block:"start"});}});})();
 document.querySelectorAll(".view-all-btn").forEach(function(b){b.addEventListener("click",function(){showTab(b.dataset.tab)})});
 document.getElementById("filterBtn").addEventListener("click",function(){document.getElementById("filterMenu").classList.toggle("hidden")});
 document.querySelectorAll(".filter-opt").forEach(function(b){b.addEventListener("click",function(){document.getElementById("filterLabel").textContent=b.dataset.filter.charAt(0).toUpperCase()+b.dataset.filter.slice(1);document.getElementById("filterMenu").classList.add("hidden")})});
