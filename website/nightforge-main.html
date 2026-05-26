@@ -268,25 +268,23 @@
     </div>
   </header>
 
-  <!-- Top section nav: discoverability shortcut. The authoritative tab
-       switcher lives deeper in the page at <nav id="tabNav">; this row
-       makes the same destinations reachable from first paint and stays
-       sticky below the header on scroll. Click handler bound at the
-       bottom of the page calls showTab(name) + scrolls to the deeper
-       nav so the user lands on the correct tab content. -->
-  <div class="sticky top-16 z-40 relative">
-    <div class="container py-4">
-      <nav class="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-slate-800/50 border border-slate-700/40 backdrop-blur-md shadow-sm" id="topNav" aria-label="Section navigation">
-        <button data-jump="blocks" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="blocks">Blocks</button>
-        <button data-jump="extrinsics" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="extrinsics">Extrinsics</button>
-        <button data-jump="privacy" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="privacy">🛡 Privacy</button>
-        <button data-jump="bridge" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="bridge">🌉 Bridge</button>
-        <button data-jump="analytics" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="analytics">📊 Analytics</button>
-        <button data-jump="governance" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="governance">🏛 Governance</button>
-        <button data-jump="epochs" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition" data-i18n="epochs">⏱ Epochs</button>
-        <a href="/tools/" class="topnav-btn px-4 py-2 rounded-xl text-sm font-medium text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition" data-i18n="tools" style="text-decoration:none;">Tools</a>
-      </nav>
-    </div>
+  <!-- Top section nav: discoverability shortcut. Plain row between header
+       and hero — no sticky, no glass card, no contained surface. The
+       authoritative tab switcher lives deeper in the page at <nav id=
+       "tabNav">; this row makes the same destinations reachable from
+       first paint. Click handler at the bottom of the page calls
+       showTab(name) + scrolls #content-<name> into view. -->
+  <div class="container mt-4 mb-6">
+    <nav class="flex items-center gap-1" id="topNav" aria-label="Section navigation">
+      <button data-jump="blocks" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="blocks">Blocks</button>
+      <button data-jump="extrinsics" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="extrinsics">Extrinsics</button>
+      <button data-jump="privacy" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="privacy">🛡 Privacy</button>
+      <button data-jump="bridge" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="bridge">🌉 Bridge</button>
+      <button data-jump="analytics" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="analytics">📊 Analytics</button>
+      <button data-jump="governance" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="governance">🏛 Governance</button>
+      <button data-jump="epochs" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition" data-i18n="epochs">⏱ Epochs</button>
+      <a href="/tools/" class="topnav-btn px-3 py-2 rounded-lg text-sm font-medium text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition" data-i18n="tools" style="text-decoration:none;">Tools</a>
+    </nav>
   </div>
   <!-- HERO — CredentialGate (preview, on-chain, indexer-verified). Promoted from old Featured Contract + credGateLiveness blocks.
        IDs cgStatus / cgProveLine / cgProveAgo / cgSwapLine / cgSwapAgo / cgVerifiedAt are preserved verbatim so loadCredentialGateLiveness() wires unchanged. -->
