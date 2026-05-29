@@ -13,8 +13,8 @@ else. `git remote -v` is the only authoritative check.**
 | Environment | Local Repo | GitHub Repo | Domain(s) | Canonical Branch | Indexer Port | Docroot | Deploy Path |
 |---|---|---|---|---|---|---|---|
 | **Mainnet (canonical UI source)** | `/home/midnight/mainnet-explorer` | `cryptoleo79/mainnet-explorer` | `nightforge.jp` (apex), `mainnet.nightforge.jp` | `main` | `3005` (`midnight-mainnet-indexer.service`) | `/var/www/explorer-main`, `/var/www/explorer-mainnet` | `sudo bash scripts/deploy-all.sh` (from `mainnet-explorer`) |
-| **Preview** | `/home/midnight/preview-explorer-new` | `cryptoleo79/preview-explorer` | `preview.nightforge.jp` | `preview-restore` *(pending GitHub default-branch switch)* | `3000` (`midnight-preview-explorer.service`) | `/var/www/explorer-lite` | `sudo bash scripts/deploy-all.sh` (from `mainnet-explorer` — preview docroot is one of four targets) |
-| **Preprod** | `/home/midnight/preprod-explorer` | `cryptoleo79/preprod-explorer` | `preprod.nightforge.jp` | `preprod-restore` *(pending GitHub default-branch switch)* | `3004` (`midnight-preprod-indexer.service`) | `/var/www/explorer-preprod` | `sudo bash scripts/deploy-all.sh` (from `mainnet-explorer`) |
+| **Preview** | `/home/midnight/preview-explorer-new` | `cryptoleo79/preview-explorer` | `preview.nightforge.jp` | `preview-restore` (GitHub default) | `3000` (`midnight-preview-explorer.service`) | `/var/www/explorer-lite` | `sudo bash scripts/deploy-all.sh` (from `mainnet-explorer` — preview docroot is one of four targets) |
+| **Preprod** | `/home/midnight/preprod-explorer` | `cryptoleo79/preprod-explorer` | `preprod.nightforge.jp` | `preprod-restore` (GitHub default) | `3004` (`midnight-preprod-indexer.service`) | `/var/www/explorer-preprod` | `sudo bash scripts/deploy-all.sh` (from `mainnet-explorer`) |
 | **YAMORI** (wallet, separate stack) | `/home/midnight/YAMORI` | `cryptoleo79/YAMORI` | n/a (Chrome extension; release zip distributed manually) | `main` | n/a | n/a | `npm run build` → `yamori-v<X>.zip` |
 
 ### Adjacent infrastructure (not explorer environments)
@@ -68,7 +68,9 @@ The local working tree at `/home/midnight/preview-explorer-new` was used to push
 
 **Detection lag — 31 days.** The local preprod indexer (port `3004`) was unaffected and continued running, but its WebSocket subscription stalled silently on 2026-04-20. Because the remote was already pointing at the wrong history, routine remote inspection did not surface the divergence between the local repo's purpose and what GitHub was advertising.
 
-**Recovery posture chosen.** Recovery was done without force-push and without history rewrite. The genuine preprod history was pushed to a new branch `preprod-restore` on the preprod repo. The genuine preview history was pushed to a new branch `preview-restore` on the preview repo. The mis-pushed `main` branches were left in place as frozen references. The pending GitHub action is a default-branch switch on each repo (Settings → Branches), which is a non-destructive UI operation.
+**Recovery posture chosen.** Recovery was done without force-push and without history rewrite. The genuine preprod history was pushed to a new branch `preprod-restore` on the preprod repo. The genuine preview history was pushed to a new branch `preview-restore` on the preview repo. The mis-pushed `main` branches were left in place as frozen references.
+
+**Recovery completed 2026-05-29.** The GitHub default-branch switch on each repo (`cryptoleo79/preview-explorer` → `preview-restore`, `cryptoleo79/preprod-explorer` → `preprod-restore`) landed on 2026-05-29 and was verified by two independent methods (REST API `default_branch` field + `git ls-remote --symref HEAD`). A fresh `git clone` of either repo now lands on the correct history by default. The mis-pushed `main` branches remain as frozen references and are listed in Safe Cleanup Candidates below.
 
 **Outcomes built into this stack.** The WebSocket freshness watchdog committed on `preprod-restore` at `f1e3c4e` is the durable detection mechanism for the silent-indexer-stall failure mode. The per-env `__NF_NET` / `__NF_API` / `__NF_RPC` conventions in `website/nightforge-main.html` are the durable mechanism for keeping UI and API in agreement. This `REPO_TOPOLOGY.md` document is the durable mechanism for keeping the local-dir-to-GitHub-repo mapping discoverable. The recommended pre-push hook below is the durable mechanism for preventing the mistake at the source.
 
@@ -95,8 +97,8 @@ These are stale or accidental artifacts. Listed for operator review; **no destru
 
 | Repo | Branch | Safe to delete? | Prerequisite |
 |---|---|---|---|
-| `cryptoleo79/preview-explorer` | `main` (LICENSE-only stub `9af6e8c`) | Yes — single auto-init commit, not part of preview history | After default-branch switch lands on `preview-restore` |
-| `cryptoleo79/preprod-explorer` | `main` (mis-pushed preview code `88d9745`) | Yes — frozen artifact of 2026-04-15 incident, no value outside the historical record kept in this file | After default-branch switch lands on `preprod-restore` |
+| `cryptoleo79/preview-explorer` | `main` (LICENSE-only stub `9af6e8c`) | Yes — single auto-init commit, not part of preview history | None — default-branch switch landed 2026-05-29; deletable any time |
+| `cryptoleo79/preprod-explorer` | `main` (mis-pushed preview code `88d9745`) | Yes — frozen artifact of 2026-04-15 incident, no value outside the historical record kept in this file | None — default-branch switch landed 2026-05-29; deletable any time |
 | `cryptoleo79/preprod-explorer` | `feat/nightforge-trust-pass` (`8d123dc`) | Unknown — verify whether it merged into mainnet's `feat/nightforge-trust-pass` (`07f5af1`) or is independent work | Diff against mainnet's branch of the same name before deleting |
 | `cryptoleo79/mainnet-explorer` | `feat/homepage-visual-hierarchy` (`ab5d522`) | Likely yes — UI work; check `git log --oneline main..feat/homepage-visual-hierarchy` to confirm no unmerged commits | Cross-check with current `main` HEAD |
 | `cryptoleo79/mainnet-explorer` | `feat/nightforge-action-layer` (`706f152`) | Likely yes | Cross-check |
@@ -121,8 +123,10 @@ These are stale or accidental artifacts. Listed for operator review; **no destru
 |---|---|---|
 | `preview-explorer-new` uncommitted changes (5 modified `tools/*.html` files) | Commit, discard, or stash — currently unsafe to push | Review diffs and decide intent |
 | `preprod-explorer` uncommitted changes (4 modified `tools/*.html` files) | Commit, discard, or stash | Review diffs and decide intent |
-| `preview-explorer-new` is `1 ahead / 18 behind` of upstream | Reconcile via merge or rebase from `preview-restore` | After default-branch switch |
-| `preprod-explorer` is `17 ahead / 22 behind` of upstream | Reconcile from `preprod-restore` | After default-branch switch |
+| `preview-explorer-new` local branch is still named `main` | Optional rename: `git branch -m main preview-restore && git branch --set-upstream-to=origin/preview-restore` | None — default-branch switch landed |
+| `preprod-explorer` local branch is still named `main` | Optional rename: `git branch -m main preprod-restore && git branch --set-upstream-to=origin/preprod-restore` | None — default-branch switch landed |
+| `preview-explorer-new` is `1 ahead / 18 behind` of (old) upstream `origin/main` | After local rename above, upstream becomes `origin/preview-restore`; local HEAD already matches it, so reconciliation reduces to nothing | None |
+| `preprod-explorer` is `17 ahead / 22 behind` of (old) upstream `origin/main` | After local rename above, upstream becomes `origin/preprod-restore`; local HEAD already matches it | None |
 
 ### Files
 

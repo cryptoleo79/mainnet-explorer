@@ -67,16 +67,20 @@ Four-domain map (see `REPO_TOPOLOGY.md` for full topology):
 
 ## Topology repair state
 
-The 2026-04-15 cross-repo accident is partially recovered. Status:
+The 2026-04-15 cross-repo accident is fully recovered as of 2026-05-29. Status:
 
 | step | status |
 |---|---|
 | Preview history pushed to `cryptoleo79/preview-explorer:preview-restore` (`88d9745`) | ✅ done |
 | Preprod history pushed to `cryptoleo79/preprod-explorer:preprod-restore` (`f1e3c4e`) | ✅ done |
-| GitHub default branch on `preview-explorer` → `preview-restore` | ❌ **NOT applied** (API still reports `main`) |
-| GitHub default branch on `preprod-explorer` → `preprod-restore` | ❌ **NOT applied** (API still reports `main`) |
+| GitHub default branch on `preview-explorer` → `preview-restore` | ✅ done 2026-05-29 (verified REST API + `git ls-remote --symref HEAD`) |
+| GitHub default branch on `preprod-explorer` → `preprod-restore` | ✅ done 2026-05-29 (verified REST API + `git ls-remote --symref HEAD`) |
 | `preview-explorer-new` working tree uncommitted (5 files in `tools/`) | ⚠ pending review |
 | `preprod-explorer` working tree uncommitted (4 files in `tools/`) | ⚠ pending review |
+| `preview-explorer-new` local branch still named `main` | optional rename to `preview-restore` (see REPO_TOPOLOGY.md § Safe Cleanup Candidates) |
+| `preprod-explorer` local branch still named `main` | optional rename to `preprod-restore` (see REPO_TOPOLOGY.md § Safe Cleanup Candidates) |
+
+Class-of-mistake closed. A fresh `git clone` of either repo now lands on the correct canonical history by default.
 
 See `REPO_TOPOLOGY.md` § Recovery History for the operational summary, and § Safe Cleanup Candidates for the post-switch cleanup list.
 
@@ -90,7 +94,7 @@ No new bugs logged this session.
 
 | item | status | reason |
 |---|---|---|
-| GitHub default-branch switch on preview-explorer and preprod-explorer | manual UI step | Settings → Branches → swap, then confirm modal. Verified non-applied via `git ls-remote --symref HEAD` |
+| GitHub default-branch switch on preview-explorer and preprod-explorer | **DONE 2026-05-29** | Both repos now point HEAD at their canonical `*-restore` branch. Verified REST API + `git ls-remote --symref HEAD`. |
 | `nightforge.app` DNS | not configured | Apex domain `nightforge.jp` serves Mainnet today. `nightforge.app` is not currently wired to this stack. Deferred until product positioning is final; meanwhile any external reference should point at `nightforge.jp`, not `.app`. |
 | `preview-explorer-new/package.json` `name: "midnight-preprod-explorer"` rename | not done | fossil from original fork; pure forward-only edit when convenient |
 | `mainnet-explorer/package.json` description "Port 3001" correction | not done | should read 3005 |
