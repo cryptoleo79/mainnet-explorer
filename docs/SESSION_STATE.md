@@ -54,9 +54,11 @@ Four-domain map (see `REPO_TOPOLOGY.md` for full topology):
 
 | field | value |
 |---|---|
-| Active preview contract | `7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703` |
+| Active contract | `7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703` |
+| Network | Midnight Preview |
 | Verified addresses match | `website/nightforge-main.html`, `website/credential-gate.html`, `contracts/credential-gate/deploy/.../deployment.json` all agree |
 | E2E status | fail → prove → pass green on preview |
+| **Proof model** | **Signed disclosure** — issuer ed25519 over a credential payload, verified out-of-circuit. **NOT full ZK predicate verification.** The `_verify_issuer_sig` witness is a placeholder that returns true; a real in-circuit Schnorr-on-JubJub verification is the queued upgrade path (see deferred items). |
 | UI surface | hero card at the top of the NightForge homepage (mainnet-only liveness widget) |
 
 ## Latest deployed NightForge commit
@@ -89,6 +91,7 @@ No new bugs logged this session.
 | item | status | reason |
 |---|---|---|
 | GitHub default-branch switch on preview-explorer and preprod-explorer | manual UI step | Settings → Branches → swap, then confirm modal. Verified non-applied via `git ls-remote --symref HEAD` |
+| `nightforge.app` DNS | not configured | Apex domain `nightforge.jp` serves Mainnet today. `nightforge.app` is not currently wired to this stack. Deferred until product positioning is final; meanwhile any external reference should point at `nightforge.jp`, not `.app`. |
 | `preview-explorer-new/package.json` `name: "midnight-preprod-explorer"` rename | not done | fossil from original fork; pure forward-only edit when convenient |
 | `mainnet-explorer/package.json` description "Port 3001" correction | not done | should read 3005 |
 | Pre-push hook | not installed | template in `REPO_TOPOLOGY.md`; install in each explorer repo with operator approval |

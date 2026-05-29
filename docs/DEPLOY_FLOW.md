@@ -133,6 +133,61 @@ Expected output:
 
 Every `placeholder leak` line must read `0`. Any non-zero value means a docroot was published outside of `deploy-all.sh`.
 
+## Rollback procedure
+
+Rolling back the NightForge UI is the same shape as rolling forward: identify the last-known-good commit, check it out in the source repo, run `deploy-all.sh`, verify.
+
+There is no automatic snapshot of `/var/www/explorer-*/index.html`. The source of truth is the git history of `website/nightforge-main.html` in this repo. Rollback works by re-deploying an older version of that file.
+
+### Standard rollback (last-known-good commit on `main`)
+
+1. Identify the commit to roll back to.
+   ```bash
+   cd /home/midnight/mainnet-explorer
+   git log --oneline -10 -- website/nightforge-main.html
+   ```
+   Pick the SHA of the commit whose state you want live. Call it `<GOOD>`.
+
+2. Confirm the rollback will not lose newer uncommitted work.
+   ```bash
+   git status
+   git diff HEAD -- website/nightforge-main.html
+   ```
+   If there is uncommitted local work in `website/nightforge-main.html`, stash it first: `git stash push -- website/nightforge-main.html`.
+
+3. Forward-only rollback (the right one — does not rewrite history):
+   ```bash
+   git checkout <GOOD> -- website/nightforge-main.html
+   git commit -m "deploy: roll back nightforge-main.html to <GOOD>"
+   sudo bash scripts/deploy-all.sh
+   ```
+   This produces a *new* commit on `main` that restores the old contents. History stays forward-only.
+
+4. Verify with the post-deploy checklist above. All four hosts should serve the rolled-back HTML, correct env labels, no placeholder leak.
+
+### Emergency rollback (out-of-band, no commit)
+
+If something is actively broken and you need to revert before you can commit:
+
+1. Save the broken file aside: `cp website/nightforge-main.html /tmp/nightforge-main.broken.$(date +%s).html`
+2. Check out the previous version into the working tree: `git checkout HEAD~1 -- website/nightforge-main.html`
+3. `sudo bash scripts/deploy-all.sh`
+4. Verify with the checklist.
+5. Then commit the rollback as in step 3 of the standard procedure above. **Do not push or deploy again until the working-tree state matches a real commit on `main`.**
+
+### What rollback does NOT cover
+
+- **Indexer / API behavior** — rollback only re-publishes the static HTML. If the bug is in `/api/*`, you need to revert the indexer source and `sudo systemctl restart midnight-<env>-{indexer,explorer}`.
+- **Tool pages** — `/tools/*.html` are served per-env by each indexer; see [Tool pages](#tool-pages). To roll back a tools page, revert the file in the appropriate repo (`mainnet-explorer`, `preview-explorer-new`, or `preprod-explorer`) and restart is not required for static files.
+- **nginx config** — `deploy-all.sh` does not touch nginx. nginx rollback is a separate procedure (sudo edit `/etc/nginx/sites-available/`, `nginx -t`, `systemctl reload nginx`).
+- **The CredentialGate contract** — on-chain, immutable, never rolled back.
+
+### When NOT to roll back
+
+- **A truth-rule violation that is already deployed.** Forward-fix it with a new commit and re-deploy. Rolling back loses the audit record of what was wrong.
+- **A typo or copy mistake.** A forward fix is two minutes and keeps history honest.
+- **You're not sure what broke.** Diagnose first. A blind rollback can mask the actual fault and rolling forward later may re-introduce it.
+
 ## What is NOT a deploy
 
 These are common confusions. None of them are a "deploy":
