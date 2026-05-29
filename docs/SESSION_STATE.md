@@ -2,78 +2,134 @@
 
 Snapshot of where this stack stands. Update at the end of each working session.
 
-## Deployed state
+## Current operational posture: OBSERVATION MODE
+
+NightForge, YAMORI, and CredentialGate are considered operational. The next milestone is **someone else using them**, not more features. New work is restricted to:
+
+- structural / topology hygiene (this session's class)
+- documentation
+- truth-rule fixes (no fake values, no static "live" theater)
+- bug fixes triggered by observed behavior
+
+Out of scope: new features, new widgets, new APIs, SDK upgrades, storage migrations, contract changes, UI redesign, deploy-behavior changes.
+
+See `OBSERVATION_MODE.md` for the frozen-surface list.
+
+## Current stable state
 
 ### NightForge — `/home/midnight/mainnet-explorer`
 
-| domain | env | role |
-|---|---|---|
-| nightforge.jp | mainnet | apex |
-| mainnet.nightforge.jp | mainnet | env-scoped |
-| preview.nightforge.jp | preview | env-scoped |
-| preprod.nightforge.jp | preprod | env-scoped |
+| field | value |
+|---|---|
+| Origin remote | `git@github.com:cryptoleo79/mainnet-explorer.git` |
+| Canonical branch | `main` |
+| Local HEAD | `d45862e ui: separate explorer nav from hero` |
+| `origin/main` | `d45862e` (in sync) |
+| Last deploy mtime | `2026-05-26 06:13:21 UTC` on all four docroots |
+| Deploy command | `sudo bash scripts/deploy-all.sh` |
+| Live env labels | apex + mainnet show `Mainnet`; preview shows `Preview`; preprod shows `Preprod`; all four `/api/*/stats` return matching `network` strings |
 
-- Deploy: `sudo bash scripts/deploy-all.sh` (writes to 4 `/var/www/<X>/` docroots)
-- Last homepage push: `fd07738 ui: improve explorer nav spacing` (2026-05-25)
-- Origin: `git@github.com:cryptoleo79/NIGHTFORGE.git`, default branch `main`, **forward-only**
+Four-domain map (see `REPO_TOPOLOGY.md` for full topology):
 
-Truth rules in force:
-- no fake values
-- no static "live" theater
-- no preview/mainnet API bleed (each env hits its own backend)
-- correct env label on first paint
+| domain | env | docroot | indexer port |
+|---|---|---|---|
+| `nightforge.jp` | Mainnet | `/var/www/explorer-main` | `3005` |
+| `mainnet.nightforge.jp` | Mainnet | `/var/www/explorer-mainnet` | `3005` |
+| `preview.nightforge.jp` | Preview | `/var/www/explorer-lite` | `3000` |
+| `preprod.nightforge.jp` | Preprod | `/var/www/explorer-preprod` | `3004` |
 
 ### YAMORI — `/home/midnight/YAMORI`
 
-- Latest zip: `/home/midnight/YAMORI/yamori-v1.5.0.zip`
-- SDK 4.0 migration: **deferred** (wallet-sdk-facade@4.0.1 patch still unshipped upstream as of 2026-05-25)
-- Chrome vault: **do not touch**
-- Repo: `cryptoleo79/yamori`, **forward-only**
+| field | value |
+|---|---|
+| Origin remote | `git@github.com:cryptoleo79/YAMORI.git` (private; SSH only, REST API returns 404 unauthenticated) |
+| Canonical branch | `main` |
+| Local HEAD | `0c0414a docs: expand sdk 4 migration plan after fresh audit` |
+| Latest release | **v1.5.0** at `/home/midnight/YAMORI/yamori-v1.5.0.zip` |
+| All release zips | v1.1.0, v1.2.0, v1.3.0, v1.4.0, v1.5.0 |
+| Chrome vault | **DO NOT TOUCH** |
+| Issuer flow | live (`gen-issuer`, `issue`, `verify-credential`) |
 
 ### CredentialGate
 
-- Active preview contract: `7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703`
-- fail → prove → pass E2E green on preview
-- Hero card lives at the top of the NightForge homepage (mainnet-only liveness widget)
+| field | value |
+|---|---|
+| Active preview contract | `7ee02faf5e88911e2f4b12edfb95bb4612282b3ad26536ff9d5ce290fa7a3703` |
+| Verified addresses match | `website/nightforge-main.html`, `website/credential-gate.html`, `contracts/credential-gate/deploy/.../deployment.json` all agree |
+| E2E status | fail → prove → pass green on preview |
+| UI surface | hero card at the top of the NightForge homepage (mainnet-only liveness widget) |
+
+## Latest deployed NightForge commit
+
+`d45862e ui: separate explorer nav from hero` — pushed to `origin/main`, deployed to all four docroots at 2026-05-26 06:13Z. Branch state: in sync, no unpushed commits.
+
+## Topology repair state
+
+The 2026-04-15 cross-repo accident is partially recovered. Status:
+
+| step | status |
+|---|---|
+| Preview history pushed to `cryptoleo79/preview-explorer:preview-restore` (`88d9745`) | ✅ done |
+| Preprod history pushed to `cryptoleo79/preprod-explorer:preprod-restore` (`f1e3c4e`) | ✅ done |
+| GitHub default branch on `preview-explorer` → `preview-restore` | ❌ **NOT applied** (API still reports `main`) |
+| GitHub default branch on `preprod-explorer` → `preprod-restore` | ❌ **NOT applied** (API still reports `main`) |
+| `preview-explorer-new` working tree uncommitted (5 files in `tools/`) | ⚠ pending review |
+| `preprod-explorer` working tree uncommitted (4 files in `tools/`) | ⚠ pending review |
+
+See `REPO_TOPOLOGY.md` § Recovery History for the operational summary, and § Safe Cleanup Candidates for the post-switch cleanup list.
 
 ## Latest known bug
 
-**Nav / hero visual collision** (logged this session, fix in progress):
-- Sticky `topNav` with `z-40` glass-card surface overlapped the CredentialGate hero on scroll.
-- Fix: drop sticky + glass surface, plain row between header and hero with `mt-4 mb-6`.
+**Nav / hero visual collision** — resolved last session in `d45862e`. The sticky `z-40` glass-card surface that overlapped the CredentialGate hero on scroll was replaced with a plain transparent row inside `mt-4 mb-6`. Live verification clean on all four docroots since 2026-05-26.
 
-## Open / deferred items
+No new bugs logged this session.
+
+## Deferred items
 
 | item | status | reason |
 |---|---|---|
-| Preview-explorer push (`/home/midnight/preview-explorer-new` → `cryptoleo79/preview-explorer`) | **blocked** | remote main has unrelated LICENSE auto-init commit `9af6e8c`. Local `88d9745` can't fast-forward. User must pick: recreate empty / push to new branch / authorize one-time force |
-| `/tools/index.html` parity on preview + preprod docroots | not deployed | mainnet/apex have DUST Console + Privacy Flow cards; preview/preprod still serve old 13,863-byte index. Needs `deploy-all.sh` patch |
-| Backend timeouts | logged in `BUG_BACKEND_TIMEOUTS.md` | analytics/bridge, live/dust-rate, live/shielded-rate, epoch/current |
-| `/governance.html` SPA route gap | not fixed | `.html` suffix lands on Overview instead of Governance tab. One-line route fix held |
-| `tools/passport-ready.html` restore | held | awaiting explicit user confirmation it's a shipped feature, not experimental |
-| Indexer v4.3 wire-up | queued | swap RPC heuristics for live GraphQL (spoIdentities, currentEpochInfo, dustGenerationStatus, committee, dParameterHistory) |
-| CredentialGate Schnorr-on-JubJub | queued | migrate `_verify_issuer_sig` from witness-stub to real in-circuit verification, pin `pragma >= 0.22 && <= 0.23` |
-| YAMORI manifest `minimum_chrome_version` 116 → 132 | queued | CVE-2026-7952 floor + Win Hello PRF baseline |
-| MIP-0002 ShieldedReceive field-order fix (#124) in YAMORI | queued | merged upstream |
+| GitHub default-branch switch on preview-explorer and preprod-explorer | manual UI step | Settings → Branches → swap, then confirm modal. Verified non-applied via `git ls-remote --symref HEAD` |
+| `preview-explorer-new/package.json` `name: "midnight-preprod-explorer"` rename | not done | fossil from original fork; pure forward-only edit when convenient |
+| `mainnet-explorer/package.json` description "Port 3001" correction | not done | should read 3005 |
+| Pre-push hook | not installed | template in `REPO_TOPOLOGY.md`; install in each explorer repo with operator approval |
+| `/tools/index.html` parity on preview + preprod indexer dirs | not synced | mainnet has 20 cards (incl. DUST Console, Privacy Flow); preview/preprod still 17. Manual copy needed — `deploy-all.sh` does not manage `/tools/` |
+| `BUG_BACKEND_TIMEOUTS.md` endpoints | logged, not fixed | `analytics/bridge`, `live/dust-rate`, `live/shielded-rate`, `epoch/current` |
+| `/governance.html` SPA route gap | not fixed | `.html` suffix lands on Overview instead of Governance tab |
+| `tools/passport-ready.html` restore | held | awaiting explicit user confirmation it's a shipped feature |
+| `wallet-sdk-facade@4.0.1` upstream patch | waiting | unshipped 25+ days; YAMORI SDK 4.0 migration **deferred** until shipped |
+| midnight-node #1206 + #1374 shield blocker | waiting | both still open upstream |
+| Mainnet DUST HRP mismatch (#1397) | waiting | Foundation-side |
+| Indexer v4.2/v4.3 rollout | waiting | all three envs still v4.1-class |
+| Chrome 147 PRF-on-create | waiting | revisit at GA |
+| SD-JWT-VC draft-17 / WGLC | waiting | revisit ~2026-07-17 |
+| YAMORI manifest `minimum_chrome_version` 116 → 132 | queued | pairs with next zip cut; surfaces CVE-2026-7952 floor + stable PRF |
+| CredentialGate Schnorr-on-JubJub design doc | queued | 1-2 day pass; do not touch contract code without design review |
+| MIP-0002 ShieldedReceive field-order fix (#124) in YAMORI parser | queued | merged upstream |
 | MPS-0012 Account Aliasing (#123) in YAMORI address book | queued | merged upstream |
-| 3 borrowed UX patterns | queued | view-key decrypt toggle, validator state ribbon, dimensional fee breakdown |
-| Midnames preprod lookup | queued | live on preprod, needs resolver wired into NightForge + YAMORI |
 
-## Repo rules
+## Known limitations
 
-- **No force-push.**
-- **No merge-rewriting history.** Forward-only on `main` for all repos.
-- **No AI attribution** in commits or PR bodies.
-- Commit style: scope prefix (`ui:`, `truth:`, `tools:`, `docs:`, `deploy:`, `fix:`) — see `COMMIT_AND_PR_STYLE.md`.
+- **Apex API asymmetry.** `nightforge.jp` serves bare `/api/*` direct from the mainnet indexer at `:3005`. The other three hosts use `/api/<env>/*`. Intentional, predates the per-env naming convention; do not "fix" without a planned migration.
+- **`midnight-preview-explorer.service` is the preview indexer**, despite the word "explorer" in the unit name. Naming inconsistency with `midnight-preprod-indexer.service`. Not a bug.
+- **`cryptoleo79/YAMORI` REST API returns 404** unauthenticated — repo is private. SSH access works fine.
+- **`cryptoleo79/NIGHTFORGE` (uppercase) is the stale legacy repo.** Last activity 2026-04-03. Canonical NightForge UI is `cryptoleo79/mainnet-explorer` (lowercase). Listed as archive candidate in `REPO_TOPOLOGY.md`.
+- **10 stale `feat/*` branches** on `cryptoleo79/mainnet-explorer`. All from completed work; cross-check before delete. Listed in `REPO_TOPOLOGY.md` § Safe Cleanup Candidates.
 
-## Repo / docroot topology
+## Repo rules (summary)
 
-See `REPO_TOPOLOGY.md` for the full repo ⇄ docroot mapping. Key rule: never point preview at the preprod repo (this exact mistake is what caused the preview-explorer push blocker).
+- **No force-push.** Forward-only on `main` for all repos.
+- **No history rewrite.** Any "fix" is a new commit.
+- **No AI attribution** in commits, PR bodies, or docs.
+- **Commit scope prefix required** — see `COMMIT_AND_PR_STYLE.md` for allowed scopes.
+- **`deploy-all.sh` is the only authoritative way** to publish the NightForge UI. No direct edits to `/var/www/*`.
+- **Each local explorer working tree must point at the matching GitHub repo.** Pre-push hook recommended in `REPO_TOPOLOGY.md`.
 
 ## See also
 
-- `BUG_BACKEND_TIMEOUTS.md` — captured backend timeout endpoints
-- `REPO_TOPOLOGY.md` — explorer repo topology + collision-prevention rules
-- `COMMIT_AND_PR_STYLE.md` — commit message + PR body standard
-- `RESEARCH_UPDATE_SWEEP.md` — 2026-05-18 intelligence sweep
-- `EXTERNAL_VALIDATION.md` + `TESTER_BRIEF.md` — external tester handoff
+- `REPO_TOPOLOGY.md` — repo / env / branch / domain mapping, rules, recovery history, safe cleanup candidates.
+- `DEPLOY_FLOW.md` — exact deploy command, target mapping, post-deploy verification checklist.
+- `OBSERVATION_MODE.md` — what is frozen at the current milestone.
+- `COMMIT_AND_PR_STYLE.md` — commit / PR standard.
+- `BUG_BACKEND_TIMEOUTS.md` — captured backend timeout endpoints.
+- `RESEARCH_UPDATE_SWEEP.md` — most recent ecosystem intelligence sweep.
+- `EXTERNAL_VALIDATION.md` + `TESTER_BRIEF.md` + `HANDOFF_PACKAGE.md` — external tester handoff materials.
