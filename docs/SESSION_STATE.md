@@ -86,9 +86,11 @@ See `REPO_TOPOLOGY.md` § Recovery History for the operational summary, and § S
 
 ## Latest known bug
 
-**Nav / hero visual collision** — resolved last session in `d45862e`. The sticky `z-40` glass-card surface that overlapped the CredentialGate hero on scroll was replaced with a plain transparent row inside `mt-4 mb-6`. Live verification clean on all four docroots since 2026-05-26.
+**Nav / hero visual collision** — resolved 2026-05-25 in `d45862e`. The sticky `z-40` glass-card surface that overlapped the CredentialGate hero on scroll was replaced with a plain transparent row inside `mt-4 mb-6`. Live verification clean on all four docroots since 2026-05-26 06:13 UTC.
 
-No new bugs logged this session.
+**Backend timeout cluster** — see `BUG_BACKEND_TIMEOUTS.md`. As of 2026-06-01 the triage refines: `/api/live/dust-rate` is the only confirmed upstream hang (4 s+); `/api/analytics/bridge` and `/api/live/shielded-rate` respond at the indexer in ~2.7 s but nginx times out (proxy timeout < indexer response); `/api/epoch/current` responds in ~540 ms at the indexer — public-side hang likely an env-prefix routing artefact. None blocks deploy.
+
+**`/api/credential-gate/liveness` returns SPA HTML on apex** — endpoint is registered in `src/api/server.ts` but the public URL serves the homepage HTML instead of JSON. Likely an nginx routing precedence issue (catch-all SPA route intercepts the API path on apex). The on-homepage CredentialGate hero card uses the same endpoint client-side; needs re-verification. Logged for next bug pass; not fixed in this hygiene pass.
 
 ## Deferred items
 
@@ -134,9 +136,11 @@ No new bugs logged this session.
 ## See also
 
 - `REPO_TOPOLOGY.md` — repo / env / branch / domain mapping, rules, recovery history, safe cleanup candidates.
-- `DEPLOY_FLOW.md` — exact deploy command, target mapping, post-deploy verification checklist.
+- `DEPLOY_FLOW.md` — exact deploy command, target mapping, post-deploy verification checklist, rollback procedure.
 - `OBSERVATION_MODE.md` — what is frozen at the current milestone.
 - `COMMIT_AND_PR_STYLE.md` — commit / PR standard.
-- `BUG_BACKEND_TIMEOUTS.md` — captured backend timeout endpoints.
-- `RESEARCH_UPDATE_SWEEP.md` — most recent ecosystem intelligence sweep.
+- `BUG_BACKEND_TIMEOUTS.md` — captured backend timeout endpoints (currently 1 confirmed upstream hang + 2 with sub-4s indexer responses that hit nginx timeout, see doc for triage).
+- `RESEARCH_UPDATE_SWEEP.md` — 2026-05-18 ecosystem intelligence sweep (older).
+- `ECOSYSTEM_WAKEUP_PLAN.md` — 2026-05-30 research + ranked opportunity list (29 items, DO NOW / PLAN / WAIT / DO NOT DO); 2026-06-01 delta sweep appended at bottom.
+- `GOVERNANCE_MEMORY_DESIGN.md` — design-only document for NightForge-as-governance-memory (D-parameter + T&C history). STATUS = DESIGNED, held; per-phase implementation requires explicit approval.
 - `EXTERNAL_VALIDATION.md` + `TESTER_BRIEF.md` + `HANDOFF_PACKAGE.md` — external tester handoff materials.
