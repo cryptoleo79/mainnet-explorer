@@ -213,3 +213,42 @@ After those three land cleanly, the second pass tackles the fee-economics panel 
 - `docs/RESEARCH_UPDATE_SWEEP.md` — prior research sweep (2026-05-18)
 
 This file's research closed **2026-05-30**. Upstream state shifts weekly; reverify before acting on any item dated more than ~10 days back.
+
+---
+
+## Delta sweep — 2026-06-01 (T+2 days)
+
+Re-ran the four research swarms two days after the baseline. Reaffirms most WAIT verdicts; introduces two material developer-side signals that strengthen them.
+
+### Material developer-side findings
+
+1. **`midnight-wallet` issue #438 opened 2026-05-29 (open)** — `@midnight-ntwrk/wallet-sdk-dust-wallet@4.1.0` `computeBalancingRecipe` Effect.iterate never terminates (sign-convention error on `currentFee`). Coin selection returns empty recipe, convergence unreachable. Reporter status "POST_FIX_CONFIRMED" but no patch release yet. This is exactly the fee-pipeline class that would break YAMORI tx flow on an SDK 4.x bump. **The 2026-06-05 re-evaluation gate in the wakeup plan shifts to 2026-06-08 minimum; WAIT verdict on SDK 4.x bump remains and is now concrete, not theoretical.** Source: github.com/midnightntwrk/midnight-wallet/issues/438.
+2. **Chrome 148 series accumulated 151 vulnerabilities (22 critical) in late-May patches** — CVE-2026-9111 (WebRTC UAF, RCE critical on Linux), CVE-2026-9872 (GPU OOB write), CVE-2026-9873 (Network UAF), CVE-2026-8004 (DevTools, extension-relevant), CVE-2026-7954 (Shared Storage leak). YAMORI v1.6.0's `minimum_chrome_version: 148` floor still stands, but the recommended patch-revision floor advances from `148.0.7778.96` (CVE-2026-7952 baseline) to whatever 148.x revision contains the May 26 fix cluster. **No `minimum_chrome_version` change vs the baseline; revise the documented rationale before v1.6.0 cuts.**
+
+### Awareness-only findings
+
+3. **`servicedesk` issue #34 opened 2026-05-31 (open)** — mainnet contract deploys return 100% rejection with Substrate `1016 Immediately Dropped`. Tx-pool / node-side. Not actionable from our side; gated on Foundation. Tracks alongside #1397 and forum #1209.
+4. **Chrome 149 promoted to Stable June 2** as scheduled. PRF-on-create macOS / Linux not confirmed GA in 149 release notes (still flagged). YAMORI `minimum_chrome_version` stays at 148; revisiting at v1.7.0.
+5. **`midnight-awesome-dapps` registry** shows entries beyond the 2026-05-30 baseline (visible: Midnight Escrow, Pintent, SilentLedger, Tokenless, Asset Tokenization Platform, Midnight Seabattle, Midnight DiceRoll). Per-PR timestamps unverified on this box (no `gh` CLI). Worth a `git log` pass on the next sweep.
+
+### Zero deltas (everything else stayed put through 2026-06-01)
+
+- **Mainnet RPC**: still `0.22.1-9ce45781`. 12+ days post node-1.0.0 GA. Unmoved.
+- **Preview RPC**: still `1.0.0-8af7d08a`. Unmoved.
+- **midnight-node releases**: latest still `node-1.0.1-rc.1` (2026-05-29). No GA promotion.
+- **midnight-indexer releases**: latest still `v4.3.3-rc.3` (2026-05-29). No promotion.
+- **Issue #1397** (mapping-validator-same-address): no comments, no PR linked.
+- **Forum #1209** (Mainnet DUST HRP mismatch — note: this is the HRP issue; #1397 is *not*, despite older session-memory mislabeling): no posts since 2026-05-20.
+- **wallet-sdk-facade / midnight-js-types / midnight-js-protocol / abstractions / dapp-connector-api**: all unmoved since 2026-05-27 swarm. `abstractions@2.1.0` now 39 days no-patches (stability signal).
+- **compactc 0.31.0 / compact-runtime 0.16.0**: unmoved since 2026-04-29.
+- **Foundation blog / forum**: no T&C update, no node 1.0.x mainnet rollout post, no governance change discussion. Most recent dev diary still 2026-05-20 ("Van Rossem Hard Fork"). 1AM Sprint 2 ongoing but no v5.0.2 / v5.1.0 yet.
+- **midnightexplorer.com v2.x**: no observable patch.
+- **1AM wallet**: still v5.0.1.
+- **Midnames registry contract address**: still not publicly surfaced.
+- **Safari 26.5.x**: no PRF/WebAuthn fix-note.
+- **WebAuthn L3**: still Candidate Recommendation (CR window extended to ≥ 2026-06-23).
+- **Firefox / Edge**: no actionable policy delta.
+
+### Net read
+
+No DO NOW / PLAN / WAIT / DO NOT DO classification changes. Both DO NOW items remain available; both PLAN items remain conditional; two WAIT verdicts strengthen with concrete citations (SDK 4.x bump now has #438; Chrome floor justification now has the 22-critical-CVE cluster). No NightForge or YAMORI action is unblocked. The wakeup plan's classifications still hold.
