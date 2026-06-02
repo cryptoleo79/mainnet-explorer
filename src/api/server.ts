@@ -396,7 +396,12 @@ app.get('/search', (req, res) => {
 });
 
 // Analytics - transaction volume per hour
-app.get('/analytics/volume', (req, res) => {
+// Bound at both the bare path and the /api/ path: the apex `/api/mainnet/`
+// nginx location strips its prefix to `/api/analytics/volume`, while the
+// other analytics routes live under `/api/analytics/*`. Without the second
+// binding the apex (nightforge.jp) volume chart 404s though the mainnet
+// subdomain works.
+app.get(['/analytics/volume', '/api/analytics/volume'], (req, res) => {
   try {
     const hours = parseInt(req.query.hours as string) || 24;
     const cutoff = Math.floor(Date.now() / 1000) - hours * 3600;

@@ -1346,7 +1346,7 @@
         checkBtn.disabled = true;
 
         try {
-          var resp = await fetch('/api/dust-eligibility?address=' + encodeURIComponent(address), { cache: 'no-store' });
+          var resp = await fetch('/api/mainnet/dust-eligibility?address=' + encodeURIComponent(address), { cache: 'no-store' });
           if (resp.status === 404) { renderResults({ registered: false }); return; }
           if (!resp.ok) {
             // Fallback to the legacy endpoint if the brief endpoint isn't yet served.
