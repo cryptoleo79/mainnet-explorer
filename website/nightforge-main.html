@@ -2012,6 +2012,66 @@
             </div>
           </div>
 
+          <!-- Extrinsic Types (section.method call breakdown) -->
+          <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-cyan-500/30 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white" data-i18n="extrinsicTypes">Extrinsic Types</h3>
+                  <p class="text-xs text-slate-500">Call breakdown by section.method</p>
+                </div>
+              </div>
+              <span id="extrinsicTypesTotal" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full"></span>
+            </div>
+            <div id="extrinsicTypesList" class="p-4 space-y-2 max-h-[360px] overflow-y-auto">
+              <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Transaction Classification (privacy split over recent txs) -->
+        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6">
+          <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center">
+                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white" data-i18n="txClassification">Transaction Classification</h3>
+                <p class="text-xs text-slate-500">Shielding + type split over recent transactions</p>
+              </div>
+            </div>
+            <span id="txClassTotal" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full"></span>
+          </div>
+          <div id="txClassList" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+            <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+            <div class="animate-pulse bg-slate-700/50 h-8 rounded"></div>
+          </div>
+        </div>
+
+        <!-- Recent Midnight Transactions (decoded) -->
+        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6">
+          <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-orange-500/30 flex items-center justify-center">
+                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white" data-i18n="midnightTxs">Midnight Transactions</h3>
+                <p class="text-xs text-slate-500">Recent decoded Midnight transactions</p>
+              </div>
+            </div>
+            <span id="mnTxsTotal" class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full"></span>
+          </div>
+          <div id="mnTxsList" class="divide-y divide-slate-700/20 max-h-[420px] overflow-y-auto">
+            <div class="animate-pulse bg-slate-700/50 h-12 m-4 rounded"></div>
+          </div>
         </div>
 
         <!-- Compare Networks -->
@@ -2361,7 +2421,7 @@ var translations = {
     recentBridgeOps: "Recent Bridge Operations", cardanoBlock: "Cardano Block",
     networkAnalytics: "Network Analytics", midnightTxs: "Midnight Txs",
     bridgeOps: "Bridge Ops", committeeUpdates: "Committee", tps: "TPS",
-    blockTime: "Block Time", shieldedRatio: "Shielded Ratio", eventTypes: "Event Types",
+    blockTime: "Block Time", shieldedRatio: "Shielded Ratio", eventTypes: "Event Types", extrinsicTypes: "Extrinsic Types", txClassification: "Transaction Classification", midnightTxs: "Midnight Transactions",
     deployedContracts: "Deployed Contracts", contractLeaderboard: "Contract Leaderboard",
     dailyActivity: "Daily Activity", compareNetworks: "Compare Networks",
     onChainGovernance: "On-Chain Governance",
@@ -2447,7 +2507,7 @@ var translations = {
     recentBridgeOps: "最近のブリッジ操作", cardanoBlock: "カルダノブロック",
     networkAnalytics: "ネットワーク分析", midnightTxs: "Midnight 取引",
     bridgeOps: "ブリッジ操作", committeeUpdates: "委員会更新", tps: "TPS",
-    blockTime: "ブロック時間", shieldedRatio: "シールド率", eventTypes: "イベント種別",
+    blockTime: "ブロック時間", shieldedRatio: "シールド率", eventTypes: "イベント種別", extrinsicTypes: "外部呼出種別", txClassification: "トランザクション分類", midnightTxs: "Midnightトランザクション",
     deployedContracts: "展開済コントラクト", contractLeaderboard: "コントラクトランキング",
     dailyActivity: "日別活動", compareNetworks: "ネットワーク比較",
     onChainGovernance: "オンチェーンガバナンス",
@@ -4461,6 +4521,104 @@ function loadAnalyticsDash(){
   }).catch(function(e){
     console.log("Events analytics error:",e);
     document.getElementById("eventTypesList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No event data available</div>';
+  });
+
+  // Fetch extrinsic types breakdown (section.method call counts)
+  fetch(API+"/analytics/extrinsic-types").then(function(r){return r.json()}).then(function(rows){
+    var listEl=document.getElementById("extrinsicTypesList");if(!listEl)return;
+    if(!rows||!rows.length){listEl.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No extrinsic data available</div>';return;}
+    var totalEl=document.getElementById("extrinsicTypesTotal");
+    var totalCount=rows.reduce(function(s,e){return s+(e.count||0)},0);
+    if(totalEl)totalEl.textContent=fmt(totalCount)+" calls";
+    rows.sort(function(a,b){return(b.count||0)-(a.count||0)});
+    var maxCount=Math.max.apply(null,rows.map(function(e){return e.count||0}));
+    var colors=["#f97316","#06b6d4","#22c55e","#8b5cf6","#ec4899","#eab308","#3b82f6","#ef4444","#10b981","#f59e0b"];
+    var html="";
+    rows.slice(0,12).forEach(function(ev,i){
+      var pct=maxCount>0?((ev.count||0)/maxCount*100):0;
+      var color=colors[i%colors.length];
+      html+='<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/85 transition">';
+      html+='<div class="w-2 h-2 rounded-full flex-shrink-0" style="background:'+color+'"></div>';
+      html+='<div class="flex-1 min-w-0">';
+      html+='<div class="flex items-center justify-between mb-1">';
+      html+='<span class="text-xs font-mono text-slate-300 truncate">'+(ev.section||"")+((ev.section&&ev.method)?".":"")+(ev.method||"")+'</span>';
+      html+='<span class="text-xs font-bold text-white ml-2">'+fmt(ev.count||0)+'</span>';
+      html+='</div>';
+      html+='<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all duration-500" style="width:'+pct.toFixed(1)+'%;background:'+color+'"></div></div>';
+      html+='</div></div>';
+    });
+    listEl.innerHTML=html;
+  }).catch(function(e){
+    console.log("Extrinsic types error:",e);
+    var el=document.getElementById("extrinsicTypesList");if(el)el.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No extrinsic data available</div>';
+  });
+
+  // Fetch transaction classification (shielding + type split over recent txs)
+  fetch(API+"/analytics/tx-classification").then(function(r){return r.json()}).then(function(d){
+    var listEl=document.getElementById("txClassList");if(!listEl)return;
+    if(!d){listEl.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No classification data available</div>';return;}
+    var totalEl=document.getElementById("txClassTotal");
+    if(totalEl)totalEl.textContent=fmt(d.analyzed||0)+" analyzed";
+    var rows=[];
+    if(d.shielding){
+      rows.push({label:"Shielded",count:d.shielding.shielded||0,color:"#22c55e"});
+      rows.push({label:"Unshielded",count:d.shielding.unshielded||0,color:"#f97316"});
+      rows.push({label:"Mixed",count:d.shielding.mixed||0,color:"#8b5cf6"});
+      rows.push({label:"Unknown",count:d.shielding.unknown||0,color:"#64748b"});
+    }
+    if(d.types){
+      var tcol=["#06b6d4","#ec4899","#eab308","#3b82f6","#10b981"];
+      Object.keys(d.types).forEach(function(k,i){
+        rows.push({label:String(k).replace(/_/g," "),count:d.types[k]||0,color:tcol[i%tcol.length]});
+      });
+    }
+    if(!rows.length){listEl.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No classification data available</div>';return;}
+    var maxCount=Math.max.apply(null,rows.map(function(r){return r.count}))||1;
+    var html="";
+    rows.forEach(function(r){
+      var pct=(r.count/maxCount*100);
+      html+='<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/85 transition">';
+      html+='<div class="w-2 h-2 rounded-full flex-shrink-0" style="background:'+r.color+'"></div>';
+      html+='<div class="flex-1 min-w-0">';
+      html+='<div class="flex items-center justify-between mb-1">';
+      html+='<span class="text-xs text-slate-300 truncate capitalize">'+r.label+'</span>';
+      html+='<span class="text-xs font-bold text-white ml-2">'+fmt(r.count)+'</span>';
+      html+='</div>';
+      html+='<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all duration-500" style="width:'+pct.toFixed(1)+'%;background:'+r.color+'"></div></div>';
+      html+='</div></div>';
+    });
+    listEl.innerHTML=html;
+  }).catch(function(e){
+    console.log("Tx classification error:",e);
+    var el=document.getElementById("txClassList");if(el)el.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No classification data available</div>';
+  });
+
+  // Fetch recent decoded Midnight transactions
+  fetch(API+"/midnight-txs").then(function(r){return r.json()}).then(function(rows){
+    var listEl=document.getElementById("mnTxsList");if(!listEl)return;
+    if(!rows||!rows.length){listEl.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No Midnight transactions available</div>';return;}
+    var totalEl=document.getElementById("mnTxsTotal");if(totalEl)totalEl.textContent=fmt(rows.length)+" recent";
+    var html="";
+    rows.slice(0,20).forEach(function(tx){
+      var hash=tx.hash||"";
+      var shield=tx.shieldingType||"unknown";
+      var shieldColor=shield==="shielded"?"text-green-400 bg-green-500/10 border-green-500/20":(shield==="unshielded"?"text-orange-400 bg-orange-500/10 border-orange-500/20":(shield==="mixed"?"text-purple-400 bg-purple-500/10 border-purple-500/20":"text-slate-400 bg-slate-500/10 border-slate-500/20"));
+      html+='<div class="flex items-center justify-between px-4 py-3 hover:bg-slate-800/85 transition">';
+      html+='<div class="min-w-0 flex-1">';
+      html+='<p class="font-mono text-cyan-400 text-xs truncate cursor-pointer hover:text-orange-400" onclick="copyHash(\''+hash+'\')" title="'+hash+'">'+truncHash(hash,10)+'</p>';
+      html+='<div class="flex items-center gap-2 mt-0.5">';
+      html+='<span class="text-[10px] text-slate-500">Block</span><span class="text-[10px] font-mono text-white">#'+fmt(tx.block_height||0)+'</span>';
+      if(tx.timestamp){html+='<span class="text-[10px] text-slate-600">•</span><span class="text-[10px] text-slate-500">'+timeAgo(tx.timestamp)+'</span>';}
+      html+='</div></div>';
+      html+='<div class="flex items-center gap-2 flex-shrink-0">';
+      if(tx.txType){html+='<span class="px-1.5 py-0.5 text-[10px] rounded bg-slate-700/40 text-slate-300">'+String(tx.txType).replace(/_/g," ")+'</span>';}
+      html+='<span class="px-1.5 py-0.5 text-[10px] rounded border '+shieldColor+'">'+shield+'</span>';
+      html+='</div></div>';
+    });
+    listEl.innerHTML=html;
+  }).catch(function(e){
+    console.log("Midnight txs error:",e);
+    var el=document.getElementById("mnTxsList");if(el)el.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No Midnight transactions available</div>';
   });
 
   // Fetch deployed contracts
