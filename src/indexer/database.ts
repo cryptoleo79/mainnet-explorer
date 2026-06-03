@@ -804,6 +804,48 @@ export function getEventBreakdown() {
   `).all() as { section: string; method: string; count: number }[];
 }
 
+// --- Transaction Health (applied vs partial success) ---
+export function getTxHealth(recentLimit = 10) {
+  const counts = db.prepare(`
+    SELECT method, COUNT(*) as count
+    FROM events
+    WHERE section = 'midnight' AND method IN ('TxApplied', 'TxPartialSuccess')
+    GROUP BY method
+  `).all() as { method: string; count: number }[];
+
+  let applied = 0;
+  let partialSuccess = 0;
+  for (const row of counts) {
+    if (row.method === 'TxApplied') applied = row.count;
+    else if (row.method === 'TxPartialSuccess') partialSuccess = row.count;
+  }
+  const total = applied + partialSuccess;
+  const partialRatePct = total > 0
+    ? Math.round((partialSuccess / total) * 10000) / 100
+    : 0;
+
+  // Recent partial-success transactions; data is a double-encoded JSON
+  // array whose first element is a JSON string holding { txHash }.
+  const recentRows = db.prepare(`
+    SELECT e.data, e.block_height, b.timestamp
+    FROM events e JOIN blocks b ON e.block_height = b.height
+    WHERE e.section = 'midnight' AND e.method = 'TxPartialSuccess'
+    ORDER BY e.block_height DESC LIMIT ?
+  `).all(recentLimit) as { data: string | null; block_height: number; timestamp: number }[];
+
+  const recentPartial = recentRows.map((r) => {
+    const parsed = parseEventData(r.data);
+    const txHash = parsed && typeof parsed === 'object' ? parsed.txHash || null : null;
+    return {
+      txHash,
+      blockHeight: r.block_height,
+      timestamp: r.timestamp,
+    };
+  });
+
+  return { applied, partialSuccess, total, partialRatePct, recentPartial };
+}
+
 // --- Governance Dashboard ---
 
 function parseEventData(data: string | null): any {

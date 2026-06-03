@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Inspector - NightForge Explorer</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Inspect Midnight transactions: contract actions, unshielded UTXOs, decoded extrinsics, and per-block drill-down. Built on the live Midnight indexer." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; }
+
+    /* Header */
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #e2e8f0;
+    }
+    .header-brand img { height: 32px; width: 32px; border-radius: 6px; }
+    .header-brand span {
+      font-weight: 700;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-nav { display: flex; gap: 1.5rem; align-items: center; }
+    .header-nav a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: #f97316; }
+    .header-nav a.active { color: #f97316; }
+
+    /* Main */
+    .main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    /* Page header */
+    .page-title { text-align: center; margin-bottom: 2rem; }
+    .page-title h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-title p { color: #94a3b8; line-height: 1.6; }
+
+    /* Truth note */
+    .truth-note {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      background: rgba(15,23,42,0.5);
+      border: 1px dashed rgba(148,163,184,0.25);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.55;
+    }
+    .truth-note strong { color: #cbd5e1; }
+    .truth-note code {
+      background: rgba(30,41,59,0.8);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #cbd5e1;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.72rem;
+    }
+
+    /* tx-health strip */
+    .health-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+    .hs-tile {
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .hs-tile.applied { border-color: rgba(34, 197, 94, 0.3); background: linear-gradient(135deg, rgba(34,197,94,0.07), rgba(15,23,42,0.55)); }
+    .hs-tile.partial { border-color: rgba(245, 158, 11, 0.3); background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(15,23,42,0.55)); }
+    .hs-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #64748b;
+    }
+    .hs-value { font-size: 1.35rem; font-weight: 800; line-height: 1.15; color: #e2e8f0; }
+    .hs-tile.applied .hs-value { color: #4ade80; }
+    .hs-tile.partial .hs-value { color: #fbbf24; }
+    .hs-sub { font-size: 0.7rem; color: #94a3b8; font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+
+    /* Search box */
+    .search-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .search-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .search-input {
+      flex: 1;
+      min-width: 220px;
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      color: #e2e8f0;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { outline: none; border-color: rgba(139,92,246,0.5); }
+    .search-input::placeholder { color: #475569; }
+    .search-btn {
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      padding: 0.7rem 1.3rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { opacity: 0.9; }
+    .search-hint { font-size: 0.72rem; color: #64748b; margin-top: 0.7rem; line-height: 1.5; }
+    .search-hint a { color: #22d3ee; text-decoration: none; cursor: pointer; }
+    .search-hint a:hover { color: #67e8f9; }
+    .mode-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+    .mode-tab {
+      background: rgba(15,23,42,0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+      color: #94a3b8;
+      padding: 0.4rem 0.95rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-tab:hover { color: #e2e8f0; }
+    .mode-tab.active {
+      background: rgba(139,92,246,0.15);
+      border-color: rgba(139,92,246,0.4);
+      color: #c4b5fd;
+    }
+
+    /* Card */
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-title svg { flex-shrink: 0; }
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: -0.9rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    /* Meta grid (block / version) */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.9rem;
+    }
+    .meta-item {
+      background: rgba(15,23,42,0.45);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+    }
+    .meta-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      margin-bottom: 0.3rem;
+    }
+    .meta-value {
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      word-break: break-all;
+    }
+    .meta-value.purple { color: #a78bfa; }
+    .meta-value.cyan { color: #22d3ee; }
+    .meta-value.green { color: #4ade80; }
+
+    /* Action / output rows */
+    .ix-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .ix-row {
+      background: rgba(15,23,42,0.45);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+    }
+    .ix-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.35rem; }
+    .type-pill {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .type-pill.deploy { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .type-pill.call { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+    .type-pill.update { background: rgba(34,211,238,0.15); color: #67e8f9; }
+    .type-pill.created { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .type-pill.spent { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .ix-entry { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 0.8rem; color: #a78bfa; font-weight: 600; }
+    .ix-addr {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.74rem;
+      color: #22d3ee;
+      word-break: break-all;
+    }
+    .ix-kv { font-size: 0.74rem; color: #94a3b8; margin-top: 0.2rem; }
+    .ix-kv span.v { color: #cbd5e1; font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+    .dust-flag {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 5px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      margin-left: 0.4rem;
+    }
+    .dust-flag.yes { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .dust-flag.no { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      padding: 0.65rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .data-table td {
+      padding: 0.6rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      vertical-align: top;
+    }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .data-table .mono { font-size: 0.74rem; }
+    .badge-ok { color: #4ade80; font-weight: 600; }
+    .badge-fail { color: #fca5a5; font-weight: 600; }
+    .table-wrap { overflow-x: auto; }
+
+    /* Decoded block */
+    .decoded-pre {
+      background: rgba(15,23,42,0.7);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.74rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 360px;
+      overflow: auto;
+    }
+
+    /* Empty / honest states */
+    .empty-state { text-align: center; color: #64748b; padding: 2rem 1rem; font-size: 0.88rem; line-height: 1.5; }
+    .empty-state.err { color: #fca5a5; }
+    .honesty-note {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      background: rgba(15,23,42,0.5);
+      border: 1px dashed rgba(148,163,184,0.25);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.75rem;
+      line-height: 1.55;
+    }
+    .hidden { display: none !important; }
+    .spinner-text { color: #fbbf24; font-size: 0.85rem; text-align: center; padding: 1.5rem; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .footer a { color: #64748b; text-decoration: none; }
+    .footer a:hover { color: #f97316; }
+
+    @media (max-width: 900px) {
+      .health-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .health-strip { grid-template-columns: 1fr; }
+      .page-title h1 { font-size: 1.5rem; }
+      .header-nav { gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="/favicon.ico" alt="NightForge" style="height:32px;width:32px;border-radius:6px;" />
+        <span>NightForge</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Explorer</a>
+        <a href="/tools/">Tools</a>
+        <a href="/tools/tx-inspector.html" class="active">Tx Inspector</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-title">
+      <h1>Transaction Inspector</h1>
+      <p>Look up a Midnight transaction or block and read exactly what the chain recorded &mdash; contract actions, unshielded UTXOs, the decoded extrinsic, and per-block extrinsics and events.</p>
+    </div>
+
+    <div class="truth-note">
+      <strong>Truth rule.</strong> This page renders only fields the Midnight indexer and local node actually return. Mainnet is quiet &mdash; most recent blocks contain <code>0</code> Midnight transactions, and that is shown honestly rather than padded. The public mainnet v4 indexer exposes <strong>no address-indexed balance query</strong>, so address balance lookup is shown as unsupported instead of returning fabricated zeros.
+    </div>
+
+    <!-- Network tx-health strip -->
+    <div class="health-strip" id="healthStrip" aria-label="Network transaction health">
+      <div class="hs-tile applied">
+        <div class="hs-label">Tx Applied</div>
+        <div class="hs-value mono" id="hsApplied" title="Awaiting tx-health endpoint">&mdash;</div>
+      </div>
+      <div class="hs-tile partial">
+        <div class="hs-label">Partial Success</div>
+        <div class="hs-value mono" id="hsPartial" title="Awaiting tx-health endpoint">&mdash;</div>
+      </div>
+      <div class="hs-tile">
+        <div class="hs-label">Partial Rate</div>
+        <div class="hs-value mono" id="hsRate" title="Awaiting tx-health endpoint">&mdash;</div>
+        <div class="hs-sub" id="hsTotal">&nbsp;</div>
+      </div>
+      <div class="hs-tile">
+        <div class="hs-label">Most Recent Partial</div>
+        <div class="hs-value mono" id="hsRecent" style="font-size:0.8rem;" title="Awaiting tx-health endpoint">&mdash;</div>
+        <div class="hs-sub" id="hsRecentSub">&nbsp;</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-card">
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="tx" id="tabTx">Transaction hash</button>
+        <button class="mode-tab" data-mode="block" id="tabBlock">Block height</button>
+      </div>
+      <div class="search-row">
+        <input class="search-input" id="searchInput" placeholder="0x… Midnight transaction hash" spellcheck="false" autocomplete="off" />
+        <button class="search-btn" id="searchBtn">Inspect</button>
+      </div>
+      <div class="search-hint" id="searchHint">
+        Paste a Midnight transaction hash, or
+        <a id="demoLink">load the example ContractDeploy at block 1,050,343</a>.
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsArea"></div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 <a href="/">NightForge Explorer</a> &mdash; Built for the Midnight Network</p>
+  </footer>
+
+  <script>
+    var DEMO_TX = '0xe01d379f1fb3ab4297396f41266573db13c415b9e2011306921e23f71bfe34da';
+    var DEMO_BLOCK = '1050343';
+    var mode = 'tx';
+
+    // --- Utilities ---
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function trunc(s, head, tail) {
+      head = head || 14; tail = tail || 8;
+      if (!s) return '';
+      s = String(s);
+      if (s.length <= head + tail + 3) return s;
+      return s.slice(0, head) + '…' + s.slice(-tail);
+    }
+    function fmtNum(n) {
+      if (n == null || n === '') return '—';
+      var x = Number(n);
+      return isNaN(x) ? esc(n) : x.toLocaleString();
+    }
+    function fmtTime(ts) {
+      if (!ts) return '—';
+      // accept seconds or ms
+      var ms = Number(ts);
+      if (ms < 1e12) ms = ms * 1000;
+      var d = new Date(ms);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+    function normHash(h) {
+      h = (h || '').trim();
+      if (!h) return '';
+      return h.toLowerCase();
+    }
+
+    // --- tx-health strip (new endpoint; degrade gracefully if not yet deployed) ---
+    function fetchHealth() {
+      fetch('/api/analytics/tx-health').then(function(r) {
+        if (!r.ok) throw new Error('tx-health ' + r.status);
+        return r.json();
+      }).then(function(j) {
+        var applied = j.applied, partial = j.partialSuccess, total = j.total, rate = j.partialRatePct;
+        document.getElementById('hsApplied').textContent = fmtNum(applied);
+        document.getElementById('hsApplied').removeAttribute('title');
+        document.getElementById('hsPartial').textContent = fmtNum(partial);
+        document.getElementById('hsPartial').removeAttribute('title');
+        var rateEl = document.getElementById('hsRate');
+        rateEl.textContent = (rate != null && !isNaN(Number(rate))) ? (Number(rate).toFixed(2) + '%') : '—';
+        rateEl.removeAttribute('title');
+        document.getElementById('hsTotal').textContent = (total != null ? fmtNum(total) + ' total' : ' ');
+        var rp = (j.recentPartial && j.recentPartial.length) ? j.recentPartial[0] : null;
+        var recentEl = document.getElementById('hsRecent');
+        var recentSub = document.getElementById('hsRecentSub');
+        if (rp && rp.txHash) {
+          recentEl.innerHTML = '<a class="ix-addr" style="cursor:pointer;color:#fbbf24;" onclick="inspectHash(\'' + esc(rp.txHash) + '\')">' + esc(trunc(rp.txHash, 10, 6)) + '</a>';
+          recentEl.removeAttribute('title');
+          recentSub.textContent = (rp.blockHeight != null ? '#' + fmtNum(rp.blockHeight) : '') + (rp.timestamp ? ' · ' + fmtTime(rp.timestamp) : '');
+        } else {
+          recentEl.textContent = '—';
+          recentSub.textContent = 'none';
+        }
+      }).catch(function() {
+        // Honest fallback: leave em-dashes with a clear title.
+        var ids = ['hsApplied', 'hsPartial', 'hsRate', 'hsRecent'];
+        for (var i = 0; i < ids.length; i++) {
+          var el = document.getElementById(ids[i]);
+          el.innerHTML = '&mdash;';
+          el.setAttribute('title', 'tx-health endpoint not available');
+        }
+        document.getElementById('hsTotal').textContent = 'unavailable';
+        document.getElementById('hsRecentSub').textContent = ' ';
+      });
+    }
+
+    // --- Renderers ---
+    function renderEnriched(e) {
+      if (!e) return '';
+      var b = e.block || {};
+      var html = '';
+      // meta
+      html += '<div class="card">';
+      html += '<div class="card-title">';
+      html += '<svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>';
+      html += 'Transaction Overview</div>';
+      html += '<div class="meta-grid">';
+      html += metaItem('Tx Hash', trunc(e.hash, 18, 10), 'cyan', e.hash);
+      html += metaItem('Block Height', b.height != null ? '#' + fmtNum(b.height) : '—', 'purple');
+      html += metaItem('Block Time', fmtTime(b.timestamp), '');
+      html += metaItem('Protocol Version', e.protocolVersion != null ? esc(e.protocolVersion) : '—', 'green');
+      html += metaItem('Block Author', b.author ? trunc(b.author, 12, 8) : '—', '', b.author);
+      html += '</div>';
+      html += '</div>';
+
+      // contract actions
+      var actions = e.contractActions || [];
+      html += '<div class="card">';
+      html += '<div class="card-title"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Contract Actions</div>';
+      html += '<div class="card-subtitle">From the indexer\'s <span class="mono" style="color:#c4b5fd;">contractActions</span> field. <span class="mono" style="color:#fbbf24;">entryPoint</span> is present on ContractCall actions only.</div>';
+      if (!actions.length) {
+        html += '<div class="empty-state">No contract actions in this transaction.</div>';
+      } else {
+        html += '<div class="ix-list">';
+        for (var i = 0; i < actions.length; i++) {
+          var a = actions[i];
+          var tn = a.__typename || 'ContractAction';
+          var cls = tn === 'ContractDeploy' ? 'deploy' : tn === 'ContractCall' ? 'call' : tn === 'ContractUpdate' ? 'update' : 'call';
+          html += '<div class="ix-row">';
+          html += '<div class="ix-head"><span class="type-pill ' + cls + '">' + esc(tn) + '</span>';
+          if (a.entryPoint) html += '<span class="ix-entry">' + esc(a.entryPoint) + '</span>';
+          html += '</div>';
+          if (a.address) html += '<div class="ix-addr">' + esc(a.address) + '</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+
+      // unshielded outputs
+      var created = e.unshieldedCreatedOutputs || [];
+      var spent = e.unshieldedSpentOutputs || [];
+      html += '<div class="card">';
+      html += '<div class="card-title"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Unshielded UTXOs</div>';
+      html += '<div class="card-subtitle">Transparent outputs only. Each shows value, token type, and whether the UTXO is <span class="mono" style="color:#4ade80;">registeredForDustGeneration</span>. Shielded (Zswap) coins are confidential and not itemized here.</div>';
+      if (!created.length && !spent.length) {
+        html += '<div class="empty-state">No unshielded UTXOs created or spent in this transaction.<br><span style="font-size:0.78rem;">Deploys and shielded transfers commonly have none.</span></div>';
+      } else {
+        html += '<div class="ix-list">';
+        html += renderUtxoGroup(created, 'created', 'Created');
+        html += renderUtxoGroup(spent, 'spent', 'Spent');
+        html += '</div>';
+      }
+      html += '</div>';
+
+      return html;
+    }
+
+    function renderUtxoGroup(list, cls, label) {
+      if (!list || !list.length) return '';
+      var html = '';
+      for (var i = 0; i < list.length; i++) {
+        var u = list[i];
+        var dust = u.registeredForDustGeneration;
+        html += '<div class="ix-row">';
+        html += '<div class="ix-head"><span class="type-pill ' + cls + '">' + label + '</span>';
+        if (typeof dust === 'boolean') {
+          html += '<span class="dust-flag ' + (dust ? 'yes' : 'no') + '">DUST ' + (dust ? 'registered' : 'not registered') + '</span>';
+        }
+        html += '</div>';
+        html += '<div class="ix-kv">value <span class="v">' + (u.value != null ? esc(u.value) : '—') + '</span>'
+              + ' &middot; token <span class="v">' + (u.tokenType ? esc(trunc(u.tokenType, 12, 8)) : '—') + '</span>';
+        if (u.outputIndex != null) html += ' &middot; idx <span class="v">' + esc(u.outputIndex) + '</span>';
+        html += '</div>';
+        if (u.owner) html += '<div class="ix-kv">owner <span class="v">' + esc(trunc(u.owner, 14, 10)) + '</span></div>';
+        html += '</div>';
+      }
+      return html;
+    }
+
+    function metaItem(label, value, cls, fullTitle) {
+      var titleAttr = fullTitle ? ' title="' + esc(fullTitle) + '"' : '';
+      return '<div class="meta-item"><div class="meta-label">' + esc(label) + '</div>'
+        + '<div class="meta-value ' + (cls || '') + '"' + titleAttr + '>' + value + '</div></div>';
+    }
+
+    function renderDecoded(d, exHash) {
+      var html = '<div class="card">';
+      html += '<div class="card-title"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Decoded Extrinsic</div>';
+      html += '<div class="card-subtitle">Decoded Midnight extrinsic for the on-chain envelope that carried this transaction.</div>';
+      if (!d || d.error) {
+        var why = (d && d.error) ? esc(d.error) : 'not found';
+        html += '<div class="empty-state">No decoded extrinsic available (<span class="mono">' + why + '</span>).'
+          + '<div class="honesty-note">The decode route is keyed by <strong>extrinsic hash</strong>, which differs from the inner Midnight tx hash. Use the per-block view to find the matching extrinsic hash, then it will resolve here.</div></div>';
+      } else {
+        var rows = '';
+        rows += decRow('Section', d.section);
+        rows += decRow('Method', d.method);
+        rows += decRow('Extrinsic hash', d.hash);
+        rows += decRow('Block height', d.block_height != null ? '#' + fmtNum(d.block_height) : null);
+        rows += decRow('Index in block', d.index_in_block);
+        rows += decRow('Signer', d.signer);
+        if (d.success != null) rows += decRow('Success', d.success ? 'applied' : 'failed');
+        if (rows) {
+          html += '<div class="meta-grid">' + rows + '</div>';
+        }
+        var decoded = d.decoded || d.decodedTransaction || d.midnight || d.args;
+        if (decoded != null) {
+          var text = (typeof decoded === 'string') ? decoded : JSON.stringify(decoded, null, 2);
+          html += '<div style="margin-top:1rem;"><div class="meta-label" style="margin-bottom:0.4rem;">Decoded payload</div><pre class="decoded-pre">' + esc(text) + '</pre></div>';
+        }
+      }
+      html += '</div>';
+      return html;
+    }
+    function decRow(label, value) {
+      if (value == null || value === '') return '';
+      return metaItem(label, esc(typeof value === 'string' ? trunc(value, 22, 10) : value), '', typeof value === 'string' ? value : null);
+    }
+
+    // --- Tx mode flow ---
+    function inspectHash(hash) {
+      mode = 'tx';
+      setMode('tx');
+      document.getElementById('searchInput').value = hash;
+      runTx(hash);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.inspectHash = inspectHash;
+
+    function runTx(rawHash) {
+      var hash = normHash(rawHash);
+      var area = document.getElementById('resultsArea');
+      if (!hash) { area.innerHTML = '<div class="card"><div class="empty-state err">Enter a transaction hash.</div></div>'; return; }
+      area.innerHTML = '<div class="card"><div class="spinner-text">Inspecting transaction…</div></div>';
+
+      var qHash = hash.indexOf('0x') === 0 ? hash : '0x' + hash;
+
+      Promise.all([
+        fetch('/api/tx-enriched/' + encodeURIComponent(qHash)).then(safeJson),
+        fetch('/api/extrinsics/' + encodeURIComponent(qHash) + '/decoded').then(safeJson)
+      ]).then(function(res) {
+        var enrichedRes = res[0], decodedRes = res[1];
+        var html = '';
+
+        if (enrichedRes.ok && enrichedRes.json && enrichedRes.json.enriched) {
+          html += renderEnriched(enrichedRes.json.enriched);
+        } else if (enrichedRes.status === 404 || (enrichedRes.json && enrichedRes.json.error)) {
+          html += '<div class="card"><div class="empty-state">Transaction <span class="mono">' + esc(trunc(qHash, 14, 8)) + '</span> not found in the indexer.'
+            + '<div class="honesty-note">Mainnet is quiet &mdash; verify the hash, or browse recent activity from the <a href="/" style="color:#22d3ee;text-decoration:none;">explorer home</a>.</div></div></div>';
+        } else {
+          html += '<div class="card"><div class="empty-state err">Transaction lookup failed (HTTP ' + esc(enrichedRes.status) + ').</div></div>';
+        }
+
+        // decoded extrinsic (keyed by extrinsic hash; may legitimately not resolve from a tx hash)
+        var dj = (decodedRes.json) ? decodedRes.json : (decodedRes.ok ? null : { error: 'HTTP ' + decodedRes.status });
+        html += renderDecoded(dj, qHash);
+
+        area.innerHTML = html;
+      }).catch(function(err) {
+        area.innerHTML = '<div class="card"><div class="empty-state err">Could not reach the API. ' + esc(err.message || '') + '</div></div>';
+      });
+    }
+
+    // --- Block mode flow ---
+    function runBlock(rawHeight) {
+      var h = (rawHeight || '').trim().replace(/^#/, '').replace(/,/g, '');
+      var area = document.getElementById('resultsArea');
+      if (!h || isNaN(Number(h))) { area.innerHTML = '<div class="card"><div class="empty-state err">Enter a numeric block height.</div></div>'; return; }
+      area.innerHTML = '<div class="card"><div class="spinner-text">Loading block #' + esc(Number(h).toLocaleString()) + '…</div></div>';
+
+      Promise.all([
+        fetch('/api/blocks/' + encodeURIComponent(h) + '/extrinsics').then(safeJson),
+        fetch('/api/blocks/' + encodeURIComponent(h) + '/events').then(safeJson)
+      ]).then(function(res) {
+        var exRes = res[0], evRes = res[1];
+        var ex = arr(exRes), ev = arr(evRes);
+        var html = '';
+
+        html += '<div class="card">';
+        html += '<div class="card-title"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M9 21V9" stroke="currentColor" stroke-width="2"/></svg>Block #' + esc(Number(h).toLocaleString()) + ' &mdash; Extrinsics</div>';
+        html += '<div class="card-subtitle">All extrinsics in the block. Most mainnet blocks carry only the <span class="mono" style="color:#94a3b8;">timestamp.set</span> inherent and no Midnight transactions.</div>';
+        if (exRes.status === 404) {
+          html += '<div class="empty-state">Block not found.</div>';
+        } else if (!ex.length) {
+          html += '<div class="empty-state">No extrinsics indexed for this block.</div>';
+        } else {
+          html += '<div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Section.Method</th><th>Hash</th><th>Signer</th><th>OK</th></tr></thead><tbody>';
+          for (var i = 0; i < ex.length; i++) {
+            var x = ex[i];
+            var ok = (x.success === 1 || x.success === true);
+            var hh = (x.hash || '');
+            var hashCell = hh ? '<a class="ix-addr" style="cursor:pointer;" onclick="inspectHash(\'' + esc(hh) + '\')">' + esc(trunc(hh, 10, 6)) + '</a>' : '—';
+            html += '<tr><td class="mono">' + esc(x.index_in_block != null ? x.index_in_block : i) + '</td>'
+              + '<td><span class="mono" style="color:#c4b5fd;">' + esc(x.section || '') + '.' + esc(x.method || '') + '</span></td>'
+              + '<td>' + hashCell + '</td>'
+              + '<td class="mono">' + (x.signer ? esc(trunc(x.signer, 8, 6)) : '—') + '</td>'
+              + '<td>' + (x.success != null ? (ok ? '<span class="badge-ok">✔</span>' : '<span class="badge-fail">✘</span>') : '—') + '</td></tr>';
+          }
+          html += '</tbody></table></div>';
+        }
+        html += '</div>';
+
+        html += '<div class="card">';
+        html += '<div class="card-title"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Block #' + esc(Number(h).toLocaleString()) + ' &mdash; Events</div>';
+        html += '<div class="card-subtitle">Runtime events emitted while executing the block\'s extrinsics.</div>';
+        if (evRes.status === 404) {
+          html += '<div class="empty-state">Block not found.</div>';
+        } else if (!ev.length) {
+          html += '<div class="empty-state">No events indexed for this block.</div>';
+        } else {
+          html += '<div class="table-wrap"><table class="data-table"><thead><tr><th>Ext#</th><th>Evt#</th><th>Section.Method</th><th>Data</th></tr></thead><tbody>';
+          for (var k = 0; k < ev.length; k++) {
+            var e = ev[k];
+            var data = e.data != null ? (typeof e.data === 'string' ? e.data : JSON.stringify(e.data)) : '';
+            html += '<tr><td class="mono">' + esc(e.extrinsic_index != null ? e.extrinsic_index : '—') + '</td>'
+              + '<td class="mono">' + esc(e.event_index != null ? e.event_index : '—') + '</td>'
+              + '<td><span class="mono" style="color:#67e8f9;">' + esc(e.section || '') + '.' + esc(e.method || '') + '</span></td>'
+              + '<td class="mono" style="color:#94a3b8;">' + esc(trunc(data, 60, 0)) + '</td></tr>';
+          }
+          html += '</tbody></table></div>';
+        }
+        html += '</div>';
+
+        area.innerHTML = html;
+      }).catch(function(err) {
+        area.innerHTML = '<div class="card"><div class="empty-state err">Could not reach the API. ' + esc(err.message || '') + '</div></div>';
+      });
+    }
+
+    // --- fetch helpers ---
+    function safeJson(r) {
+      return r.text().then(function(t) {
+        var j = null;
+        try { j = JSON.parse(t); } catch (e) {}
+        return { ok: r.ok, status: r.status, json: j };
+      });
+    }
+    function arr(res) {
+      if (!res || !res.json) return [];
+      if (Array.isArray(res.json)) return res.json;
+      if (Array.isArray(res.json.extrinsics)) return res.json.extrinsics;
+      if (Array.isArray(res.json.events)) return res.json.events;
+      return [];
+    }
+
+    // --- Mode + input wiring ---
+    function setMode(m) {
+      mode = m;
+      document.getElementById('tabTx').classList.toggle('active', m === 'tx');
+      document.getElementById('tabBlock').classList.toggle('active', m === 'block');
+      var input = document.getElementById('searchInput');
+      var hint = document.getElementById('searchHint');
+      if (m === 'tx') {
+        input.placeholder = '0x… Midnight transaction hash';
+        hint.innerHTML = 'Paste a Midnight transaction hash, or <a id="demoLink">load the example ContractDeploy at block 1,050,343</a>.';
+      } else {
+        input.placeholder = 'Block height, e.g. 1050343';
+        hint.innerHTML = 'Enter a block height, or <a id="demoLink">load example block 1,050,343</a>.';
+      }
+      wireDemo();
+    }
+    function wireDemo() {
+      var dl = document.getElementById('demoLink');
+      if (!dl) return;
+      dl.onclick = function() {
+        if (mode === 'tx') { document.getElementById('searchInput').value = DEMO_TX; runTx(DEMO_TX); }
+        else { document.getElementById('searchInput').value = DEMO_BLOCK; runBlock(DEMO_BLOCK); }
+      };
+    }
+    function runSearch() {
+      var v = document.getElementById('searchInput').value;
+      if (mode === 'tx') runTx(v); else runBlock(v);
+    }
+
+    document.getElementById('tabTx').addEventListener('click', function() { setMode('tx'); });
+    document.getElementById('tabBlock').addEventListener('click', function() { setMode('block'); });
+    document.getElementById('searchBtn').addEventListener('click', runSearch);
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') runSearch();
+    });
+
+    // Init
+    setMode('tx');
+    fetchHealth();
+    setInterval(fetchHealth, 60000);
+    // Prefill the demo transaction on first load so the page is never empty.
+    document.getElementById('searchInput').value = DEMO_TX;
+    runTx(DEMO_TX);
+  </script>
+
+</body>
+</html>
