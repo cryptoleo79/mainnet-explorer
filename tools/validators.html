@@ -766,24 +766,6 @@
       <button class="refresh-btn" id="refreshBtn" onclick="fetchAll()">Refresh</button>
     </div>
 
-    <!-- D-Parameter -->
-    <div class="dparam-card" id="dparamCard">
-      <div>
-        <div class="dparam-title">D-Parameter</div>
-        <div class="dparam-sub">Decentralization governance parameter</div>
-      </div>
-      <div class="dparam-values" id="dparamValues">
-        <div class="dparam-item">
-          <div class="dparam-num" id="dPermissioned" title="Awaiting indexer data">—</div>
-          <div class="dparam-label">Permissioned</div>
-        </div>
-        <div class="dparam-item">
-          <div class="dparam-num" id="dRegistered" title="Awaiting indexer data">—</div>
-          <div class="dparam-label">Registered Candidates</div>
-        </div>
-      </div>
-    </div>
-
     <!-- Governance: federation timeline + live state + T&C + tx health (all real on-chain data) -->
     <div class="card" id="govCard">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
@@ -1356,21 +1338,11 @@
           renderPhaseBanner(committeeData, null, committeeFederated);
         }
 
-        // D-Parameter — endpoint returns { history:[{blockHeight,timestamp,numPermissionedCandidates,numRegisteredCandidates}], ... }.
-        // Use the latest (highest blockHeight) entry; honest '--' if no history.
+        // D-Parameter history -> Federation & Governance timeline.
+        // Endpoint returns { history:[{blockHeight,timestamp,numPermissionedCandidates,numRegisteredCandidates}], ... }.
         if (dparamRes.status === 'fulfilled' && dparamRes.value.ok) {
           const dp = await dparamRes.value.json();
           const hist = Array.isArray(dp.history) ? dp.history.slice() : [];
-          let latest = null;
-          if (hist.length) {
-            latest = hist.slice().sort((a, b) => (b.blockHeight || 0) - (a.blockHeight || 0))[0];
-          }
-          const perm = latest && latest.numPermissionedCandidates != null ? latest.numPermissionedCandidates
-                     : (dp.permissioned != null ? dp.permissioned : null);
-          const reg = latest && latest.numRegisteredCandidates != null ? latest.numRegisteredCandidates
-                    : (dp.registered != null ? dp.registered : (dp.candidates != null ? dp.candidates : null));
-          document.getElementById('dPermissioned').textContent = perm != null ? perm : '--';
-          document.getElementById('dRegistered').textContent = reg != null ? reg : '--';
           renderGovernanceTimeline(hist);
         }
 

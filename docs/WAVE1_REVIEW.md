@@ -1,9 +1,9 @@
 # Wave 1 — Release-Candidate Review
 
 **Question answered:** *Is Wave 1 ready?*
-**Verdict:** ✅ **YES — ready for mainnet deployment.** One optional cosmetic dedupe recommended (non-blocking).
+**Verdict:** ✅ **YES — ready for mainnet deployment.** The one RC issue (cosmetic d-parameter duplication) is now **fixed** — see "Post-review fix" below.
 
-**Branch:** `feat/operator-intel-wave1` · **Commit reviewed:** `7ad1593` · **Worktree:** `/home/midnight/mainnet-explorer-wave1`
+**Branch:** `feat/operator-intel-wave1` · **Commit reviewed:** `7ad1593` (+ dedupe fix) · **Worktree:** `/home/midnight/mainnet-explorer-wave1`
 **Date:** 2026-06-03 · **Reviewer scope:** deploy-readiness only. No new features, no Wave 2.
 
 ---
@@ -23,10 +23,9 @@ Diffstat vs `be4e4ec`: 6 files, +1365 / −172.
 
 ## Item-by-item verdict
 
-### 1. Governance timeline / current-state — ⚠️ CONDITIONAL PASS
+### 1. Governance timeline / current-state — ✅ PASS *(was CONDITIONAL; fixed)*
 - Real data confirmed live: `current-state` → block 1,099,178, **130 permissioned / 0 registered**, T&C `ca85ed77…` + `midnight.gd/global-terms-txt`. `d-parameter` history = genesis 10/0 → block 522886 130/0. Values 100% data-driven; `0 registered` rendered red as "fully federated" (honest).
-- **Why conditional — duplicated surface:** `tools/validators.html` now renders d-parameter **twice on one page** — the original `dparamCard` (Permissioned/Registered numbers, line 769) *and* the new `govCard`'s "Live d-parameter" tile (line ~800). Same real value, shown 2×. Not misleading, not fake — purely redundant.
-- **Smallest correction (optional, ~10-line cut):** delete the now-redundant simple `dparamCard` in `validators.html` (the richer `govCard` supersedes it). The cross-page appearance (homepage Governance tab vs validators tool) is acceptable tiering (summary vs detail), not flagged.
+- **Duplication resolved:** the redundant `dparamCard` in `tools/validators.html` was removed. D-parameter now appears as two *distinct* views only — the live snapshot tile (`govLivePerm`, fed by `current-state`) and the history timeline (fed by `d-parameter` history) — no repeated surface. The cross-page appearance (homepage Governance tab vs validators tool) is acceptable tiering (summary vs detail).
 
 ### 2. Tx-health rate — ✅ PASS
 - Real data: `TxApplied=179594`, `TxPartialSuccess=8696` (~4.62% partial-fail). `recentPartial` returns real txHashes (e.g. `0x21b2d910…`@1086404).
@@ -54,7 +53,7 @@ Diffstat vs `be4e4ec`: 6 files, +1365 / −172.
 | Real data only | ✅ PASS | Every value traced to a real source; live-verified. |
 | No fake values | ✅ PASS | No hardcoded data literals (the "87171" was the color `#f87171`). |
 | No empty widgets | ✅ PASS | All endpoints return real data on the mainnet target; missing-endpoint cases degrade to honest "unavailable", not blank boxes. |
-| No duplicated surfaces | ⚠️ CONDITIONAL | `validators.html` shows d-parameter twice (item 1). Cosmetic. |
+| No duplicated surfaces | ✅ PASS | `validators.html` dedupe applied — redundant `dparamCard` removed. |
 | Mobile layout | ✅ PASS | Media queries collapse grids; viewport meta on all pages. |
 | Desktop layout | ✅ PASS | Cards reuse existing grid/card classes. |
 | API latency | ✅ PASS | tx-health 32 ms+15 ms; indexer current-state 184 ms round-trip. |
@@ -66,7 +65,7 @@ Diffstat vs `be4e4ec`: 6 files, +1365 / −172.
 ---
 
 ## What should be cut
-- **Optional:** the redundant simple `dparamCard` in `tools/validators.html` (superseded by the new Federation & Governance card). Cosmetic only.
+- **Done:** the redundant simple `dparamCard` in `tools/validators.html` was removed (post-review dedupe fix).
 - Nothing else. Noise was already cut pre-build: top-signers (12 signers), fee analytics (no fee events).
 
 ## What should wait
@@ -81,11 +80,7 @@ Diffstat vs `be4e4ec`: 6 files, +1365 / −172.
 
 ## Deployment recommendation
 
-**Deploy Wave 1 to mainnet — APPROVED.** All five reviewed items pass (one as conditional/cosmetic). Real signal only; no fake data; no empty widgets; honest 501s.
-
-Two acceptable paths:
-1. **Deploy as-is.** The validators.html d-parameter duplication is cosmetic (same real value) and not misleading.
-2. **Deploy after a ~10-line cut** removing the redundant `dparamCard` in `validators.html` — the cleaner end-state.
+**Deploy Wave 1 to mainnet — APPROVED.** All five reviewed items PASS (the one conditional is now fixed). Real signal only; no fake data; no empty widgets; no duplicated surfaces; honest 501s.
 
 Environment notes (pre-existing patterns, action for the deploy step, not blockers): build with `npm run build` (tsc, 0 errors) then `scripts/deploy-all.sh`; ensure preprod/preview backends carry the new endpoints if their tool pages are updated, else they degrade honestly.
 
