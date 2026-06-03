@@ -15,7 +15,7 @@
 - **tools** `tools/tx-inspector.html` (new) — enriched tx view + decoded extrinsic + per-block drill-down + tx-health strip.
 - **web** `website/nightforge-main.html` — Governance tab: live-state, tx-health, T&C memory, d-param timeline (10→130); en+ja i18n.
 - **tools** `tools/validators.html` — Federation & Governance card + d-param timeline; fixed a latent bug (old card read wrong fields, showed `--`).
-- **tools** `tools/index.html` — links Transaction Inspector + Passport-Ready.
+- **tools** `tools/index.html` — links Transaction Inspector. *(Passport-Ready card cut pre-merge — see "Post-review fix #2": it is a YAMORI/credential standards-alignment explainer mixing live + future capability, not NightForge operator intelligence; reverted to its pre-Wave-1 reachability from contracts.html only.)*
 
 Diffstat vs `be4e4ec`: 6 files, +1365 / −172.
 
