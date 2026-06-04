@@ -766,22 +766,43 @@
       <button class="refresh-btn" id="refreshBtn" onclick="fetchAll()">Refresh</button>
     </div>
 
-    <!-- D-Parameter -->
-    <div class="dparam-card" id="dparamCard">
-      <div>
-        <div class="dparam-title">D-Parameter</div>
-        <div class="dparam-sub">Decentralization governance parameter</div>
-      </div>
-      <div class="dparam-values" id="dparamValues">
-        <div class="dparam-item">
-          <div class="dparam-num" id="dPermissioned" title="Awaiting indexer data">—</div>
-          <div class="dparam-label">Permissioned</div>
+    <!-- Governance: federation timeline + live state + T&C + tx health (all real on-chain data) -->
+    <div class="card" id="govCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <div>
+          <div class="dparam-title" style="font-size:1rem;">Federation &amp; Governance</div>
+          <div class="dparam-sub">D-Parameter history, live chain state, and chain-governing terms &mdash; all from the Midnight indexer.</div>
         </div>
-        <div class="dparam-item">
-          <div class="dparam-num" id="dRegistered" title="Awaiting indexer data">—</div>
-          <div class="dparam-label">Registered Candidates</div>
+        <span id="govPhaseBadge" class="v-class-chip permissioned" style="display:none;"></span>
+      </div>
+
+      <!-- Live state + tx-health metric tiles -->
+      <div class="headline-metrics" style="margin-bottom:1.25rem;" id="govTiles">
+        <div class="metric-tile" title="Current system parameters from the latest block (/api/governance/current-state).">
+          <div class="metric-tile-label">Live d-parameter</div>
+          <div class="metric-tile-value" id="govLivePerm" style="font-size:1.5rem;">&mdash;</div>
+          <div class="metric-tile-sub" id="govLiveSub">permissioned / registered candidates</div>
+        </div>
+        <div class="metric-tile" title="Applied vs partial-success transactions from the local index (/api/analytics/tx-health).">
+          <div class="metric-tile-label">Transaction health</div>
+          <div class="metric-tile-value" id="govTxRate" style="font-size:1.5rem;">&mdash;</div>
+          <div class="metric-tile-sub" id="govTxSub">partial-success rate (applied vs partial)</div>
+        </div>
+        <div class="metric-tile" title="Active chain-governing terms hash (/api/governance/tc-history + current-state).">
+          <div class="metric-tile-label">Active T&amp;C</div>
+          <div class="metric-tile-value mono" id="govTcHash" style="font-size:1.1rem;">&mdash;</div>
+          <div class="metric-tile-sub" id="govTcSub">chain-governing terms hash</div>
         </div>
       </div>
+
+      <!-- D-parameter timeline -->
+      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;margin-bottom:0.75rem;">D-Parameter Timeline</div>
+      <div id="govTimeline">
+        <div style="color:#64748b;font-size:0.85rem;padding:0.5rem 0;"><span class="spinner"></span> Loading governance history...</div>
+      </div>
+      <p style="font-size:0.75rem;color:#64748b;line-height:1.55;margin-top:0.9rem;border-top:1px solid rgba(255,255,255,0.05);padding-top:0.8rem;">
+        Midnight launched fully federated (0 registered SPOs). The D-Parameter sets how many block-producer slots are permissioned versus open to registered SPOs. Permissioned-only with 0 registered means the chain is still fully federated; decentralization begins when registered candidates first appear (Mōhalu).
+      </p>
     </div>
 
     <!-- Validator directory -->
@@ -1038,6 +1059,109 @@
       return num.toFixed(0);
     }
 
+    function govDateUTC(ms) {
+      if (!ms) return '--';
+      const d = new Date(typeof ms === 'number' ? ms : new Date(ms).getTime());
+      if (isNaN(d.getTime())) return '--';
+      return d.toISOString().slice(0, 10);
+    }
+
+    // Render the D-Parameter timeline from /api/governance/d-parameter history.
+    function renderGovernanceTimeline(hist) {
+      const el = document.getElementById('govTimeline');
+      if (!el) return;
+      const arr = Array.isArray(hist) ? hist.slice() : [];
+      if (!arr.length) {
+        el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">No d-parameter events recorded.</div>';
+        return;
+      }
+      arr.sort((a, b) => (a.blockHeight || 0) - (b.blockHeight || 0));
+      const latest = arr[arr.length - 1];
+      const fullyFederated = (latest.numRegisteredCandidates || 0) === 0;
+      const badge = document.getElementById('govPhaseBadge');
+      if (badge) {
+        badge.textContent = fullyFederated ? 'Fully federated' : 'Mixed';
+        badge.className = 'v-class-chip ' + (fullyFederated ? 'permissioned' : 'registered');
+        badge.style.display = '';
+      }
+      el.innerHTML = arr.map((ev, i) => {
+        const prev = i > 0 ? arr[i - 1] : null;
+        const perm = ev.numPermissionedCandidates;
+        const reg = ev.numRegisteredCandidates;
+        let label;
+        if (ev.blockHeight === 0) label = 'Genesis &mdash; federated launch';
+        else if (prev && perm !== prev.numPermissionedCandidates) {
+          label = 'Permissioned cap ' + (perm > prev.numPermissionedCandidates ? 'raised' : 'lowered') + ' ' + prev.numPermissionedCandidates + ' &rarr; ' + perm;
+        } else if (prev && reg !== prev.numRegisteredCandidates) {
+          label = 'Registered candidates ' + (reg > prev.numRegisteredCandidates ? 'opened' : 'changed') + ' ' + prev.numRegisteredCandidates + ' &rarr; ' + reg;
+        } else label = 'Parameter update';
+        const isLast = i === arr.length - 1;
+        return `<div style="display:flex;gap:0.85rem;${isLast ? '' : 'padding-bottom:1.1rem;'}">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <div style="width:11px;height:11px;border-radius:50%;background:${isLast ? '#22d3ee' : '#0891b2'};box-shadow:0 0 0 4px rgba(34,211,238,0.12);flex-shrink:0;"></div>
+              ${isLast ? '' : '<div style="width:2px;flex:1;background:rgba(34,211,238,0.25);margin-top:4px;"></div>'}
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:700;color:#f1f5f9;font-size:0.9rem;">${label}${isLast ? ' <span class="v-class-chip registered" style="margin-left:0.4rem;">current</span>' : ''}</div>
+              <div style="font-size:0.72rem;color:#64748b;margin:0.15rem 0 0.4rem;" class="mono">Block #${(ev.blockHeight || 0).toLocaleString()} &middot; ${govDateUTC(ev.timestamp)}</div>
+              <div style="display:flex;gap:1.25rem;flex-wrap:wrap;font-size:0.78rem;" class="mono">
+                <span style="color:#fbbf24;">${perm} permissioned</span>
+                <span style="color:${reg === 0 ? '#f87171' : '#4ade80'};">${reg} registered</span>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Live governance state + tx-health + active T&C hash — all real, honest fallbacks.
+    async function fetchGovernanceExtras() {
+      // Live state
+      fetch('/api/governance/current-state').then(r => r.ok ? r.json() : null).then(d => {
+        const permEl = document.getElementById('govLivePerm');
+        const subEl = document.getElementById('govLiveSub');
+        const tcHashEl = document.getElementById('govTcHash');
+        if (!d || d.error || !d.dParameter) {
+          if (permEl) permEl.textContent = '--';
+          return;
+        }
+        const p = d.dParameter.numPermissionedCandidates;
+        const r2 = d.dParameter.numRegisteredCandidates;
+        if (permEl) permEl.textContent = p + ' / ' + r2;
+        if (subEl) subEl.textContent = 'permissioned / registered · block #' + (d.blockHeight || 0).toLocaleString();
+        if (tcHashEl && d.termsAndConditions && d.termsAndConditions.hash) {
+          tcHashEl.textContent = d.termsAndConditions.hash.slice(0, 10) + '…';
+          tcHashEl.title = d.termsAndConditions.hash;
+        }
+      }).catch(() => {});
+
+      // Transaction health
+      fetch('/api/analytics/tx-health').then(r => r.ok ? r.json() : null).then(d => {
+        const rateEl = document.getElementById('govTxRate');
+        const subEl = document.getElementById('govTxSub');
+        if (!d || d.error || typeof d.total !== 'number') {
+          if (rateEl) rateEl.textContent = '--';
+          return;
+        }
+        const rate = typeof d.partialRatePct === 'number' ? d.partialRatePct : 0;
+        if (rateEl) rateEl.textContent = rate.toFixed(2) + '%';
+        if (subEl) subEl.textContent = d.applied.toLocaleString() + ' applied · ' + d.partialSuccess.toLocaleString() + ' partial';
+      }).catch(() => {});
+
+      // T&C history (active = latest; link via current-state url if present)
+      fetch('/api/governance/tc-history').then(r => r.ok ? r.json() : null).then(d => {
+        const subEl = document.getElementById('govTcSub');
+        const hist = (d && Array.isArray(d.history)) ? d.history.slice() : [];
+        if (!hist.length) { if (subEl) subEl.textContent = 'no terms changes recorded'; return; }
+        hist.sort((a, b) => (b.blockHeight || 0) - (a.blockHeight || 0));
+        const latest = hist[0];
+        if (subEl) {
+          const versions = hist.length + (hist.length === 1 ? ' version' : ' versions');
+          const link = latest.url ? ` · <a href="${latest.url}" target="_blank" rel="noopener" class="v-link">view terms</a>` : '';
+          subEl.innerHTML = versions + ' · since block #' + (latest.blockHeight || 0).toLocaleString() + link;
+        }
+      }).catch(() => {});
+    }
+
     function renderPhaseBanner(committee, regCount, federated) {
       const banner = document.getElementById('phaseBanner');
       const text = document.getElementById('phaseBannerText');
@@ -1214,17 +1338,19 @@
           renderPhaseBanner(committeeData, null, committeeFederated);
         }
 
-        // D-Parameter
+        // D-Parameter history -> Federation & Governance timeline.
+        // Endpoint returns { history:[{blockHeight,timestamp,numPermissionedCandidates,numRegisteredCandidates}], ... }.
         if (dparamRes.status === 'fulfilled' && dparamRes.value.ok) {
           const dp = await dparamRes.value.json();
-          document.getElementById('dPermissioned').textContent = dp.permissioned != null ? dp.permissioned : '--';
-          document.getElementById('dRegistered').textContent = dp.registered != null ? dp.registered : (dp.candidates != null ? dp.candidates : '--');
+          const hist = Array.isArray(dp.history) ? dp.history.slice() : [];
+          renderGovernanceTimeline(hist);
         }
 
       } catch (err) {
         console.error('Validator fetch error:', err);
         renderEmpty();
       } finally {
+        fetchGovernanceExtras();
         btn.textContent = 'Refresh';
         btn.disabled = false;
       }
@@ -1235,6 +1361,8 @@
     // Liveness Pulse: fetch immediately then poll every 10s
     fetchLiveness();
     setInterval(fetchLiveness, 10000);
+    // Re-sync governance state every 60s (live state + tx-health)
+    setInterval(fetchGovernanceExtras, 60000);
   </script>
 
 </body>

@@ -2166,6 +2166,67 @@
           </div>
         </div>
 
+        <!-- Federation & Decentralization Governance (real on-chain system parameters) -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-6">
+
+          <!-- Live governance state — /governance/current-state -->
+          <div class="glass rounded-2xl border border-emerald-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-transparent">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/30 flex items-center justify-center"><span class="text-sm">🛡</span></div>
+                <div><h3 class="font-semibold text-white" data-i18n="liveGovState">Live Governance State</h3><p class="text-xs text-slate-500" data-i18n="liveGovStateSub">Current chain system parameters</p></div>
+              </div>
+              <span id="govStateBlock" class="text-xs text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full font-mono"></span>
+            </div>
+            <div id="govStateBody" class="px-6 py-5 text-sm text-slate-400">
+              <div class="px-1 py-3 text-center text-slate-500">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Transaction health — /analytics/tx-health -->
+          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-cyan-500/10 to-transparent">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/30 flex items-center justify-center"><span class="text-sm">📊</span></div>
+                <div><h3 class="font-semibold text-white" data-i18n="txHealth">Transaction Health</h3><p class="text-xs text-slate-500" data-i18n="txHealthSub">Applied vs partial-success (local index)</p></div>
+              </div>
+              <span id="txHealthRate" class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full font-mono"></span>
+            </div>
+            <div id="txHealthBody" class="px-6 py-5 text-sm text-slate-400">
+              <div class="px-1 py-3 text-center text-slate-500">Loading…</div>
+            </div>
+          </div>
+
+          <!-- T&C compliance memory — /governance/tc-history -->
+          <div class="glass rounded-2xl border border-amber-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-amber-500/10 to-transparent">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/30 flex items-center justify-center"><span class="text-sm">📜</span></div>
+                <div><h3 class="font-semibold text-white" data-i18n="tcMemory">Terms &amp; Conditions</h3><p class="text-xs text-slate-500" data-i18n="tcMemorySub">Compliance memory — chain-governing terms</p></div>
+              </div>
+              <span id="tcCount" class="text-xs text-amber-400 bg-amber-400/10 px-2 py-1 rounded-full"></span>
+            </div>
+            <div id="tcBody" class="divide-y divide-slate-700/20 max-h-[260px] overflow-y-auto">
+              <div class="px-4 py-8 text-center text-slate-500">Loading…</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- D-Parameter federation timeline — /governance/d-parameter -->
+        <div class="glass rounded-2xl border border-purple-500/20 overflow-hidden mb-6">
+          <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-transparent">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center"><span class="text-sm">🧭</span></div>
+              <div><h3 class="font-semibold text-white" data-i18n="dParamTimeline">D-Parameter Timeline</h3><p class="text-xs text-slate-500" data-i18n="dParamTimelineSub">On-chain decentralization parameter — permissioned vs registered candidates</p></div>
+            </div>
+            <span id="dParamPhase" class="text-xs px-2 py-1 rounded-full"></span>
+          </div>
+          <div id="dParamTimelineBody" class="px-6 py-5">
+            <div class="px-1 py-3 text-center text-slate-500">Loading…</div>
+          </div>
+        </div>
+
         <!-- Council Activity -->
         <div class="grid lg:grid-cols-2 gap-6 mb-6">
           <div class="glass rounded-2xl border border-blue-500/20 overflow-hidden">
@@ -2426,6 +2487,10 @@ var translations = {
     dailyActivity: "Daily Activity", compareNetworks: "Compare Networks",
     onChainGovernance: "On-Chain Governance",
     councilTechCommittee: "Council & Technical Committee Activity",
+    liveGovState: "Live Governance State", liveGovStateSub: "Current chain system parameters",
+    txHealth: "Transaction Health", txHealthSub: "Applied vs partial-success (local index)",
+    tcMemory: "Terms & Conditions", tcMemorySub: "Compliance memory — chain-governing terms",
+    dParamTimeline: "D-Parameter Timeline", dParamTimelineSub: "On-chain decentralization parameter — permissioned vs registered candidates",
     totalActions: "Total Actions", councilProposals: "Council Proposals",
     councilVotes: "Council Votes", techProposals: "Tech Proposals",
     techVotes: "Tech Votes", authorityResets: "Authority Resets",
@@ -2512,6 +2577,10 @@ var translations = {
     dailyActivity: "日別活動", compareNetworks: "ネットワーク比較",
     onChainGovernance: "オンチェーンガバナンス",
     councilTechCommittee: "評議会 & 技術委員会の活動",
+    liveGovState: "ライブガバナンス状態", liveGovStateSub: "現在のチェーンシステムパラメータ",
+    txHealth: "トランザクション健全性", txHealthSub: "適用済み vs 部分成功（ローカルインデックス）",
+    tcMemory: "利用規約", tcMemorySub: "コンプライアンス記録 — チェーン統治規約",
+    dParamTimeline: "Dパラメータの推移", dParamTimelineSub: "オンチェーン分散化パラメータ — 許可制 vs 登録候補",
     totalActions: "総アクション", councilProposals: "評議会提案",
     councilVotes: "評議会投票", techProposals: "技術提案",
     techVotes: "技術投票", authorityResets: "権限リセット",
@@ -4774,8 +4843,175 @@ function renderAnalyticsDailyChartFromVolume(data){
 // ============================================
 // Governance Dashboard
 // ============================================
+
+// Federation & decentralization governance — real on-chain system parameters.
+// Sources: /governance/current-state (live), /analytics/tx-health (local index),
+// /governance/tc-history + /governance/d-parameter (indexer change logs).
+// Truth rule: render only what each endpoint returns; honest empty states otherwise.
+function govDateUTC(ms){
+  if(!ms)return"—";
+  var d=new Date(typeof ms==="number"?ms:new Date(ms).getTime());
+  if(isNaN(d.getTime()))return"—";
+  return d.toISOString().slice(0,10);
+}
+function loadGovernanceFederation(){
+  // 1) Live governance state
+  fetch(API+"/governance/current-state").then(function(r){return r.json()}).then(function(d){
+    var body=document.getElementById("govStateBody");
+    var blkEl=document.getElementById("govStateBlock");
+    if(!body)return;
+    if(!d||d.error||!d.dParameter){
+      body.innerHTML='<div class="px-1 py-3 text-center text-slate-500">Live state unavailable</div>';
+      if(blkEl)blkEl.textContent="";
+      return;
+    }
+    if(blkEl)blkEl.textContent="#"+fmt(d.blockHeight||0);
+    var perm=d.dParameter.numPermissionedCandidates;
+    var reg=d.dParameter.numRegisteredCandidates;
+    var tcHash=d.termsAndConditions&&d.termsAndConditions.hash?d.termsAndConditions.hash:null;
+    var federated=(reg===0);
+    var rows=[
+      {l:"Permissioned candidates",v:fmt(perm),c:"#fbbf24"},
+      {l:"Registered candidates",v:fmt(reg),c:reg===0?"#f87171":"#4ade80"},
+      {l:"Phase",v:federated?"Federated":"Mixed / Mōhalu",c:federated?"#fbbf24":"#4ade80"},
+      {l:"Active T&C hash",v:tcHash?(tcHash.slice(0,10)+"…"):"—",c:"#94a3b8",mono:true}
+    ];
+    body.innerHTML=rows.map(function(r){
+      return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:5px 0;">'+
+        '<span style="color:#64748b;">'+r.l+'</span>'+
+        '<span class="'+(r.mono?'font-mono ':'')+'" style="color:'+r.c+';font-weight:700;">'+r.v+'</span>'+
+      '</div>';
+    }).join('');
+  }).catch(function(){
+    var body=document.getElementById("govStateBody");
+    if(body)body.innerHTML='<div class="px-1 py-3 text-center text-slate-500">Live state unavailable</div>';
+  });
+
+  // 2) Transaction health
+  fetch(API+"/analytics/tx-health").then(function(r){return r.json()}).then(function(d){
+    var body=document.getElementById("txHealthBody");
+    var rateEl=document.getElementById("txHealthRate");
+    if(!body)return;
+    if(!d||d.error||typeof d.total!=="number"){
+      body.innerHTML='<div class="px-1 py-3 text-center text-slate-500">Health data unavailable</div>';
+      if(rateEl)rateEl.textContent="";
+      return;
+    }
+    var rate=typeof d.partialRatePct==="number"?d.partialRatePct:0;
+    if(rateEl){rateEl.textContent=rate.toFixed(2)+"% partial";}
+    var appliedPct=d.total>0?(d.applied/d.total*100):0;
+    var rows=[
+      {l:"Applied (full success)",v:fmt(d.applied),c:"#4ade80"},
+      {l:"Partial success",v:fmt(d.partialSuccess),c:"#facc15"},
+      {l:"Total settled",v:fmt(d.total),c:"#e2e8f0"}
+    ];
+    var bar='<div style="margin:4px 0 12px;height:8px;border-radius:4px;overflow:hidden;background:rgba(250,204,21,0.25);display:flex;">'+
+      '<div style="height:100%;width:'+appliedPct.toFixed(2)+'%;background:#22c55e;"></div></div>';
+    body.innerHTML=bar+rows.map(function(r){
+      return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:5px 0;">'+
+        '<span style="color:#64748b;">'+r.l+'</span>'+
+        '<span class="font-mono" style="color:'+r.c+';font-weight:700;">'+r.v+'</span>'+
+      '</div>';
+    }).join('')+
+      '<p class="text-xs text-slate-500" style="margin-top:8px;line-height:1.5;">Midnight reports partial-success when some operations in a transaction apply and others fail (e.g. a guarded contract call). A low, steady partial rate is normal.</p>';
+  }).catch(function(){
+    var body=document.getElementById("txHealthBody");
+    if(body)body.innerHTML='<div class="px-1 py-3 text-center text-slate-500">Health data unavailable</div>';
+  });
+
+  // 3) T&C compliance memory
+  fetch(API+"/governance/tc-history").then(function(r){return r.json()}).then(function(d){
+    var body=document.getElementById("tcBody");
+    var countEl=document.getElementById("tcCount");
+    if(!body)return;
+    var hist=(d&&Array.isArray(d.history))?d.history.slice():[];
+    if(countEl)countEl.textContent=hist.length+(hist.length===1?" version":" versions");
+    if(hist.length===0){
+      body.innerHTML='<div class="px-4 py-8 text-center text-slate-500">No terms changes recorded</div>';
+      return;
+    }
+    hist.sort(function(a,b){return (b.blockHeight||0)-(a.blockHeight||0);});
+    body.innerHTML=hist.map(function(t,i){
+      var label=(t.blockHeight===0)?"Genesis terms":"Terms update";
+      var current=(i===0)?'<span class="text-xs text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full" style="margin-left:6px;">active</span>':'';
+      var link=t.url?'<a href="'+t.url+'" target="_blank" rel="noopener" class="text-xs text-amber-400 hover:underline">view terms ↗</a>':'';
+      return '<div class="px-4 py-3 hover:bg-slate-800/85 transition">'+
+        '<div class="flex items-center justify-between mb-1">'+
+          '<span class="text-sm text-white">'+label+current+'</span>'+
+          '<span class="text-xs text-slate-500 font-mono">#'+fmt(t.blockHeight||0)+'</span>'+
+        '</div>'+
+        '<div class="font-mono text-xs text-slate-400" style="word-break:break-all;">'+(t.hash||'—')+'</div>'+
+        '<div class="flex items-center justify-between mt-1"><span class="text-xs text-slate-600">'+govDateUTC(t.timestamp)+'</span>'+link+'</div>'+
+      '</div>';
+    }).join('');
+  }).catch(function(){
+    var body=document.getElementById("tcBody");
+    if(body)body.innerHTML='<div class="px-4 py-8 text-center text-slate-500">Terms history unavailable</div>';
+  });
+
+  // 4) D-Parameter federation timeline
+  fetch(API+"/governance/d-parameter").then(function(r){return r.json()}).then(function(d){
+    var body=document.getElementById("dParamTimelineBody");
+    var phaseEl=document.getElementById("dParamPhase");
+    if(!body)return;
+    var hist=(d&&Array.isArray(d.history))?d.history.slice():[];
+    if(hist.length===0){
+      body.innerHTML='<div class="px-1 py-3 text-center text-slate-500">No d-parameter events recorded</div>';
+      if(phaseEl)phaseEl.textContent="";
+      return;
+    }
+    // ascending by block height for a chronological audit trail
+    hist.sort(function(a,b){return (a.blockHeight||0)-(b.blockHeight||0);});
+    var latest=hist[hist.length-1];
+    var fullyFederated=(latest.numRegisteredCandidates||0)===0;
+    if(phaseEl){
+      phaseEl.textContent=fullyFederated?"Fully federated":"Mixed";
+      phaseEl.style.color=fullyFederated?"#fbbf24":"#4ade80";
+      phaseEl.style.background=fullyFederated?"rgba(251,191,36,0.12)":"rgba(74,222,128,0.12)";
+      phaseEl.style.border="1px solid "+(fullyFederated?"rgba(251,191,36,0.35)":"rgba(74,222,128,0.35)");
+    }
+    var items=hist.map(function(ev,i){
+      var prev=i>0?hist[i-1]:null;
+      var perm=ev.numPermissionedCandidates;
+      var reg=ev.numRegisteredCandidates;
+      var label;
+      if(ev.blockHeight===0){label="Genesis — federated launch";}
+      else if(prev&&perm!==prev.numPermissionedCandidates){
+        label="Permissioned cap "+(perm>prev.numPermissionedCandidates?"raised":"lowered")+" "+prev.numPermissionedCandidates+" → "+perm;
+      } else if(prev&&reg!==prev.numRegisteredCandidates){
+        label="Registered candidates "+(reg>prev.numRegisteredCandidates?"opened":"changed")+" "+prev.numRegisteredCandidates+" → "+reg;
+      } else {label="Parameter update";}
+      var isLast=(i===hist.length-1);
+      return '<div style="display:flex;gap:14px;'+(isLast?'':'padding-bottom:18px;')+'">'+
+        '<div style="display:flex;flex-direction:column;align-items:center;">'+
+          '<div style="width:12px;height:12px;border-radius:50%;background:'+(isLast?'#a78bfa':'#7c3aed')+';box-shadow:0 0 0 4px rgba(124,58,237,0.15);flex-shrink:0;"></div>'+
+          (isLast?'':'<div style="width:2px;flex:1;background:rgba(124,58,237,0.3);margin-top:4px;"></div>')+
+        '</div>'+
+        '<div style="flex:1;padding-bottom:2px;">'+
+          '<div class="flex items-center gap-2 flex-wrap">'+
+            '<span class="text-sm font-semibold text-white">'+label+'</span>'+
+            (isLast?'<span class="text-xs text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-full">current</span>':'')+
+          '</div>'+
+          '<div class="text-xs text-slate-500" style="margin:2px 0 6px;">Block #'+fmt(ev.blockHeight||0)+' · '+govDateUTC(ev.timestamp)+'</div>'+
+          '<div class="flex gap-4 flex-wrap font-mono text-xs">'+
+            '<span style="color:#fbbf24;">'+fmt(perm)+' permissioned</span>'+
+            '<span style="color:'+(reg===0?'#f87171':'#4ade80')+';">'+fmt(reg)+' registered</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    });
+    body.innerHTML=items.join('')+
+      '<p class="text-xs text-slate-500" style="margin-top:14px;line-height:1.5;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;">'+
+      'Midnight launched fully federated (0 registered SPOs). The D-Parameter sets how many block-producer slots are permissioned vs open to registered SPOs; permissioned-only with 0 registered means the chain is still fully federated. Decentralization begins when registered candidates first appear (Mōhalu).</p>';
+  }).catch(function(){
+    var body=document.getElementById("dParamTimelineBody");
+    if(body)body.innerHTML='<div class="px-1 py-3 text-center text-slate-500">Timeline unavailable</div>';
+  });
+}
+
 var governanceInterval=null;
 function loadGovernance(){
+  loadGovernanceFederation();
   fetch(API+"/governance").then(function(r){return r.json()}).then(function(data){
     if(!data)return;
 

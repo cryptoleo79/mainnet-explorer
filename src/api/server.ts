@@ -35,6 +35,7 @@ import {
   getCommitteeMembers,
   getContractAddresses,
   getEventBreakdown,
+  getTxHealth,
   getGovernanceData,
   getEpochTimeline,
   getCardanoAnchors,
@@ -866,6 +867,30 @@ app.get('/api/analytics/events', (req, res) => {
   }
 });
 
+// --- Transaction Health API (applied vs partial success) ---
+let txHealthCache: { data: any; ts: number } | null = null;
+app.get('/api/analytics/tx-health', (req, res) => {
+  try {
+    const now = Date.now();
+    if (txHealthCache && now - txHealthCache.ts < 60000) {
+      return res.json(txHealthCache.data);
+    }
+    const h = getTxHealth(10);
+    const result = {
+      applied: h.applied,
+      partialSuccess: h.partialSuccess,
+      total: h.total,
+      partialRatePct: h.partialRatePct,
+      recentPartial: h.recentPartial,
+      generatedAt: new Date().toISOString(),
+    };
+    txHealthCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // --- Bridge Monitor API ---
 app.get('/api/analytics/bridge', (req, res) => {
   try {
@@ -1305,179 +1330,28 @@ app.get('/address/:address', (req, res) => {
 
 // ─── Enhanced Address Lookup ─────────────────────────────────────
 app.get('/api/address/:address/detail', async (req, res) => {
-  try {
-    const address = req.params.address;
-    const indexerUrl = (config.network as any)?.indexerHttp || (config.network as any)?.httpEndpoint || 'https://indexer.mainnet.midnight.network/api/v4/graphql';
-
-    // Query indexer for address transactions
-    const resp = await fetch(indexerUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `{
-          transactions(
-            where: { unshieldedCreatedOutputs_some: { owner: "${address}" } }
-            orderBy: BLOCK_HEIGHT_DESC
-            limit: 100
-          ) {
-            hash
-            blockHeight
-            timestamp
-            fees { paidFees }
-            unshieldedCreatedOutputs { owner value tokenType spentAtTransaction { hash } }
-          }
-        }`,
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-    const data = await resp.json();
-    const txs = data?.data?.transactions || [];
-
-    // Compute balance from unspent outputs
-    let balance = 0n;
-    let totalReceived = 0n;
-    let totalSpent = 0n;
-    let txCount = 0;
-    let firstSeen = Infinity;
-    let lastSeen = 0;
-
-    for (const tx of txs) {
-      txCount++;
-      const ts = tx.timestamp || 0;
-      if (ts < firstSeen) firstSeen = ts;
-      if (ts > lastSeen) lastSeen = ts;
-
-      for (const o of (tx.unshieldedCreatedOutputs || [])) {
-        if (o.owner === address) {
-          const val = BigInt(o.value || 0);
-          totalReceived += val;
-          if (!o.spentAtTransaction) {
-            balance += val;
-          } else {
-            totalSpent += val;
-          }
-        }
-      }
-    }
-
-    res.json({
-      address,
-      balance: (Number(balance) / 1_000_000).toFixed(6),
-      totalReceived: (Number(totalReceived) / 1_000_000).toFixed(6),
-      totalSpent: (Number(totalSpent) / 1_000_000).toFixed(6),
-      transactionCount: txCount,
-      firstSeen: firstSeen < Infinity ? new Date(firstSeen * 1000).toISOString() : null,
-      lastSeen: lastSeen > 0 ? new Date(lastSeen * 1000).toISOString() : null,
-      isShielded: address.startsWith('mn_shield'),
-      poweredBy: 'NightForge Explorer',
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
+  // Honest unsupported response. The mainnet v4 indexer 'transactions' query
+  // accepts only offset:{hash,identifier} — there is no where/orderBy/limit,
+  // no 'fees' field, and no address-indexed query. The previous GraphQL here
+  // silently returned all-zeros for every address. We do not fabricate data.
+  res.status(501).json({
+    error: 'address balance lookup not supported on mainnet v4',
+    reason: 'public indexer exposes no address-indexed transaction query',
+    alternative: '/api/address/:address (local activity)',
+  });
 });
 
 // ─── Address Summary (compact, wallet-friendly) ───────────────
-const addressSummaryCache = new Map<string, { data: any; ts: number }>();
-
 app.get('/api/address-summary/:address', async (req, res) => {
-  try {
-    const address = req.params.address;
-
-    // Input validation
-    if (!address.startsWith('mn_addr_') && !address.startsWith('mn_shield-addr_')) {
-      return res.status(400).json({ error: 'Invalid address format — must start with mn_addr_ or mn_shield-addr_' });
-    }
-
-    // 30-second cache per address
-    const cached = addressSummaryCache.get(address);
-    if (cached && Date.now() - cached.ts < 30000) {
-      return res.json(cached.data);
-    }
-
-    // Shielded addresses: privacy preserved
-    if (address.startsWith('mn_shield-addr_')) {
-      const result = {
-        address,
-        isShielded: true,
-        balance: 'private',
-        txCount: 0,
-        firstSeen: null,
-        lastSeen: null,
-        dustRegistered: null,
-        note: 'Shielded addresses cannot be queried — privacy preserved',
-      };
-      addressSummaryCache.set(address, { data: result, ts: Date.now() });
-      return res.json(result);
-    }
-
-    // Unshielded: query indexer
-    const indexerUrl = (config.network as any)?.indexerHttp || (config.network as any)?.httpEndpoint || 'https://indexer.mainnet.midnight.network/api/v4/graphql';
-    const resp = await fetch(indexerUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `{
-          transactions(
-            where: { unshieldedCreatedOutputs_some: { owner: "${address.replace(/[^a-zA-Z0-9_]/g, '')}" } }
-            orderBy: BLOCK_HEIGHT_DESC
-            limit: 200
-          ) {
-            hash
-            timestamp
-            unshieldedCreatedOutputs { owner value spentAtTransaction { hash } }
-          }
-        }`,
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-    const data = await resp.json();
-    const txs = data?.data?.transactions || [];
-
-    let balance = 0n;
-    let txCount = 0;
-    let firstSeen: number | null = null;
-    let lastSeen: number | null = null;
-
-    for (const tx of txs) {
-      txCount++;
-      const ts = tx.timestamp || 0;
-      if (ts > 0) {
-        if (firstSeen === null || ts < firstSeen) firstSeen = ts;
-        if (lastSeen === null || ts > lastSeen) lastSeen = ts;
-      }
-      for (const o of (tx.unshieldedCreatedOutputs || [])) {
-        if (o.owner === address) {
-          const val = BigInt(o.value || 0);
-          if (!o.spentAtTransaction) {
-            balance += val;
-          }
-        }
-      }
-    }
-
-    const result = {
-      address,
-      balance: (Number(balance) / 1_000_000).toFixed(6),
-      txCount,
-      firstSeen,
-      lastSeen,
-      isShielded: false,
-      dustRegistered: null,
-    };
-
-    addressSummaryCache.set(address, { data: result, ts: Date.now() });
-    // Evict stale entries every 100 lookups
-    if (addressSummaryCache.size > 500) {
-      const now = Date.now();
-      for (const [k, v] of addressSummaryCache) {
-        if (now - v.ts > 60000) addressSummaryCache.delete(k);
-      }
-    }
-
-    res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Address lookup failed' });
-  }
+  // Honest unsupported response. The mainnet v4 indexer 'transactions' query
+  // accepts only offset:{hash,identifier} — there is no where/orderBy/limit,
+  // no 'fees' field, and no address-indexed query. The previous GraphQL here
+  // silently returned all-zeros for every address. We do not fabricate data.
+  res.status(501).json({
+    error: 'address balance lookup not supported on mainnet v4',
+    reason: 'public indexer exposes no address-indexed transaction query',
+    alternative: '/api/address/:address (local activity)',
+  });
 });
 
 // Price proxy with caching (avoids CoinGecko rate limits)
@@ -2916,6 +2790,54 @@ app.get('/api/governance/d-parameter', async (req, res) => {
   }
 });
 
+// ─── Governance Current State (live system parameters) ──────────
+let govStateCache: { data: any; ts: number } | null = null;
+
+app.get('/api/governance/current-state', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (govStateCache && now - govStateCache.ts < 60000) {
+      return res.json(govStateCache.data);
+    }
+
+    const data = await queryIndexer(`{
+      block {
+        height
+        systemParameters {
+          dParameter { numPermissionedCandidates numRegisteredCandidates }
+          termsAndConditions { hash url }
+        }
+      }
+    }`);
+
+    const block = data?.block;
+    const sp = block?.systemParameters;
+    if (!block || !sp) {
+      if (govStateCache) return res.json(govStateCache.data);
+      return res.status(503).json({ error: 'Indexer returned no system parameters' });
+    }
+
+    const result = {
+      blockHeight: block.height,
+      dParameter: {
+        numPermissionedCandidates: sp.dParameter?.numPermissionedCandidates ?? 0,
+        numRegisteredCandidates: sp.dParameter?.numRegisteredCandidates ?? 0,
+      },
+      termsAndConditions: {
+        hash: sp.termsAndConditions?.hash ?? null,
+        url: sp.termsAndConditions?.url ?? null,
+      },
+      generatedAt: new Date().toISOString(),
+    };
+
+    govStateCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    if (govStateCache) return res.json(govStateCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ─── Live Feed (Recent Activity Snapshot) ───────────────────────
 app.get('/api/live/recent', (req, res) => {
   try {
@@ -3103,6 +3025,7 @@ export function startAPI() {
     console.log(`  GET /api/analytics/contracts - Contract leaderboard`);
     console.log(`  GET /api/analytics/overview - Network overview`);
     console.log(`  GET /api/analytics/events - Event type breakdown`);
+    console.log(`  GET /api/analytics/tx-health - Transaction health (applied vs partial success)`);
     console.log(`  GET /api/committee - Current committee members`);
     console.log(`  GET /api/block-producers - Block producer leaderboard`);
     console.log(`  GET /api/tx-enriched/:hash - Enriched transaction data from official indexer`);
@@ -3121,6 +3044,7 @@ export function startAPI() {
     console.log(`  GET /api/epoch/current - Current epoch info from indexer`);
     console.log(`  GET /api/epoch/utilization - Epoch utilization history`);
     console.log(`  GET /api/governance/d-parameter - Decentralization parameter history`);
+    console.log(`  GET /api/governance/current-state - Live system parameters (d-param, T&C)`);
     console.log(`  GET /api/live/recent - Live feed recent activity snapshot`);
     console.log(`  GET /api/live/dust-rate - DUST event rate (events/min, trend)`);
     console.log(`  GET /api/live/shielded-rate - Shielded (zswap) event rate`);
