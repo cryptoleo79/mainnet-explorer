@@ -53,7 +53,12 @@ app.use(express.json());
 // Serve static tools pages
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use('/tools', express.static(path.resolve(__dirname, '../../tools'), { maxAge: 0, etag: false, lastModified: false, setHeaders: (res) => { res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } }));
+// Tool pages are static but must never go stale (NightForge is a truth/freshness
+// product — no old governance pages after a deploy). Enable ETag + Last-Modified
+// and Cache-Control: no-cache so the browser revalidates on every request and
+// gets a cheap 304 when unchanged — fast repeat loads, zero staleness. Does NOT
+// affect /api/* freshness (those are separate routes with their own caching).
+app.use('/tools', express.static(path.resolve(__dirname, '../../tools'), { maxAge: 0, etag: true, lastModified: true, setHeaders: (res) => { res.setHeader('Cache-Control', 'no-cache'); } }));
 
 // Rewrite non-API paths to /api/ prefix for nginx proxy compatibility
 // (nginx strips /api/mainnet/ prefix, so backend receives /governance instead of /api/governance)
