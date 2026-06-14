@@ -401,7 +401,7 @@
 
     <!-- Health + Countdown -->
     <div class="health-row">
-      <div class="card">
+      <div class="card" id="healthCard">
         <div class="card-title">
           <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Epoch Health
@@ -433,7 +433,7 @@
     </div>
 
     <!-- Epoch history -->
-    <div class="card">
+    <div class="card" id="historyCard">
       <div class="card-title">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 16l4-6 4 4 5-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Epoch History
@@ -539,23 +539,28 @@
 
         const data = await res.json();
 
-        if (!data || (data.epoch == null && data.number == null)) {
+        // /api/epoch/current returns { epochNo, durationSeconds, elapsedSeconds, percentComplete }
+        const epochNo = data.epochNo ?? data.epoch ?? data.number ?? null;
+        if (!data || epochNo == null) {
           document.getElementById('epochNumber').textContent = '--';
           document.getElementById('epochHistory').innerHTML = '<div class="empty-state">Awaiting epoch data...</div>';
           return;
         }
 
         // Current epoch
-        const epochNum = data.epoch || data.number || '--';
-        document.getElementById('epochNumber').textContent = epochNum;
+        document.getElementById('epochNumber').textContent = epochNo;
 
-        // Duration
-        const durationMs = (data.durationMs || data.duration || EPOCH_DURATION_MS);
-        const durationMin = Math.round(durationMs / 60000);
-        document.getElementById('epochDuration').textContent = durationMin + ' min';
+        // Duration — API reports durationSeconds; fall back to legacy fields
+        const durationMs = data.durationSeconds != null
+          ? Number(data.durationSeconds) * 1000
+          : (data.durationMs || data.duration || EPOCH_DURATION_MS);
+        document.getElementById('epochDuration').textContent = Math.round(durationMs / 60000) + ' min';
 
-        // Calculate times
-        if (data.startTime) {
+        // Live epoch times — API reports elapsedSeconds
+        if (data.elapsedSeconds != null) {
+          epochStartTime = Date.now() - Number(data.elapsedSeconds) * 1000;
+          epochEndTime = epochStartTime + durationMs;
+        } else if (data.startTime) {
           epochStartTime = new Date(data.startTime).getTime();
           epochEndTime = epochStartTime + durationMs;
         } else if (data.endTime) {
@@ -567,24 +572,36 @@
           epochEndTime = epochStartTime + durationMs;
         }
 
-        // Health
-        const produced = Number(data.blocksProduced || data.produced || 0);
-        const expected = Number(data.blocksExpected || data.expected || 0);
-        const ratio = expected > 0 ? (produced / expected * 100) : (produced > 0 ? 100 : 0);
+        // Health (block production) — /api/epoch/current does not provide it.
+        // HIDE the card rather than render fake/empty data.
+        const produced = data.blocksProduced ?? data.produced;
+        const expected = data.blocksExpected ?? data.expected;
+        const healthCard = document.getElementById('healthCard');
+        const healthRow = document.querySelector('.health-row');
+        if (expected != null && Number(expected) > 0) {
+          if (healthCard) healthCard.style.display = '';
+          if (healthRow) healthRow.style.gridTemplateColumns = '';
+          const ratio = Number(produced || 0) / Number(expected) * 100;
+          const healthEl = document.getElementById('healthPct');
+          healthEl.textContent = ratio.toFixed(1) + '%';
+          healthEl.classList.remove('green', 'amber', 'red');
+          healthEl.classList.add(ratio >= 95 ? 'green' : ratio >= 80 ? 'amber' : 'red');
+          document.getElementById('blocksProduced').textContent = formatNum(Number(produced || 0));
+          document.getElementById('blocksExpected').textContent = formatNum(Number(expected));
+        } else if (healthCard) {
+          healthCard.style.display = 'none';
+          if (healthRow) healthRow.style.gridTemplateColumns = '1fr'; // countdown takes full width
+        }
 
-        const healthEl = document.getElementById('healthPct');
-        healthEl.textContent = ratio.toFixed(1) + '%';
-        healthEl.classList.remove('green', 'amber', 'red');
-        if (ratio >= 95) healthEl.classList.add('green');
-        else if (ratio >= 80) healthEl.classList.add('amber');
-        else healthEl.classList.add('red');
-
-        document.getElementById('blocksProduced').textContent = formatNum(produced);
-        document.getElementById('blocksExpected').textContent = formatNum(expected);
-
-        // Epoch history
+        // Epoch history — not provided by /api/epoch/current. HIDE if empty.
         const history = data.history || data.recentEpochs || [];
-        renderEpochHistory(history);
+        const historyCard = document.getElementById('historyCard');
+        if (history.length > 0) {
+          if (historyCard) historyCard.style.display = '';
+          renderEpochHistory(history);
+        } else if (historyCard) {
+          historyCard.style.display = 'none';
+        }
         hasLoaded = true;
 
         // Update countdown immediately
