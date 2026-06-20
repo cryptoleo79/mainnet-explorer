@@ -494,6 +494,24 @@ export function getContractAnalytics() {
     SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractCall'
   `).get() as { count: number };
 
+  // Real per-contract interaction counts, derived from ContractCall events.
+  // Each ContractCall event's data carries the target contractAddress (double-
+  // encoded JSON: data = ["{...}"]). Count calls + most-recent call time per
+  // address. This is real local data — no estimate, no fabricated count.
+  const callAgg = db.prepare(`
+    SELECT
+      json_extract(json_extract(data, '$[0]'), '$.contractAddress') AS addr,
+      COUNT(*) AS cnt,
+      MAX(timestamp) AS lastTs
+    FROM events
+    WHERE section = 'midnight' AND method = 'ContractCall'
+    GROUP BY addr
+  `).all() as { addr: string | null; cnt: number; lastTs: number }[];
+  const callMap = new Map<string, { count: number; lastTs: number }>();
+  for (const r of callAgg) {
+    if (r.addr) callMap.set(r.addr, { count: r.cnt, lastTs: r.lastTs });
+  }
+
   // Get tx activity per day
   const deploymentsPerDay = db.prepare(`
     SELECT
@@ -506,7 +524,7 @@ export function getContractAnalytics() {
     LIMIT 30
   `).all() as { day: string; count: number }[];
 
-  // Parse deployed contract addresses
+  // Parse deployed contract addresses and attach REAL interaction counts.
   const topContracts = deployedContracts.map(c => {
     let address = '';
     let txHash = '';
@@ -516,15 +534,23 @@ export function getContractAnalytics() {
       address = inner.contractAddress || '';
       txHash = inner.txHash || '';
     } catch {}
+    const agg = address ? callMap.get(address) : undefined;
     return {
       address,
       txHash,
-      interactions: 0,
+      // Truth rule: real count when the address parsed (0 = genuinely never
+      // called); null when the address is unknown (never a fabricated 0).
+      interactions: address ? (agg?.count ?? 0) : null,
+      interactionsSource: 'events.ContractCall',
       firstSeen: c.timestamp,
-      lastSeen: c.timestamp,
+      lastSeen: agg?.lastTs ? Math.max(c.timestamp, agg.lastTs) : c.timestamp,
       block: c.block_height,
     };
   });
+
+  // "Most Active" must actually be most active — sort by real interactions desc
+  // (unknown/null sinks to the bottom).
+  topContracts.sort((a, b) => (b.interactions ?? -1) - (a.interactions ?? -1));
 
   return {
     totalContracts: topContracts.length,
