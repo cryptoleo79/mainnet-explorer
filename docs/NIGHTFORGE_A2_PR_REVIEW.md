@@ -2,9 +2,9 @@
 
 Branch: `fix/nightforge-contract-interactions` (HEAD `0484657`). Reviews the `interactions:0` truth fix for merge readiness. No merge, no deploy, no DUST work, no YAMORI.
 
-## Verdict: **PASS** (with one documented caveat — owner decision below)
+## Verdict: **PASS** — caveat resolved (dedupe Option B implemented)
 
-The fix is correct, truthful, and strictly better than the shipping lie (`interactions:0` for all). It is safe to merge as-is. One pre-existing display artifact (duplicate leaderboard rows) is now *visible* and warrants a yes/no before it fronts a user-facing "Most Active" list.
+The fix is correct, truthful, and strictly better than the shipping lie (`interactions:0` for all). The duplicate-leaderboard-row caveat has been **resolved** by collapsing to one row per contract address (Option B). The leaderboard now reconciles exactly (`Σ interactions == totalCalls`). Ready to merge.
 
 ---
 
@@ -28,33 +28,36 @@ The fix is correct, truthful, and strictly better than the shipping lie (`intera
 
 **Before (origin/main):** every contract `interactions: 0` (hardcoded at `database.ts:522`).
 
-**After (this branch):**
+**After (this branch, post-dedupe):**
 ```
-totalContracts: 155 | totalCalls: 15310
-top 3:  6057 | 2206 | 2206   (events.ContractCall, sorted desc)
-distribution (per row): with calls 99 | genuine 0: 56 | null/unknown: 0
+totalContracts: 107 | totalCalls: 15315        (one row per address)
+top 5:  6057 | 2206 | 1443 | 1033 | 983        (all distinct contracts, sorted desc)
+distribution: with calls 70 | genuine 0: 37 | null/unknown: 0
+Σ interactions: 15315 == totalCalls 15315       (RECONCILES exactly)
 zero-check: sampled 0-contract → 0 real call rows  (truly never called ✓)
 ```
+(`totalCalls` drifts upward between runs because the live indexer keeps advancing — 15301 → 15310 → 15315.)
 
 ---
 
-## Caveat (pre-existing, now visible) — needs an owner call
+## Caveat — RESOLVED (dedupe Option B implemented)
 
-**Duplicate `ContractDeploy` rows.** Live: **155 rows, 107 distinct addresses, 48 rows are repeat addresses.** `topContracts` is one row per deploy event, so a contract with multiple deploy events appears **multiple times** in the leaderboard, each row carrying that address's full call count (e.g. `2206` shows twice in the top 3). Consequence: the leaderboard repeats contracts and `Σ interactions` (19,033) over-counts vs `totalCalls` (15,310).
+**Duplicate `ContractDeploy` rows.** Before dedupe: **155 rows, 107 distinct addresses, 48 duplicate rows** — a contract with multiple deploy events appeared multiple times, each row carrying the full per-address count (`2206` showed twice in the top 3), so `Σ interactions` over-counted `totalCalls`.
 
-- **Not introduced by this fix** — the old code returned the same duplicate rows; they were just invisible because every value was `0`.
-- **Not a truth violation per row** — each row's count is a real, correct per-address tally.
-- **But** a user-facing "Most Active" list showing the same contract twice is mildly misleading.
+**Fix (this commit — `getContractAnalytics`):** collapse to **one row per contract address**. Earliest deploy wins `firstSeen`/`block`/`txHash`; `lastSeen` takes the latest activity; per-address `interactions` count is unchanged. **Unknown/unparsed addresses (`interactions === null`) are kept individually** — distinct unknown contracts, never merged. Deterministic sort: interactions desc, address tiebreaker.
 
-**Options (owner decides — NOT done in this PR, out of stated scope):**
-- **(A) Merge as-is, dedupe as a fast follow-up.** The fix is strictly better than the lie today; dedupe is a separate 1-liner.
-- **(B) Add a 1-line dedupe before merge** — keep first deploy row per address (e.g. dedupe `topContracts` by `address`). Smallest correct leaderboard.
+| | Before dedupe | After dedupe |
+|---|---|---|
+| rows | 155 | **107** |
+| distinct addresses | 107 | 107 |
+| duplicate rows | **48** | **0** |
+| Σ interactions vs totalCalls | 19,033 > 15,310 (over-count) | **15,315 == 15,315 (reconciles)** |
 
-Recommendation: **(B)** if the leaderboard is imminently user-facing; **(A)** if not. Either way, dedupe is the immediate next step.
+No counts altered, no estimates, no API expansion, no new endpoints.
 
 ---
 
 ## Merge readiness
-**READY to merge** (criteria all pass; build + typecheck green; no API expansion). Hold only for your decision on the duplicate-row caveat (A vs B). No deploy implied by merge — the change is server-side and takes effect only on a service restart.
+**READY to merge.** All criteria pass; dedupe applied; build + typecheck green (`tsc` 0 errors); leaderboard reconciles exactly. No deploy implied by merge — server-side change, takes effect on a service restart.
 
-*Verification only. Docs committed (this file). Not pushed pending approval.*
+*Verification + dedupe. Docs committed (this file). Pushed with the dedupe commit.*
