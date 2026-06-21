@@ -494,6 +494,24 @@ export function getContractAnalytics() {
     SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractCall'
   `).get() as { count: number };
 
+  // Real per-contract interaction counts, derived from ContractCall events.
+  // Each ContractCall event's data carries the target contractAddress (double-
+  // encoded JSON: data = ["{...}"]). Count calls + most-recent call time per
+  // address. This is real local data — no estimate, no fabricated count.
+  const callAgg = db.prepare(`
+    SELECT
+      json_extract(json_extract(data, '$[0]'), '$.contractAddress') AS addr,
+      COUNT(*) AS cnt,
+      MAX(timestamp) AS lastTs
+    FROM events
+    WHERE section = 'midnight' AND method = 'ContractCall'
+    GROUP BY addr
+  `).all() as { addr: string | null; cnt: number; lastTs: number }[];
+  const callMap = new Map<string, { count: number; lastTs: number }>();
+  for (const r of callAgg) {
+    if (r.addr) callMap.set(r.addr, { count: r.cnt, lastTs: r.lastTs });
+  }
+
   // Get tx activity per day
   const deploymentsPerDay = db.prepare(`
     SELECT
@@ -506,8 +524,8 @@ export function getContractAnalytics() {
     LIMIT 30
   `).all() as { day: string; count: number }[];
 
-  // Parse deployed contract addresses
-  const topContracts = deployedContracts.map(c => {
+  // Parse deployed contract addresses and attach REAL interaction counts.
+  const rows = deployedContracts.map(c => {
     let address = '';
     let txHash = '';
     try {
@@ -516,15 +534,46 @@ export function getContractAnalytics() {
       address = inner.contractAddress || '';
       txHash = inner.txHash || '';
     } catch {}
+    const agg = address ? callMap.get(address) : undefined;
     return {
       address,
       txHash,
-      interactions: 0,
+      // Truth rule: real count when the address parsed (0 = genuinely never
+      // called); null when the address is unknown (never a fabricated 0).
+      interactions: address ? (agg?.count ?? 0) : null,
+      interactionsSource: 'events.ContractCall',
       firstSeen: c.timestamp,
-      lastSeen: c.timestamp,
+      lastSeen: agg?.lastTs ? Math.max(c.timestamp, agg.lastTs) : c.timestamp,
       block: c.block_height,
     };
   });
+
+  // Collapse duplicate ContractDeploy rows: ONE entry per contract address (the
+  // interaction count is already per-address). Earliest deploy wins firstSeen/
+  // block/txHash; lastSeen takes the latest activity. Unknown/unparsed addresses
+  // (interactions === null) are kept individually — they are distinct unknown
+  // contracts and must not be merged. No counts are altered; no estimates.
+  const byAddr = new Map<string, typeof rows[number]>();
+  const unknownRows: typeof rows = [];
+  for (const row of rows) {
+    if (!row.address) { unknownRows.push(row); continue; }
+    const existing = byAddr.get(row.address);
+    if (!existing) { byAddr.set(row.address, { ...row }); continue; }
+    if (row.firstSeen < existing.firstSeen) {
+      existing.firstSeen = row.firstSeen;
+      existing.block = row.block;
+      existing.txHash = row.txHash;
+    }
+    if (row.lastSeen > existing.lastSeen) existing.lastSeen = row.lastSeen;
+    // interactions/interactionsSource are identical per address — unchanged.
+  }
+  const topContracts = [...byAddr.values(), ...unknownRows];
+
+  // "Most Active" must actually be most active — sort by real interactions desc
+  // (unknown/null sinks to the bottom); address as a deterministic tiebreaker.
+  topContracts.sort((a, b) =>
+    (b.interactions ?? -1) - (a.interactions ?? -1) ||
+    String(a.address).localeCompare(String(b.address)));
 
   return {
     totalContracts: topContracts.length,
