@@ -454,12 +454,12 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    .badge-registered, .badge-surplus {
+    .badge-registered {
       background: rgba(34,197,94,0.15);
       color: #4ade80;
       border: 1px solid rgba(34,197,94,0.3);
     }
-    .badge-unregistered, .badge-deficit {
+    .badge-unregistered {
       background: rgba(239,68,68,0.12);
       color: #fca5a5;
       border: 1px solid rgba(239,68,68,0.25);
@@ -469,8 +469,8 @@
       height: 8px;
       border-radius: 50%;
     }
-    .badge-registered .badge-dot, .badge-surplus .badge-dot { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
-    .badge-unregistered .badge-dot, .badge-deficit .badge-dot { background: #ef4444; }
+    .badge-registered .badge-dot { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .badge-unregistered .badge-dot { background: #ef4444; }
 
     /* CTA register */
     .cta-register {
@@ -1132,8 +1132,8 @@
     <!-- ========== ECONOMICS ========== -->
     <section id="panel-economics" class="tab-panel" role="tabpanel" aria-labelledby="tab-economics" hidden>
       <div class="page-title">
-        <h2>DUST Economics Observatory</h2>
-        <p>Real-time generation, consumption, and sustainability metrics for the Midnight Network.</p>
+        <h2>DUST Generation Estimate</h2>
+        <p>Projection from published protocol constants and the stated assumptions below &mdash; not live on-chain economics.</p>
       </div>
 
       <div class="refresh-row">
@@ -1145,63 +1145,51 @@
       </div>
 
       <div class="msg msg-error" id="e-errorMsg" role="alert"></div>
-      <div class="msg msg-loading" id="e-loadingMsg"><span class="spinner"></span>Fetching DUST economics&hellip;</div>
+      <div class="msg msg-loading" id="e-loadingMsg"><span class="spinner"></span>Fetching DUST generation estimate&hellip;</div>
 
       <div class="results" id="e-results">
 
-        <div class="section-heading gen">Generation</div>
+        <div class="section-heading gen">Generation estimate</div>
         <div class="result-card">
           <div class="stat-grid">
-            <div class="stat-item"><div class="stat-label">Estimated Staked NIGHT</div><div class="stat-value green" id="e-stakedNight" title="Awaiting indexer data">&mdash;</div><div class="stat-sub" id="e-stakedNightSub">&mdash;</div></div>
-            <div class="stat-item"><div class="stat-label">DUST Per Day</div><div class="stat-value green" id="e-dustPerDay" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">network-wide</div></div>
-            <div class="stat-item"><div class="stat-label">DUST Per Week</div><div class="stat-value cyan" id="e-dustPerWeek" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">7-day projected</div></div>
-            <div class="stat-item"><div class="stat-label">Max Network Capacity</div><div class="stat-value orange" id="e-maxCapacity" title="Awaiting indexer data">&mdash;</div><div class="stat-sub" id="e-maxCapacitySub">&mdash;</div></div>
-            <div class="stat-item"><div class="stat-label">Days to Max Capacity</div><div class="stat-value purple" id="e-daysToMax" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">at current rate</div></div>
+            <div class="stat-item"><div class="stat-label">Est. Staked NIGHT</div><div class="stat-value green" id="e-stakedNight" title="Assumption-based">&mdash;</div><div class="stat-sub" id="e-stakedNightSub">&mdash;</div></div>
+            <div class="stat-item"><div class="stat-label">Est. DUST Per Day</div><div class="stat-value green" id="e-dustPerDay" title="Projected from assumptions">&mdash;</div><div class="stat-sub">projected</div></div>
+            <div class="stat-item"><div class="stat-label">Est. DUST Per Week</div><div class="stat-value cyan" id="e-dustPerWeek" title="Projected from assumptions">&mdash;</div><div class="stat-sub">projected</div></div>
+            <div class="stat-item"><div class="stat-label">Est. Max Capacity</div><div class="stat-value orange" id="e-maxCapacity" title="Projected from assumptions">&mdash;</div><div class="stat-sub" id="e-maxCapacitySub">&mdash;</div></div>
           </div>
         </div>
 
-        <div class="section-heading con">Consumption</div>
+        <div class="section-heading con">Network activity (real)</div>
         <div class="result-card">
           <div class="stat-grid">
-            <div class="stat-item"><div class="stat-label">Avg Daily Transactions</div><div class="stat-value orange" id="e-avgDailyTx" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">network-wide</div></div>
-            <div class="stat-item"><div class="stat-label">DUST Burn Per Day</div><div class="stat-value orange" id="e-dustBurn" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">est. consumption</div></div>
-            <div class="stat-item"><div class="stat-label">Avg Fee Per Transaction</div><div class="stat-value cyan" id="e-avgFee" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">in specks</div></div>
+            <div class="stat-item"><div class="stat-label">Avg Daily Transactions</div><div class="stat-value orange" id="e-avgDailyTx" title="indexer: extrinsics / network age">&mdash;</div><div class="stat-sub">extrinsics / network age</div></div>
           </div>
         </div>
 
-        <div class="section-heading flow">Net Flow</div>
+        <div class="section-heading con">Assumptions</div>
         <div class="result-card">
-          <div class="flow-row">
-            <div class="flow-stats">
-              <div class="stat-item"><div class="stat-label">Daily Net DUST</div><div class="stat-value green" id="e-dailyNet" title="Awaiting indexer data">&mdash;</div><div class="stat-sub">generation minus burn</div></div>
-              <div class="stat-item"><div class="stat-label">Status</div><div id="e-flowBadge" style="margin-top:0.375rem;">&mdash;</div></div>
-            </div>
-            <div class="flow-gauge">
-              <div class="gauge-container">
-                <div class="gauge-ring">
-                  <svg viewBox="0 0 100 100" aria-hidden="true">
-                    <circle class="bg" cx="50" cy="50" r="42" />
-                    <circle class="fg" id="e-gaugeCircle" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89" />
-                  </svg>
-                  <div class="gauge-text" id="e-gaugeText" title="Awaiting indexer data">&mdash;</div>
-                </div>
-                <div class="gauge-label">Sustainability</div>
-              </div>
-            </div>
+          <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">Staked NIGHT %</div><div class="stat-value cyan" id="e-stakedPct" title="Assumption, not measured on-chain">&mdash;</div><div class="stat-sub">assumed, not measured</div></div>
+            <div class="stat-item"><div class="stat-label">Total NIGHT Supply</div><div class="stat-value cyan" id="e-totalSupply" title="Assumption, not measured on-chain">&mdash;</div><div class="stat-sub">assumed</div></div>
           </div>
+          <p class="stat-sub" id="e-assumeNote" style="margin-top:0.5rem;">&mdash;</p>
+        </div>
+
+        <div class="result-card" id="e-unavailable" style="display:none;">
+          <div class="stat-label">Live economics unavailable</div>
+          <p class="stat-sub" id="e-unavailReason" style="margin-top:0.375rem;">&mdash;</p>
         </div>
 
         <button class="params-toggle" id="e-paramsToggle" aria-expanded="false" type="button">
-          <span>Technical Parameters</span><span class="chevron">&#9660;</span>
+          <span>Protocol Parameters</span><span class="chevron">&#9660;</span>
         </button>
         <div class="params-body" id="e-paramsBody"><div class="param-grid" id="e-paramGrid"></div></div>
       </div>
 
       <div class="info-box purple">
-        <h3>Understanding DUST Economics</h3>
-        <p><strong>Generation:</strong> DUST is produced passively from staked NIGHT. Each address caps at 5x its NIGHT balance.</p>
-        <p><strong>Consumption:</strong> Every Midnight transaction burns DUST. 1 DUST = 10^15 specks.</p>
-        <p><strong>Sustainability:</strong> 100 = strong surplus. Healthy economies stay above 80.</p>
+        <h3>Understanding this estimate</h3>
+        <p><strong>Generation:</strong> DUST is produced passively from staked NIGHT, capped at 5&times; an address's NIGHT balance. The figures above are a <em>projection</em> from the assumed staked-NIGHT amount &mdash; not a measured network total.</p>
+        <p><strong>Why no consumption / net-flow / sustainability?</strong> Those need a real per-transaction DUST fee, which is not yet available from the indexer. Rather than show a guessed fee, those metrics are intentionally omitted. 1 DUST = 10^15 specks.</p>
       </div>
 
       <div class="info-box purple">
@@ -1573,19 +1561,6 @@
         t.setAttribute('aria-expanded', String(open));
       });
 
-      function scoreColor(s) { return s >= 80 ? '#22c55e' : s >= 50 ? '#eab308' : '#ef4444'; }
-      function scoreText(s)  { return s >= 80 ? 'color:#4ade80' : s >= 50 ? 'color:#facc15' : 'color:#fca5a5'; }
-
-      function setGauge(score) {
-        var c = $('e-gaugeCircle'), t = $('e-gaugeText');
-        var circ = 2 * Math.PI * 42;
-        var v = Math.max(0, Math.min(100, score));
-        c.style.strokeDashoffset = circ - (v / 100) * circ;
-        c.style.stroke = scoreColor(v);
-        t.textContent = Math.round(v);
-        t.style.cssText = scoreText(v);
-      }
-
       function renderParams(params) {
         var labels = {
           specksPerStarPerSecond: 'Specks / Star / Second',
@@ -1624,32 +1599,36 @@
 
       function renderEcon(data) {
         hideMsgs('e-errorMsg', 'e-loadingMsg');
+
+        // Generation estimate (projection from the staked-NIGHT assumption).
         var gen = data.generation || {};
         $('e-stakedNight').textContent    = fmt(gen.estimatedStakedNight);
         var raw = parseFloat(gen.estimatedStakedNight || 0);
-        $('e-stakedNightSub').textContent = raw ? raw.toLocaleString() + ' NIGHT' : '—';
-        $('e-dustPerDay').textContent     = fmt(gen.dustPerDay);
-        $('e-dustPerWeek').textContent    = fmt(gen.dustPerWeek);
-        $('e-maxCapacity').textContent    = fmt(gen.maxNetworkCapacity);
-        $('e-maxCapacitySub').textContent = gen.maxNetworkCapacity ? fmt(gen.maxNetworkCapacity) + ' DUST total' : '—';
-        $('e-daysToMax').textContent      = gen.daysToMaxCapacity != null ? parseFloat(gen.daysToMaxCapacity).toFixed(1) : '—';
+        $('e-stakedNightSub').textContent = raw ? raw.toLocaleString() + ' NIGHT (est.)' : '—';
+        $('e-dustPerDay').textContent     = fmt(gen.estimatedDustPerDay);
+        $('e-dustPerWeek').textContent    = fmt(gen.estimatedDustPerWeek);
+        $('e-maxCapacity').textContent    = fmt(gen.estimatedMaxCapacity);
+        $('e-maxCapacitySub').textContent = gen.estimatedMaxCapacity ? fmt(gen.estimatedMaxCapacity) + ' DUST (est.)' : '—';
 
-        var con = data.consumption || {};
-        $('e-avgDailyTx').textContent = fmt(con.avgDailyTransactions);
-        $('e-dustBurn').textContent   = fmt(con.estimatedDustBurnPerDay);
-        $('e-avgFee').textContent     = con.avgFeePerTransaction == null ? '—' : con.avgFeePerTransaction;
+        // Real, indexer-derived activity.
+        var act = data.activity || {};
+        $('e-avgDailyTx').textContent = fmt(act.avgDailyTransactions);
 
-        var flow = data.netFlow || {};
-        $('e-dailyNet').textContent = fmt(flow.dailyNetDust);
-        var status = (flow.status || '').toLowerCase();
-        $('e-flowBadge').innerHTML = status === 'surplus'
-          ? '<span class="status-badge badge-surplus"><span class="badge-dot"></span>Surplus</span>'
-          : status === 'deficit'
-            ? '<span class="status-badge badge-deficit"><span class="badge-dot"></span>Deficit</span>'
-            : '—';
+        // Assumptions — surfaced explicitly.
+        var asm = data.assumptions || {};
+        $('e-stakedPct').textContent   = asm.stakedNightPct != null ? (asm.stakedNightPct * 100).toFixed(0) + '%' : '—';
+        $('e-totalSupply').textContent = asm.totalNightSupply != null ? fmt(asm.totalNightSupply) : '—';
+        $('e-assumeNote').textContent  = asm.note || '';
 
-        var score = parseFloat(flow.sustainabilityScore);
-        if (!isNaN(score)) setGauge(score);
+        // Honest statement of what is intentionally omitted.
+        var un = data.unavailable;
+        if (un && un.reason) {
+          $('e-unavailReason').textContent = un.reason + (un.omittedFields ? ' Omitted: ' + un.omittedFields.join(', ') + '.' : '');
+          $('e-unavailable').style.display = '';
+        } else {
+          $('e-unavailable').style.display = 'none';
+        }
+
         if (data.parameters) renderParams(data.parameters);
         eStamp.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
         eRes.classList.add('visible');
