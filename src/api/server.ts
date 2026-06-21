@@ -2272,56 +2272,73 @@ app.get('/api/dust-economics', async (req, res) => {
     const stats = getStats(); // existing function that returns indexer stats
     const overview = (getNetworkOverviewData?.() || {}) as any;
 
+    // Published Midnight protocol constants (real, not estimated).
     const SPECKS_PER_STAR_PER_SEC = 8267;
     const STARS_PER_NIGHT = 1_000_000;
     const SPECKS_PER_DUST = 1e15;
-    const CAP_RATIO = 5;
-    const TIME_TO_CAP_SEC = 604815;
+    const CAP_RATIO = 5;                 // 5 DUST per NIGHT cap
+    const TIME_TO_CAP_SEC = 604815;      // ~7 days, derived from the constants above
 
-    // Estimate network dust generation from total NIGHT supply
-    // This is an approximation based on known tokenomics
-    const totalNightSupply = 4_500_000_000; // 4.5B total NIGHT
-    const estimatedStakedNight = totalNightSupply * 0.3; // ~30% estimated staked
+    // ── Assumptions (NOT measured on-chain) ──────────────────────────
+    // Staked-NIGHT and total supply are assumptions; the staked figure drives
+    // the generation projection below and is surfaced explicitly so the output
+    // can never be mistaken for a live, measured value.
+    const ASSUMED_STAKED_PCT = 0.3;
+    const ASSUMED_TOTAL_NIGHT_SUPPLY = 4_500_000_000;
+    const estimatedStakedNight = ASSUMED_TOTAL_NIGHT_SUPPLY * ASSUMED_STAKED_PCT;
 
-    const networkSpecksPerSec = estimatedStakedNight * STARS_PER_NIGHT * SPECKS_PER_STAR_PER_SEC;
-    const networkDustPerDay = (networkSpecksPerSec * 86400) / SPECKS_PER_DUST;
-    const networkMaxCapacity = estimatedStakedNight * CAP_RATIO;
+    // Generation projection — depends ONLY on the staked-NIGHT assumption.
+    const projectedSpecksPerSec = estimatedStakedNight * STARS_PER_NIGHT * SPECKS_PER_STAR_PER_SEC;
+    const estimatedDustPerDay = (projectedSpecksPerSec * 86400) / SPECKS_PER_DUST;
+    const estimatedMaxCapacity = estimatedStakedNight * CAP_RATIO;
 
-    // Transaction fee burn estimate (from extrinsic count)
-    const avgDustPerTx = 300_000_000; // ~300M specks average fee
-    const dailyTxEstimate = (overview.extrinsics || stats.extrinsics || 0) / Math.max(1, (overview.networkAgeDays || 1));
-    const dailyDustBurn = (dailyTxEstimate * avgDustPerTx) / SPECKS_PER_DUST;
+    // Real, indexer-derived activity (total extrinsics / network age in days).
+    const avgDailyTransactions = Math.round(
+      (overview.extrinsics || stats.extrinsics || 0) / Math.max(1, (overview.networkAgeDays || 1))
+    );
 
-    const netDustFlow = networkDustPerDay - dailyDustBurn;
+    // NOTE: fee-derived economics (per-tx fee, daily burn, net flow, surplus/
+    // deficit, sustainability score) are intentionally OMITTED — there is no
+    // real per-transaction DUST fee source yet (the indexer `fees` field is not
+    // wired). They were previously computed from a guessed 300M-specks/tx fee
+    // and are removed rather than shown as fabricated economics.
 
     res.json({
-      observatory: 'NightForge DUST Economics',
+      title: 'DUST Generation Estimate',
+      basis: 'Projection from published protocol constants and the stated assumptions below. NOT live on-chain economics.',
       generation: {
-        estimatedStakedNight: estimatedStakedNight,
-        dustPerDay: parseFloat(networkDustPerDay.toFixed(2)),
-        dustPerWeek: parseFloat((networkDustPerDay * 7).toFixed(2)),
-        maxNetworkCapacity: networkMaxCapacity,
-        daysToMaxCapacity: parseFloat((TIME_TO_CAP_SEC / 86400).toFixed(1)),
+        estimatedStakedNight,
+        estimatedDustPerDay: parseFloat(estimatedDustPerDay.toFixed(2)),
+        estimatedDustPerWeek: parseFloat((estimatedDustPerDay * 7).toFixed(2)),
+        estimatedMaxCapacity,
       },
-      consumption: {
-        avgDailyTransactions: parseFloat(dailyTxEstimate.toFixed(0)),
-        estimatedDustBurnPerDay: parseFloat(dailyDustBurn.toFixed(2)),
-        avgFeePerTransaction: `${(avgDustPerTx / 1e6).toFixed(0)}M specks`,
+      activity: {
+        avgDailyTransactions,
+        basis: 'indexer: total extrinsics / network age (days)',
       },
-      netFlow: {
-        dailyNetDust: parseFloat(netDustFlow.toFixed(2)),
-        status: netDustFlow > 0 ? 'surplus' : 'deficit',
-        sustainabilityScore: parseFloat(Math.min(100, (networkDustPerDay / Math.max(1, dailyDustBurn) * 100)).toFixed(1)),
+      assumptions: {
+        stakedNightPct: ASSUMED_STAKED_PCT,
+        totalNightSupply: ASSUMED_TOTAL_NIGHT_SUPPLY,
+        note: 'Staked % and total supply are assumptions, not measured on-chain.',
       },
       parameters: {
         specksPerStarPerSecond: SPECKS_PER_STAR_PER_SEC,
         starsPerNight: STARS_PER_NIGHT,
         specksPerDust: '1e15',
         capRatio: CAP_RATIO,
-        timeToCapSeconds: TIME_TO_CAP_SEC,
+        daysToCapPerNight: parseFloat((TIME_TO_CAP_SEC / 86400).toFixed(1)),
         gracePeriodHours: 3,
       },
-      note: 'Estimates based on tokenomics parameters. Actual values depend on registration rates.',
+      unavailable: {
+        reason: 'No real per-transaction DUST fee source yet (indexer fees field pending).',
+        omittedFields: [
+          'consumption.avgFeePerTransaction',
+          'consumption.estimatedDustBurnPerDay',
+          'netFlow.dailyNetDust',
+          'netFlow.status',
+          'netFlow.sustainabilityScore',
+        ],
+      },
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
